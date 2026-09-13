@@ -1,0 +1,12 @@
+book/_build/
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
+# never commit specs, plans, or agent-instruction docs
+CLAUDE.md
+AGENTS.md
+docs/superpowers/
+docs/plans/
+*-spec.md
+*-plan.md
+.claude/

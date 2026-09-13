@@ -1,0 +1,38 @@
+<div class="wk-widget" id="w-loop">
+  <div class="wk-title">/// Interactive · step the loop</div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+    <span class="wk-node on">User asks</span><span style="color:#aaa">→</span>
+    <span class="wk-node">Model</span><span style="color:#aaa">→</span>
+    <span class="wk-node">Tool call?</span><span style="color:#aaa">→</span>
+    <span class="wk-node">Run tool</span><span style="color:#aaa">→</span>
+    <span class="wk-node">Append result</span><span style="color:#aaa">↺</span>
+  </div>
+  <div class="wk-log">▸ user: "What was Deere's revenue growth last quarter?"</div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button type="button" class="primary" data-step>Step ▶</button>
+    <button type="button" data-reset>Reset</button>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-loop");
+  const steps = [
+    [1, "▸ model: tool_call get_financials(ticker='DE', period='Q2-2026')"],
+    [2, "▸ loop: the reply is a tool call, not text → run it"],
+    [3, "▸ tool: {\"name\": \"Deere\", \"revenue\": 13.8e9, \"yoy\": 0.064}"],
+    [4, "▸ loop: append the result to messages, call the model again"],
+    [1, "▸ model: text → \"Deere revenue grew 6.4% YoY to $13.8B in Q2-2026.\""],
+    [0, "▸ loop: reply is text → stop. 2 model calls, 1 tool call, 5 log lines. ✔"],
+  ];
+  const start = w.querySelector(".wk-log").textContent;
+  const nodes = w.querySelectorAll(".wk-node");
+  let i = 0;
+  const light = (n) => { nodes.forEach((x) => x.classList.remove("on")); nodes[n].classList.add("on"); };
+  w.querySelector("[data-step]").onclick = () => {
+    if (i >= steps.length) return;
+    w.querySelector(".wk-log").textContent += "\n" + steps[i][1];
+    light(steps[i][0]); i++;
+  };
+  w.querySelector("[data-reset]").onclick = () => { i = 0; w.querySelector(".wk-log").textContent = start; light(0); };
+})();
+</script>

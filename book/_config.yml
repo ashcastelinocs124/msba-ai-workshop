@@ -1,0 +1,38 @@
+title: AI, ML, and Financial Markets Workshop Series
+author: Gies College of Business · MSBA
+copyright: "2026"
+only_build_toc_files: true
+
+execute:
+  execute_notebooks: "off"
+
+parse:
+  myst_enable_extensions:
+    - colon_fence
+    - dollarmath
+    - substitution
+    - html_image
+
+html:
+  use_repository_button: true
+  use_issues_button: false
+  use_edit_page_button: false
+  home_page_in_navbar: true
+  extra_footer: "Runnable cells execute in your browser via Pyodide. Colab notebooks call the Anthropic API with your own key."
+
+repository:
+  url: https://github.com/ashcastelinocs124/msba-ai-workshop
+  path_to_book: book
+  branch: main
+
+sphinx:
+  config:
+    html_context:
+      default_mode: light
+    html_js_files:
+      - pyodide-cell.js
+      - quiz.js
+    html_theme_options:
+      show_navbar_depth: 2
+      logo:
+        text: "AI · ML · Markets"
