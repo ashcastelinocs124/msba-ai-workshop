@@ -37,9 +37,24 @@ cd book/_build/html && python3 -m http.server 8791
 
 Open http://127.0.0.1:8791. Serve over HTTP rather than opening the file directly; the runnable cells fetch the Python modules from `_static/py/`.
 
-## Deploy
+## Two copies, one push
 
-Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the book and publishes it to GitHub Pages. In the repository settings, set Pages → Source to **GitHub Actions** once.
+Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the book once and deploys it twice:
+
+| Copy | URL | Who | Model cells |
+|---|---|---|---|
+| Public | https://ashcastelinocs124.github.io/msba-ai-workshop/ | anyone | mock model only; model cells link to the campus copy |
+| Campus | https://dl-msba-workshop.azurewebsites.net/ | @illinois.edu sign-in (Entra) | run against gpt-5-mini on Azure AI Foundry via `/api/chat` |
+
+The campus copy is the same static site served by a small FastAPI app (`app/main.py`) that adds two routes: `/api/whoami` (signed-in user and today's token use) and `/api/chat`, a proxy that holds the Foundry key (an App Service setting that references Key Vault), fixes the model deployment server-side, caps `max_completion_tokens` and a per-student daily token budget, and forwards to the Foundry `/openai/v1/chat/completions` endpoint. The browser never sees a key. In-page cells reach the model with `from llm import azure_model`, a drop-in for the mock model that the chapter 1 loop accepts as `model=`.
+
+Azure resources (resource group `DL_ResourceGroup_01`): web app `dl-msba-workshop` on the shared plan `dl-appplan-01`, Foundry account `dl-foundry-msba-workshop` (deployment `gpt-5-mini`), Key Vault `dl-kv-msba-workshop`. The Azure deploy job needs the repo secret `AZURE_PUBLISH_PROFILE` (the app's publish profile); until it exists that job fails without failing the workflow.
+
+Run the proxy test:
+
+```bash
+uv run --with fastapi --with httpx --with pytest -q python -m pytest app/test_main.py
+```
 
 ## Editing a chapter
 

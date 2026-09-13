@@ -10,3 +10,6 @@ docs/plans/
 *-spec.md
 *-plan.md
 .claude/
+.pytest_cache/
+dist/
+campus.zip

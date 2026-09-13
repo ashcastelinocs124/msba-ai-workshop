@@ -32,6 +32,7 @@ sphinx:
     html_js_files:
       - pyodide-cell.js
       - quiz.js
+      - site.js
     html_theme_options:
       show_navbar_depth: 2
       logo:

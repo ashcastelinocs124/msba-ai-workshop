@@ -32,7 +32,7 @@ def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True):
         log.append({"step": step, "kind": "tool_call", "tool": name, "args": args, "result": result, "ms": round(ms, 2)})
         if verbose:
             print(f"step {step}: tool_call {name}({json.dumps(args)}) -> {json.dumps(result)[:120]}")
-        msgs.append({"role": "assistant", "content": f"<tool_call>{name}({json.dumps(args)})"})
+        msgs.append({"role": "assistant", "content": f"<tool_call>{name}({json.dumps(args)})", "tool_call": {"name": name, "args": args}})
         msgs.append({"role": "tool", "name": name, "content": result})
 
     log.append({"step": max_steps, "kind": "budget_exhausted"})

@@ -24,6 +24,15 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: book/_build/html
+      - name: Package the campus copy (proxy + built site)
+        run: |
+          mkdir -p dist && cp -r app dist/app && cp -r book/_build/html dist/html
+          cp app/requirements.txt dist/requirements.txt
+          cd dist && zip -qr ../campus.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: campus
+          path: campus.zip
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -33,3 +42,16 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+  deploy-azure:
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true   # ponytail: until the AZURE_PUBLISH_PROFILE secret exists this job fails harmlessly
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: campus
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: dl-msba-workshop
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: campus.zip

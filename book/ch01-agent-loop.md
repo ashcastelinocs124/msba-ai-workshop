@@ -233,7 +233,43 @@ The Colab notebook runs this exact scenario against the real model. Compare its 
 </div>
 ```
 
-## 1.7 Exercise
+## 1.8 Run it against a real model
+
+The mock model answered every question so far. This section sends the same loop, the same tool schemas, and the same refund request to a GPT deployment on Illinois Azure.
+
+Your browser never sees a key. The page calls `/api/chat` on this site, a small proxy that holds the key, checks that you are signed in with your campus account, and forwards the request. That is the same "no write tools, a human approves" idea from 1.6 applied to the key itself: the model is reachable, the credential is not.
+
+```{raw} html
+<div class="wk-banner wk-pages-only">Model cells need the campus copy of this book: <a data-campus="/ch01-agent-loop.html#run-it-against-a-real-model" href="#">open it there</a> and sign in with your @illinois.edu account. Everything else on this page works here.</div>
+```
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+from llm import azure_model      # real model, via /api/chat on this site
+
+answer, log = agent("Customer is asking for a refund on order #4488. What should we do?", model=azure_model)
+print()
+print(answer)
+```
+
+Compare with the mock's run in 1.6. The tool order should match, because the schema made it the only sensible order. The wording will differ; the citation should not.
+
+Now the question the mock could never handle, because it only knows the scripts in this book:
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+from llm import azure_model
+
+answer, log = agent("Tom Okafor (order #4519) says the lamp arrived scratched. Is that a refund or a warranty claim, and what do we need from him?", model=azure_model)
+print()
+print(answer)
+```
+
+Read the log. Did the model look up the order? Did it search the policy for warranty, refund, or both? Every extra tool call costs tokens and time, so a good loop is not the one that calls the most tools, it is the one that calls exactly the ones the question needs. Your token budget for the day is in the header of this page.
+
+## 1.9 Exercise
 
 Open the Colab notebook. It contains the same loop, wired to the real Anthropic API with `strict: true` schemas.
 
