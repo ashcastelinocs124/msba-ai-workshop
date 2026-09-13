@@ -37,7 +37,7 @@ def _post(path, body):
     xhr.setRequestHeader("Content-Type", "application/json")
     xhr.send(json.dumps(body))
     status = int(xhr.status)
-    if status == 404:
+    if status in (404, 405):  # no proxy on this copy (GitHub Pages answers 405 to POST)
         raise LLMUnavailable(f"this copy of the book has no {path}. Open the campus site to run model cells:\n{_campus_url()}")
     if status in (401, 403):
         raise LLMUnavailable("sign in with your @illinois.edu account, then run the cell again.")
