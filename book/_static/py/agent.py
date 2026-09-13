@@ -44,10 +44,10 @@ if __name__ == "__main__":
     ans, log = agent("What was Deere's revenue growth last quarter?", verbose=False)
     assert "6.4%" in ans, ans
     assert log[0]["kind"] == "tool_call" and log[0]["tool"] == "get_financials"
-    ans, _ = agent("What is the refund policy?", verbose=False)
-    assert "[source: refund-policy" in ans, ans
-    for oid, expect in [("4471", "APPROVE"), ("4488", "STORE CREDIT"), ("4502", "HOLD"), ("4519", "DECLINE")]:
-        ans, log = agent(f"Customer is asking for a refund on order #{oid}. What should we do?", verbose=False)
-        assert expect in ans, (oid, ans)
-        assert [e.get("tool") for e in log[:2]] == ["get_order", "search_docs"], log
+    ans, _ = agent("What does the handbook say about the blackout window?", verbose=False)
+    assert "[source: personal-trading" in ans, ans
+    for rid, expect in [("7101", "APPROVE"), ("7102", "DECLINE"), ("7103", "DECLINE"), ("7104", "HOLD")]:
+        ans, log = agent(f"Can compliance clear trade request #{rid}?", verbose=False)
+        assert expect in ans, (rid, ans)
+        assert [e.get("tool") for e in log[:2]] == ["get_trade_request", "search_docs"], log
     print("ok")

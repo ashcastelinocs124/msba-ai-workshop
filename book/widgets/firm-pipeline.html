@@ -1,0 +1,37 @@
+<div class="wk-widget" id="w-firm-pipe" style="background:#fff">
+  <div class="wk-title">/// How a note gets made, and where this book plugs in · click a stage</div>
+  <div class="flow">
+    <button type="button" class="st" data-k="data"><b>1 · Data</b><span>filings, vendor feeds, client questions</span></button><i>→</i>
+    <button type="button" class="st" data-k="research"><b>2 · Research</b><span>lookups, reading, first draft</span></button><i>→</i>
+    <button type="button" class="st" data-k="model"><b>3 · Model</b><span>forecasts, comparisons, signals</span></button><i>→</i>
+    <button type="button" class="st" data-k="compliance"><b>4 · Compliance</b><span>citations, pre-clearance, sign-off</span></button><i>→</i>
+    <button type="button" class="st" data-k="client"><b>5 · Client</b><span>published note, follow-up questions</span></button>
+  </div>
+  <div class="detail" id="fp-detail">Click a stage to see what the firm automates there, and which chapter builds it.</div>
+  <style>
+    #w-firm-pipe .flow{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap}
+    #w-firm-pipe .st{flex:1 1 110px;min-width:0;text-align:left;border:2px solid #e6e8ee;border-radius:10px;padding:10px 12px;background:#fafbfc;color:#13294b;cursor:pointer;font:inherit}
+    #w-firm-pipe .st b{display:block;font-size:14px}
+    #w-firm-pipe .st span{display:block;font-size:12px;color:#5a6478;margin-top:3px;line-height:1.35}
+    #w-firm-pipe .st.on{border-color:#ff5f05;background:#fff3ea}
+    #w-firm-pipe .flow i{align-self:center;color:#aaa;font-style:normal}
+    #w-firm-pipe .detail{margin-top:12px;border:1px solid #e6e8ee;border-radius:8px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:#1f2430;background:#fafbfc;min-height:64px}
+    #w-firm-pipe .detail .ch{display:inline-block;font:700 11px ui-monospace,Menlo,monospace;background:#13294b;color:#fff;border-radius:999px;padding:2px 9px;margin:0 6px 4px 0}
+  </style>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-firm-pipe"), d = w.querySelector("#fp-detail");
+  const info = {
+    data: ["<span class='ch'>Ch 3</span><span class='ch'>Ch 8</span><span class='ch'>Ch 9</span>", "Retrieval over the firm's filings and handbook so answers come with citations (chapter 3). Market data and the AI value chain the clients ask about (chapter 8). A reproducible data snapshot for research (chapter 9)."],
+    research: ["<span class='ch'>Ch 1</span><span class='ch'>Ch 2</span>", "The first agents: a tool-using loop that answers a client's data question or a handbook question, with every step logged (chapter 1), made reliable through prompts, schemas, and context (chapter 2)."],
+    model: ["<span class='ch'>Ch 4</span><span class='ch'>Ch 5</span><span class='ch'>Ch 9</span>", "Turning a business question into a valid modeling problem (chapter 4), comparing models and watching for drift (chapter 5), and an honestly backtested signal (chapter 9)."],
+    compliance: ["<span class='ch'>Ch 1</span><span class='ch'>Ch 6</span>", "Trade pre-clearance triage: the agent recommends, Elena approves (chapter 1). Then the harness that makes it safe to run every day: budgets, traces, injection guards, evaluation (chapter 6)."],
+    client: ["<span class='ch'>Ch 7</span><span class='ch'>Ch 8</span>", "Deciding, per client request, whether the answer needs an agent, a model, or a SQL query (chapter 7), and explaining AI as an investment theme without hype (chapter 8)."],
+  };
+  w.querySelectorAll(".st").forEach((b) => b.addEventListener("click", () => {
+    w.querySelectorAll(".st").forEach((x) => x.classList.remove("on")); b.classList.add("on");
+    const [chips, text] = info[b.dataset.k]; d.innerHTML = chips + "<br>" + text;
+  }));
+})();
+</script>

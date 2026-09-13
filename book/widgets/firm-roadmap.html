@@ -1,0 +1,41 @@
+<div class="wk-widget" id="w-firm-road" style="background:#fff">
+  <div class="wk-title">/// The year ahead · click a part</div>
+  <div class="track">
+    <button type="button" class="pt on" data-p="1"><b>Part I</b><span>Agents</span><em>Ch 1–3</em></button>
+    <button type="button" class="pt" data-p="2"><b>Part II</b><span>Machine learning</span><em>Ch 4–5</em></button>
+    <button type="button" class="pt" data-p="3"><b>Part III</b><span>Systems and decisions</span><em>Ch 6–7</em></button>
+    <button type="button" class="pt" data-p="4"><b>Part IV</b><span>Finance</span><em>Ch 8–9</em></button>
+  </div>
+  <div class="grid">
+    <div><div class="h">What the firm adopts</div><div id="rd-what"></div></div>
+    <div><div class="h">Who feels it first</div><div id="rd-who"></div></div>
+    <div><div class="h">What stays with people</div><div id="rd-keep"></div></div>
+  </div>
+  <style>
+    #w-firm-road .track{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;position:relative}
+    #w-firm-road .pt{border:2px solid #e6e8ee;border-radius:10px;padding:10px;background:#fafbfc;color:#13294b;cursor:pointer;font:inherit;text-align:left}
+    #w-firm-road .pt b{display:block;font:700 10.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:#ff5f05}
+    #w-firm-road .pt span{display:block;font-weight:700;font-size:14px;margin-top:2px}
+    #w-firm-road .pt em{display:block;font-style:normal;font-size:11.5px;color:#5a6478;margin-top:2px}
+    #w-firm-road .pt.on{border-color:#ff5f05;background:#fff3ea}
+    #w-firm-road .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+    #w-firm-road .grid>div{border:1px solid #e6e8ee;border-radius:8px;padding:10px 12px;background:#fafbfc;font-size:13px;line-height:1.45;color:#1f2430}
+    #w-firm-road .h{font:700 10.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:#5a6478;margin-bottom:6px}
+    @media (max-width:640px){#w-firm-road .track{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-firm-road");
+  const P = {
+    1: ["A tool-using agent that answers client data questions and handbook questions with a logged, cited trail; a compliance triage assistant for trade pre-clearance; retrieval over the firm's own documents.", "Priya and Marcus (lookups and drafts), Elena (pre-clearance recommendations).", "Every published number, every trade clearance, every client recommendation. The agent proposes; a person approves."],
+    2: ["Models on the firm's own data: which clients are likely to lapse, which names deserve coverage, how a forecast compares with the consensus; and the monitoring that says when a model has drifted.", "Tom's data team, then the analysts who consume the outputs.", "The framing of each question, the choice of what a model may influence, and the decision itself."],
+    3: ["The agents go into production: budgets, traces, injection guards, evaluation sets, and an orchestration layer. Plus a written framework for when to use ML, an agent, or a SQL query.", "Elena (she can finally read the logs), Tom (he runs the harness), and every analyst whose request now gets routed.", "The call on what is automated at all. Some requests are best answered by a person in ten minutes."],
+    4: ["The same tools pointed at markets: return and risk basics, the AI investment value chain clients keep asking about, and a reproducible research workflow or signal, backtested honestly.", "Jordan (AI-theme questions), Priya (a research memo pipeline), the firm's clients.", "The investment view. Software gathers, extracts, and tests; the analyst decides and signs."],
+  };
+  const set = (p) => { w.querySelector("#rd-what").textContent = P[p][0]; w.querySelector("#rd-who").textContent = P[p][1]; w.querySelector("#rd-keep").textContent = P[p][2];
+    w.querySelectorAll(".pt").forEach((b) => b.classList.toggle("on", b.dataset.p === String(p))); };
+  w.querySelectorAll(".pt").forEach((b) => b.addEventListener("click", () => set(b.dataset.p)));
+  set(1);
+})();
+</script>

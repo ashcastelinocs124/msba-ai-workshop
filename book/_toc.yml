@@ -3,6 +3,7 @@ root: intro
 parts:
   - caption: Start here
     chapters:
+      - file: the-firm
       - file: setup
   - caption: Part I · Agents
     chapters:

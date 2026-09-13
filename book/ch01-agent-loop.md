@@ -14,6 +14,8 @@
 
 ## 1.1 What an agent is
 
+It is Monday morning at Champaign Capital Research and the first item in your inbox is a client asking for Deere's revenue growth last quarter. If you have not read [the firm page](the-firm.md), do that first; this chapter, and every chapter after it, is one task from that firm's plan.
+
 An agent is a language model that decides what to do next, does it through a tool, looks at what came back, and repeats until the job is done or a limit stops it.
 
 Every word in that sentence is doing work. *Decides*: the model, not your code, picks the next step. *Through a tool*: the model never touches data or systems directly; it asks for a named tool with arguments, and your code runs it. *Looks at what came back*: the tool's result goes into the conversation, so the next decision is made with more information than the last. *Until a limit stops it*: an agent without a budget is a bug, not a feature.
@@ -24,7 +26,7 @@ It helps to put the agent next to the two things it is most often confused with.
 |---|---|---|---|
 | **Single model call** | nobody; there is one step | reads the input, writes the output | "Summarize this earnings call transcript." |
 | **Workflow** | your code, in advance | fills in a slot at each fixed step | Extract the vendor, then classify the invoice, then draft an email. Three calls, fixed order. |
-| **Agent** | the model, as it goes | chooses which tool to call, reads the result, chooses again | "Should we refund order #4488?" The model decides it needs the order first, then the policy, then answers. |
+| **Agent** | the model, as it goes | chooses which tool to call, reads the result, chooses again | "Can Marcus sell his Caterpillar shares today?" The model decides it needs the request first, then the trading policy, then answers. |
 
 A workflow is a recipe. An agent is a cook. Most business problems are recipes, and a recipe is cheaper, faster, and easier to test. You reach for an agent when you cannot write the recipe in advance because the steps depend on what the data turns out to say.
 
@@ -46,7 +48,7 @@ Every agent, from a forty-line script to a commercial product, is made of the sa
 
 **The model.** It reads the conversation so far and produces either a tool request or a final answer. It has no memory between calls and no access to anything outside the text it is given. In this book the model is a mock for the in-page cells and a real one in Colab and on the campus copy of this site; the other two ingredients do not change.
 
-**The tools.** Named functions with a typed contract: a name, a description of when to use them, and a schema for their arguments. The model sees only the contract. Your code owns the implementation, and with it every decision about what the agent is allowed to reach. A read-only `get_order` is a very different risk from an `issue_refund`, and the difference lives entirely in this layer.
+**The tools.** Named functions with a typed contract: a name, a description of when to use them, and a schema for their arguments. The model sees only the contract. Your code owns the implementation, and with it every decision about what the agent is allowed to reach. A read-only `get_trade_request` is a very different risk from a `clear_trade`, and the difference lives entirely in this layer.
 
 **The loop.** The code that carries messages to the model, executes the tool it asks for, appends the result, and goes again. It is also where the guardrails live: the step budget, the timeout, the log, and the human approval gate for anything that writes.
 
@@ -63,16 +65,16 @@ print(TOOL_SCHEMAS[2]["name"], "-", TOOL_SCHEMAS[2]["description"])
 print("arguments:", list(TOOL_SCHEMAS[2]["input_schema"]["properties"]))
 ```
 
-Notice what is *not* in the list: nothing that sends an email, moves money, or changes a record. That is a design choice you will make on purpose in 1.9, and chapter 6 is about how to relax it safely.
+Notice what is *not* in the list: nothing that sends an email, clears a trade, publishes a note, or changes a record. That is a design choice you will make on purpose in 1.9, and chapter 6 is about how to relax it safely.
 
 ## 1.3 When an agent is the right tool
 
 Because an agent decides its own steps, it costs more per task than a workflow, it is slower, and it is harder to test. Those are real costs, so an agent has to earn its place. Four questions settle it:
 
 1. **Can you write the steps down in advance?** If yes, write a workflow. Invoice matching, monthly report generation, and document classification are recipes.
-2. **Do the steps depend on what the data says?** A support request that might need an order lookup, a policy check, a warranty check, or none of them, depending on what the customer wrote, is agent territory.
+2. **Do the steps depend on what the data says?** A client question that might need a filing lookup, a data-vendor pull, a policy check, or none of them, depending on what the client wrote, is agent territory.
 3. **What does a mistake cost, and will anyone see it?** An agent that recommends and a human who approves is a cheap mistake. An agent that acts on a live system is not. Start with the first.
-4. **Is the task worth the latency and the tokens?** Three model calls to triage a $59 refund is fine. Three model calls per row of a million-row table is not.
+4. **Is the task worth the latency and the tokens?** Three model calls to pre-clear one trade request is fine. Three model calls per row of a million-row price table is not.
 
 Chapter 7 turns these four questions into a full decision framework, with the "neither" answer treated seriously. For now the rule of thumb is: workflow by default, agent when the recipe cannot be written, and never let an agent hold a pen until its log has earned your trust.
 
@@ -153,7 +155,7 @@ The `agent()` function in this book returns a **log** alongside the answer: one 
 from agent import agent
 import json
 
-answer, log = agent("What is the refund policy?", verbose=False)
+answer, log = agent("What does the handbook say about the blackout window?", verbose=False)
 print(answer)
 print()
 for entry in log:
@@ -227,59 +229,58 @@ print(answer)
 print([e["kind"] for e in log])
 ```
 
-## 1.9 A live business example: refund triage
+## 1.9 A live business example: trade pre-clearance
 
-Everything so far used a finance question because the numbers are easy to check. Here is the same loop doing a job a business actually pays for: deciding what to do with a refund request.
+Everything so far used a research question because the numbers are easy to check. Here is the same loop doing a job the firm pays two people to do: pre-clearing employees' personal trades.
 
-The scenario. An office-furniture retailer gets forty refund requests a day. The policy is short (14 days, unused, receipt required, store credit after that), but applying it means looking up the order, reading the policy, and writing a consistent answer. Today a support rep does all three by hand, and two reps reading the same policy reach different decisions.
+The scenario. Everyone at Champaign Capital must ask compliance before trading a stock in a sector the firm covers. Elena Ruiz's team gets about thirty requests a week by email. Each one means opening the request, checking the restricted list, checking when the firm last published on that name, checking how long the position has been held, and writing back a decision with the policy clause that supports it. The rules fit on one page. Applying them the same way at 4:55 on a Friday is the hard part, and two officers reading the same handbook have reached different answers on the same request.
 
-The agent gets two tools: `get_order`, which returns the order record, and `search_docs`, which returns the relevant policy chunks. It does not get a `issue_refund` tool. It recommends; a human approves. That split is the single most important design decision in the example, and it is a tool-API decision, not a prompt decision.
+The agent gets two tools: `get_trade_request`, which returns the request record, and `search_docs`, which returns the relevant handbook chunks. It does not get a `clear_trade` tool. It recommends; a compliance officer approves. That split is the single most important design decision in the example, and it is a tool-API decision, not a prompt decision.
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 
-question = "Customer Priya Natarajan is asking for a refund on order #4471. What should we do?"
-answer, log = agent(question)
+answer, log = agent("Can compliance clear trade request #7102?")
 print()
 print(answer)
 ```
 
-Read the steps. The model asked for the order first, then the policy, then decided. It could not have decided from the question alone, and it could not have skipped the order lookup, because the policy hinges on the number of days since purchase.
+Read the steps. The model asked for the request first, then the policy, then decided. It could not have decided from the question alone, and it could not have skipped the lookup, because every rule hinges on a field in the request.
 
-Now change the order number. Each order in the fixture data trips a different clause of the policy:
+Now change the request number. Each request in the fixture data trips a different clause of the handbook:
 
-| Order | Customer | What is different | Expected recommendation |
+| Request | Employee | What is different | Expected recommendation |
 |---|---|---|---|
-| 4471 | Priya Natarajan | 9 days, unused, receipt | Approve full refund |
-| 4488 | Marcus Bell | 21 days | Store credit, needs manager sign-off |
-| 4502 | Elena Ruiz | No receipt on file | Hold and ask for proof of purchase |
-| 4519 | Tom Okafor | Item was used | Decline full refund, offer exchange |
+| 7101 | Priya Natarajan, buy 50 DE | firm last published on Deere 41 days ago | Approve |
+| 7102 | Marcus Bell, sell 200 CAT | position held 12 days | Decline, 30-day minimum holding period |
+| 7103 | Jordan Lee, buy 30 NVDA | NVIDIA is on the restricted list | Decline |
+| 7104 | Tom Okafor, sell 80 DE | firm published on Deere 6 days ago | Hold until the 14-day blackout ends |
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 
-for order_id in ["4471", "4488", "4502", "4519"]:
-    answer, log = agent(f"Customer is asking for a refund on order #{order_id}. What should we do?", verbose=False)
-    print(f"#{order_id}: {answer}\n")
+for request_id in ["7101", "7102", "7103", "7104"]:
+    answer, log = agent(f"Can compliance clear trade request #{request_id}?", verbose=False)
+    print(f"#{request_id}: {answer}\n")
 ```
 
-Every recommendation ends with a `[source: …]` tag naming the policy chunk it relied on. Chapter 3 makes that mandatory. For now, notice what it buys you: a manager who disagrees with a recommendation can open the policy line, not argue with a model.
+Every recommendation ends with a `[source: …]` tag naming the handbook chunk it relied on. Chapter 3 makes that mandatory. For now, notice what it buys you: an employee who disagrees with a decision can read the clause, not argue with a model.
 
-The log is the audit trail. This is what you would store per request, and what you would show a compliance reviewer six months later:
+The log is the audit trail. This is what you would store per request, and what you would show the firm's annual compliance review:
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 import json
 
-answer, log = agent("Customer is asking for a refund on order #4488. What should we do?", verbose=False)
+answer, log = agent("Can compliance clear trade request #7104?", verbose=False)
 for entry in log:
     print(json.dumps({k: v for k, v in entry.items() if k != "result"}))
 ```
 
-What the business gets from this loop, compared with the rep doing it by hand: the same policy applied the same way every time, a written reason with a citation on every decision, a log that can be reviewed, and a rep who now approves forty recommendations instead of researching forty cases. What it does not get is an agent that moves money. That stays behind a human click until the log has earned trust, which is the subject of chapter 6.
+What the firm gets from this loop, compared with an officer doing it by hand: the same handbook applied the same way every time, a written reason with a citation on every decision, a log that can be reviewed, and a compliance officer who now approves thirty recommendations instead of researching thirty requests. What it does not get is an agent that clears trades. That stays behind a human click until the log has earned trust, which is the subject of chapter 6.
 
 The Colab notebook runs this exact scenario against the real model. Compare its tool sequence with the mock's; a well-designed schema should make them match.
 
@@ -289,7 +290,7 @@ The Colab notebook runs this exact scenario against the real model. Compare its 
 <div class="quiz" data-answer="c"
      data-ok="Correct. The steps are fixed and known in advance, so code should decide them. A model call fills each slot; no agent is needed."
      data-no="Look at who decides the order of steps. If you can write the recipe before seeing the data, you do not need the model to choose.">
-  <p class="q">Every Monday, finance needs each new vendor invoice extracted into fields, matched to a purchase order, and flagged if the amounts differ. Which shape fits?</p>
+  <p class="q">Every month, Champaign Capital's data team needs each data-vendor invoice extracted into fields, matched to the contract, and flagged if the amounts differ. Which shape fits?</p>
   <label><input type="radio" name="q0" value="a"> An agent, because it involves several steps and a model</label>
   <label><input type="radio" name="q0" value="b"> A single model call, because it is one document at a time</label>
   <label><input type="radio" name="q0" value="c"> A workflow: code runs the three fixed steps and the model only extracts fields</label>
@@ -311,7 +312,7 @@ The Colab notebook runs this exact scenario against the real model. Compare its 
 
 ## 1.10 Run it against a real model
 
-The mock model answered every question so far. This section sends the same loop, the same tool schemas, and the same refund request to a GPT deployment on Illinois Azure.
+The mock model answered every question so far. This section sends the same loop, the same tool schemas, and the same pre-clearance request to a GPT deployment on Illinois Azure.
 
 Your browser never sees a key. The page calls `/api/chat` on this site, a small proxy that holds the key, checks that you are signed in with your campus account, and forwards the request. That is the same "no write tools, a human approves" idea from 1.9 applied to the key itself: the model is reachable, the credential is not.
 
@@ -324,7 +325,7 @@ Your browser never sees a key. The page calls `/api/chat` on this site, a small 
 from agent import agent
 from llm import azure_model      # real model, via /api/chat on this site
 
-answer, log = agent("Customer is asking for a refund on order #4488. What should we do?", model=azure_model)
+answer, log = agent("Can compliance clear trade request #7102?", model=azure_model)
 print()
 print(answer)
 ```
@@ -338,19 +339,19 @@ Now the question the mock could never handle, because it only knows the scripts 
 from agent import agent
 from llm import azure_model
 
-answer, log = agent("Tom Okafor (order #4519) says the lamp arrived scratched. Is that a refund or a warranty claim, and what do we need from him?", model=azure_model)
+answer, log = agent("Priya Natarajan (request #7101) wants to buy Deere, but says she will probably publish a note on Deere within two weeks. Approve now, hold, or decline, and what should compliance tell her?", model=azure_model)
 print()
 print(answer)
 ```
 
-Read the log. Did the model look up the order? Did it search the policy for warranty, refund, or both? Every extra tool call costs tokens and time, so a good loop is not the one that calls the most tools, it is the one that calls exactly the ones the question needs. Your token budget for the day is in the header of this page.
+Read the log. Did the model look up the request? Did it search the handbook for the blackout rule, the pre-clearance rule, or both? Every extra tool call costs tokens and time, so a good loop is not the one that calls the most tools, it is the one that calls exactly the ones the question needs. Your token budget for the day is in the header of this page.
 
 ## 1.11 Exercise
 
 Open the Colab notebook. It contains the same loop, wired to the real Anthropic API with `strict: true` schemas.
 
 1. Classify three tasks from your own work or internship as single call, workflow, or agent, using the four questions in 1.3. One sentence each.
-2. Run the refund-triage scenario for all four orders against the real model and compare its tool sequence and recommendations with the mock's.
+2. Run the pre-clearance scenario for all four requests against the real model and compare its tool sequence and recommendations with the mock's.
 3. Add a second data tool, `get_price(ticker)`, with a closed schema, and run *"Is Deere's revenue growth better than Caterpillar's, and what are both trading at?"* It should show four tool calls and one text answer.
 4. Extend the step log with the total elapsed time of the whole run.
 5. In three sentences, explain one tool call the model made that you would not have made, and what schema change would prevent it.

@@ -4,6 +4,10 @@
 <p class="wk-lede">An interactive textbook for the Gies MSBA workshop series on AI, machine learning, and financial markets. Nine chapters in four parts. Every chapter has code you can run in the page, a visual explainer you can poke, a checkpoint quiz, and a Colab notebook for the real thing.</p>
 ```
 
+## The story
+
+Every chapter is set at **Champaign Capital Research**, a fictional independent equity research firm that is adopting agents and machine learning one careful step at a time. The firm, its people, its problems, and its plan for the year are on [the firm page](the-firm.md). Read it first; every chapter picks up a task from that plan.
+
 ## How this book works
 
 Each chapter follows the same shape so you always know where to look:
@@ -18,14 +22,14 @@ Each chapter follows the same shape so you always know where to look:
 
 | Part | Chapters | The question it answers |
 |---|---|---|
-| I · Agents | 1–3 | How does a model take actions, and how do I keep that honest? |
+| I · Agents | 1–3 | What is an agent, how does it take actions, and how do I keep that honest? |
 | II · Machine learning | 4–5 | How do I turn a business question into a model I can trust? |
 | III · Systems and decisions | 6–7 | How do I run this in production, and when should I not? |
 | IV · Finance | 8–9 | What does all of this look like when the domain is markets? |
 
 ## Before session 1
 
-Read the [setup page](setup.md). It takes ten minutes and gets you a working Colab with an API key.
+Read [the firm page](the-firm.md), then the [setup page](setup.md). It takes ten minutes and gets you a working Colab with an API key.
 
 ```{tableofcontents}
 ```
