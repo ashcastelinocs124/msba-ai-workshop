@@ -35,12 +35,13 @@ Here is the smallest possible demonstration. Ask the model a question it cannot 
 ```{code-block} python
 :class: pyodide
 from mock_model import model
+from agent import explain_reply
 
 reply = model([{"role": "user", "content": "What was Deere's revenue growth last quarter?"}])
-print(reply)
+print(explain_reply(reply))
 ```
 
-That is not an answer. It is a request: "run `get_financials` with these arguments and show me the result." A single model call stops here. An agent is what happens when something picks that request up, runs it, and asks the model again. That something is the loop, and you will write it in section 1.4.
+That is not an answer. It is a request to run a tool and hand back the result. A single model call stops here. An agent is what happens when something picks that request up, runs it, and asks the model again. That something is the loop, and you will write it in section 1.4.
 
 ## 1.2 The three ingredients
 
@@ -62,7 +63,7 @@ print("tools the agent can call:", list(TOOLS))
 print()
 print("what the model sees for one of them:")
 print(TOOL_SCHEMAS[2]["name"], "-", TOOL_SCHEMAS[2]["description"])
-print("arguments:", list(TOOL_SCHEMAS[2]["input_schema"]["properties"]))
+print("arguments:", ", ".join(TOOL_SCHEMAS[2]["input_schema"]["properties"]))
 ```
 
 Notice what is *not* in the list: nothing that sends an email, clears a trade, publishes a note, or changes a record. That is a design choice you will make on purpose in 1.9, and chapter 6 is about how to relax it safely.
@@ -131,19 +132,20 @@ Print it and look:
 :class: pyodide
 from mock_model import model
 from tools import TOOLS
-import json
+from agent import explain_reply, _describe_result
 
 msgs = [{"role": "user", "content": "What was Deere's revenue growth last quarter?"}]
 reply = model(msgs)
-print("model asked for:", reply)
+print("The model's first move:", explain_reply(reply))
 
 result = TOOLS[reply["tool"]](**reply["args"])
-msgs.append({"role": "assistant", "content": f"<tool_call>{reply['tool']}({json.dumps(reply['args'])})"})
+msgs.append({"role": "assistant", "content": f"[{reply['tool']}]"})
 msgs.append({"role": "tool", "name": reply["tool"], "content": result})
 
-print("\nwhat the model sees on the NEXT call:")
+print("\nWhat the model sees on the NEXT call, one line per message:")
 for m in msgs:
-    print(" ", m["role"].ljust(9), str(m["content"])[:90])
+    text = _describe_result(m["content"]) if m["role"] == "tool" else str(m["content"])
+    print(" ", m["role"].ljust(9), text)
 ```
 
 This is what "transparent" means in this chapter. A transparent agent is one where you can print the messages list at any step and every line is something a human put there or a tool returned. Nothing is hidden inside a framework object.
@@ -152,14 +154,13 @@ The `agent()` function in this book returns a **log** alongside the answer: one 
 
 ```{code-block} python
 :class: pyodide
-from agent import agent
-import json
+from agent import agent, narrate
 
 answer, log = agent("What does the handbook say about the blackout window?", verbose=False)
 print(answer)
 print()
-for entry in log:
-    print(json.dumps(entry)[:140])
+for line in narrate(log):
+    print(line)
 ```
 
 ## 1.7 Designing the tool API
@@ -170,9 +171,8 @@ Open the schemas this book ships with:
 
 ```{code-block} python
 :class: pyodide
-from tools import TOOL_SCHEMAS
-import json
-print(json.dumps(TOOL_SCHEMAS[0], indent=2))
+from tools import TOOL_SCHEMAS, describe_schema
+describe_schema(TOOL_SCHEMAS[0])
 ```
 
 Four rules, each of which fixes a failure you will otherwise see in week one:
@@ -203,10 +203,10 @@ def validate(schema, args):
     return problems or ["ok"]
 
 fin = TOOL_SCHEMAS[0]; search = TOOL_SCHEMAS[3]
-print(validate(fin, {"ticker": "DE", "period": "Q2-2026"}))
-print(validate(fin, {"ticker": "Deere"}))
-print(validate(fin, {"ticker": "DE", "period": "Q2-2026", "currency": "EUR"}))
-print(validate(search, {"query": ""}))
+print(", ".join(validate(fin, {"ticker": "DE", "period": "Q2-2026"})))
+print(", ".join(validate(fin, {"ticker": "Deere"})))
+print(", ".join(validate(fin, {"ticker": "DE", "period": "Q2-2026", "currency": "EUR"})))
+print(", ".join(validate(search, {"query": ""})))
 ```
 
 ## 1.8 Two failure modes and their guards
@@ -272,12 +272,11 @@ The log is the audit trail. This is what you would store per request, and what y
 
 ```{code-block} python
 :class: pyodide
-from agent import agent
-import json
+from agent import agent, narrate
 
 answer, log = agent("Can compliance clear trade request #7104?", verbose=False)
-for entry in log:
-    print(json.dumps({k: v for k, v in entry.items() if k != "result"}))
+for line in narrate(log):
+    print(line)
 ```
 
 What the firm gets from this loop, compared with an officer doing it by hand: the same handbook applied the same way every time, a written reason with a citation on every decision, a log that can be reviewed, and a compliance officer who now approves thirty recommendations instead of researching thirty requests. What it does not get is an agent that clears trades. That stays behind a human click until the log has earned trust, which is the subject of chapter 6.

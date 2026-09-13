@@ -54,6 +54,16 @@ def search_docs(query: str, k: int = 3) -> list:
 
 TOOLS = {"get_financials": get_financials, "get_price": get_price, "get_trade_request": get_trade_request, "search_docs": search_docs}
 
+
+def describe_schema(schema):
+    """Print a tool's contract in plain, indented English instead of raw JSON."""
+    print(f"{schema['name']} — {schema['description']}")
+    props, req = schema["input_schema"]["properties"], schema["input_schema"]["required"]
+    for field, spec in props.items():
+        need = "required" if field in req else "optional"
+        note = f", one of: {', '.join(str(v) for v in spec['enum'])}" if "enum" in spec else ""
+        print(f"  - {field} ({need}){note}")
+
 # The schemas the model sees. Chapter 1 is about why these matter.
 TOOL_SCHEMAS = [
     {"name": "get_financials",
