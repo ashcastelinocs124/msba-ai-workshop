@@ -4,7 +4,14 @@ from fastapi.testclient import TestClient
 
 import app.main as m
 
+import base64
+import json
+
 H = {"x-ms-client-principal-name": "Student@illinois.edu"}
+CLAIMS = base64.b64encode(json.dumps(
+    {"claims": [{"typ": "name", "val": "Priya Natarajan"}, {"typ": "preferred_username", "val": "student@illinois.edu"}]}
+).encode()).decode()
+H_NAMED = {**H, "x-ms-client-principal": CLAIMS}
 
 
 def fake_transport(status=200, usage=900):
@@ -28,6 +35,9 @@ def test_proxy(monkeypatch):
     assert c.get("/api/whoami").status_code == 401                      # no Easy Auth header
     assert c.post("/api/chat", json={"messages": []}, headers=H).status_code == 200
     who = c.get("/api/whoami", headers=H).json()
-    assert who == {"user": "student@illinois.edu", "used": 900, "cap": 1000, "model": "gpt-5-mini"}
+    assert who == {"name": "student@illinois.edu", "user": "student@illinois.edu", "used": 900, "cap": 1000, "model": "gpt-5-mini"}
+    # with the richer Easy Auth claims header, the pill shows the real name instead of the email
+    named = c.get("/api/whoami", headers=H_NAMED).json()
+    assert named["name"] == "Priya Natarajan" and named["user"] == "student@illinois.edu"
     assert c.post("/api/chat", json={"messages": [], "max_tokens": 99999}, headers=H).status_code == 200
     assert c.post("/api/chat", json={"messages": []}, headers=H).status_code == 429   # cap reached

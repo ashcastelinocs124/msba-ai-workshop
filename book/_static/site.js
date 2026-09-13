@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (who && slot) {
     const pill = document.createElement("span");
     pill.className = "wk-who";
-    pill.innerHTML = `Signed in as <b>${who.user}</b> · ${who.used.toLocaleString()} / ${who.cap.toLocaleString()} tokens today · <a href="/.auth/logout">Sign out</a>`;
+    pill.innerHTML = `Signed in as <b>${who.name}</b> · ${who.used.toLocaleString()} / ${who.cap.toLocaleString()} tokens today · <a href="/.auth/logout">Sign out</a>`;
     slot.prepend(pill);
   }
   document.querySelectorAll(".wk-pages-only").forEach((el) => { el.hidden = !!who; });

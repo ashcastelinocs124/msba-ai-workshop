@@ -3,6 +3,8 @@
 The Foundry key lives in App Service settings (Key Vault reference), never in the page.
 Entra Easy Auth in front of the app supplies X-MS-CLIENT-PRINCIPAL-NAME; requests without it are refused.
 """
+import base64
+import json
 import os
 from datetime import date
 
@@ -28,6 +30,21 @@ def _user(request: Request) -> str:
     return user.lower()
 
 
+def _display_name(request: Request) -> str | None:
+    """The signed-in user's real name from Easy Auth's claims header, so the page can greet
+    them by name instead of their email. Falls back to None (caller uses the email) if the
+    header is missing or the identity provider didn't send a name claim."""
+    raw = request.headers.get("x-ms-client-principal")
+    if not raw:
+        return None
+    try:
+        claims = json.loads(base64.b64decode(raw)).get("claims", [])
+    except Exception:
+        return None
+    name_types = {"name", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"}
+    return next((c.get("val") for c in claims if c.get("typ") in name_types), None)
+
+
 def _used(user: str) -> int:
     return _usage.get((user, date.today().isoformat()), 0)
 
@@ -35,7 +52,7 @@ def _used(user: str) -> int:
 @app.get("/api/whoami")
 def whoami(request: Request):
     user = _user(request)
-    return {"user": user, "used": _used(user), "cap": DAILY_CAP, "model": DEPLOYMENT}
+    return {"name": _display_name(request) or user, "user": user, "used": _used(user), "cap": DAILY_CAP, "model": DEPLOYMENT}
 
 
 @app.post("/api/chat")
