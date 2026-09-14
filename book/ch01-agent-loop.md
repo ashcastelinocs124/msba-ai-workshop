@@ -224,9 +224,9 @@ from tools import TOOLS
 def stubborn(msgs):
     return {"type": "tool_call", "tool": "get_price", "args": {"ticker": "DE"}}
 
-answer, log = agent("anything", TOOLS, model=stubborn, max_steps=3, verbose=False)
+answer, log = agent("anything", TOOLS, model=stubborn, max_steps=3)
+print()
 print(answer)
-print([e["kind"] for e in log])
 ```
 
 ## 1.9 A live business example: trade pre-clearance
