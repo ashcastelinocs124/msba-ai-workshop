@@ -49,8 +49,8 @@ Never paste a key into a cell. Never commit one to a repository.
 
 | | |
 |---|---|
-| When | *To be announced* |
-| Where | *To be announced* |
+| When | Fridays, 1–3 pm (times may change; check the session announcement) |
+| Where | Business Instructional Facility (BIF) |
 | Bring | A laptop, a charger, and the Colab from the previous chapter |
 
 ## Getting help
