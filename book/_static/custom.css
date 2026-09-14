@@ -95,3 +95,14 @@ h1, h2 { color: var(--wk-navy); letter-spacing: -0.02em; }
 .wk-cell .wk-gctl button { font: 600 12px system-ui, sans-serif; border: 1px solid var(--wk-navy); color: var(--wk-navy); background: #fff; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
 .wk-cell .wk-gctl button.primary { background: var(--wk-navy); color: #fff; }
 .wk-cell .wk-gctl button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Header controls (signed-in pill, icons, Report) pinned to the viewport's top-right: over the end of the top search bar
+   at rest (4rem tall), then shrinking to the sticky article header's 3rem once the page scrolls (body.scrolled). */
+@media (min-width: 992px) {
+  .bd-header-article .article-header-buttons { position: fixed; top: 0; right: 0; height: 4rem; align-items: center; padding-right: 0.5rem; background: var(--pst-color-background); }
+  .bd-header-article { z-index: 1031; } /* above the top navbar (1030), which otherwise paints over the pinned controls */
+  body.scrolled .bd-header-article .article-header-buttons { height: 3rem; }
+}
+@media (min-width: 1200px) {
+  .bd-sidebar-secondary { top: 3rem; } /* stick below the pinned controls instead of under them */
+}
