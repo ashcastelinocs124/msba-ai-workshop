@@ -46,3 +46,32 @@ h1, h2 { color: var(--wk-navy); letter-spacing: -0.02em; }
 .wk-who b { color: var(--wk-navy); }
 .wk-banner { background: #fff8e6; border: 1px solid #f9d48b; border-radius: 8px; padding: 10px 14px; font-size: 0.95rem; margin: 1rem 0; }
 .wk-banner a { color: #7a5200; font-weight: 700; }
+
+/* graph-view toggle for step-shaped code output (pyodide-cell.js): a vertical timeline,
+   one numbered stop per step, colored and iconed by what kind of step it is (look up /
+   search / answer), full text on every card — nothing truncated, nothing to decode. */
+.wk-cell .wk-bar-right { display: flex; align-items: center; gap: 8px; }
+.wk-cell .wk-seg { display: flex; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; background: #fff; }
+.wk-cell .wk-seg button { background: #fff; color: var(--wk-muted); font: 700 11px ui-monospace, Menlo, monospace; padding: 4px 12px; border: 0; border-radius: 0; cursor: pointer; }
+.wk-cell .wk-seg button.on { background: var(--wk-navy); color: #fff; }
+.wk-cell .wk-seg button:disabled { color: #c7cbd4; cursor: not-allowed; background: #fff; }
+.wk-cell .wk-graph { display: none; border-top: 1px dashed var(--wk-line); background: #fafbfc; padding: 16px 18px; }
+.wk-cell .wk-gprogress { font: 700 11px ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 12px; }
+.wk-cell .wk-gtrack { display: flex; flex-direction: column; }
+.wk-cell .wk-gitem { display: flex; gap: 14px; cursor: pointer; }
+.wk-cell .wk-grail { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.wk-cell .wk-gdot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--wk-line); background: #fff; color: #c7cbd4; flex-shrink: 0; transition: box-shadow 0.15s ease; }
+.wk-cell .wk-gdot svg { width: 16px; height: 16px; }
+.wk-cell .wk-gline { flex: 1; width: 2px; min-height: 16px; background: var(--wk-line); margin: 2px 0; }
+.wk-cell .wk-gcard { flex: 1; background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13.5px; line-height: 1.55; color: #b7bcc7; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
+.wk-cell .wk-glabel { display: block; font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: inherit; margin-bottom: 4px; }
+.wk-cell .wk-gitem.done .wk-gdot { border-color: var(--k-color); color: var(--k-color); background: var(--k-tint); }
+.wk-cell .wk-gitem.done .wk-gline { background: var(--k-color); }
+.wk-cell .wk-gitem.done .wk-gcard { color: #1f2430; border-color: var(--k-color); }
+.wk-cell .wk-gitem.done .wk-glabel { color: var(--k-color); }
+.wk-cell .wk-gitem.cur .wk-gdot { border-color: var(--wk-orange); background: #fff3ea; color: var(--wk-orange); box-shadow: 0 0 0 4px rgba(255, 95, 5, 0.15); }
+.wk-cell .wk-gitem.cur .wk-gcard { background: #fffaf5; border-color: var(--wk-orange); }
+.wk-cell .wk-gctl { display: flex; gap: 8px; margin-top: 2px; }
+.wk-cell .wk-gctl button { font: 600 12px system-ui, sans-serif; border: 1px solid var(--wk-navy); color: var(--wk-navy); background: #fff; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+.wk-cell .wk-gctl button.primary { background: var(--wk-navy); color: #fff; }
+.wk-cell .wk-gctl button:disabled { opacity: 0.5; cursor: not-allowed; }
