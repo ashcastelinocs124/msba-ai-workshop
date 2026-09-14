@@ -18,7 +18,6 @@ html:
   use_issues_button: false
   use_edit_page_button: false
   home_page_in_navbar: true
-  extra_footer: "Runnable cells execute in your browser via Pyodide. Colab notebooks call the Anthropic API with your own key."
 
 repository:
   url: https://github.com/ashcastelinocs124/msba-ai-workshop
@@ -33,7 +32,12 @@ sphinx:
       - pyodide-cell.js
       - quiz.js
       - site.js
+    # html_theme_options here replaces the options derived from the html: block above,
+    # so the footer and repository button must be set here to render.
     html_theme_options:
       show_navbar_depth: 2
       logo:
         text: "AI · ML · Markets"
+      repository_url: https://github.com/ashcastelinocs124/msba-ai-workshop
+      use_repository_button: true
+      extra_footer: 'Runnable cells execute in your browser via Pyodide. Colab notebooks call the Anthropic API with your own key. Built by <a href="https://github.com/ashcastelinocs124">@ashcastelinocs124</a>.'
