@@ -56,7 +56,7 @@ function reportButton(slot) {
     form.reset();
   };
 
-  slot.prepend(btn);
+  slot.append(btn);
   document.body.append(dlg);
 }
 
