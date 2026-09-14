@@ -18,24 +18,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll("a[data-campus]").forEach((a) => { a.href = window.WK_CAMPUS_URL + a.dataset.campus; });
 });
 
-// Fullscreen is for reading: hide the left navigation while in it and restore it on exit
-// (button or Esc), keeping a sidebar the reader had already closed closed.
-(() => {
-  let wasHidden = false;
-  const onChange = () => {
-    const sidebar = document.querySelector("#pst-primary-sidebar");
-    const button = document.querySelector(".btn-fullscreen-button");
-    if (!sidebar) return;
-    const full = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    if (full) {
-      wasHidden = sidebar.classList.contains("pst-sidebar-hidden");
-      sidebar.classList.add("pst-sidebar-hidden");
-    } else if (!wasHidden) {
-      sidebar.classList.remove("pst-sidebar-hidden");
-    }
-    // Bootstrap moved the title attribute into data-bs-original-title when it built the tooltip.
-    if (button) button.setAttribute("data-bs-original-title", full ? "Exit fullscreen" : "Fullscreen mode");
-  };
-  document.addEventListener("fullscreenchange", onChange);
-  document.addEventListener("webkitfullscreenchange", onChange);
-})();
+// sphinx-book-theme binds its desktop sidebar toggle to the first .primary-toggle, which is
+// the hidden mobile one, so the visible ☰ in the article header does nothing. Bind it here.
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.querySelector(".bd-header-article .primary-toggle, .header-article .primary-toggle");
+  const sidebar = document.querySelector("#pst-primary-sidebar");
+  if (!button || !sidebar) return;
+  button.addEventListener("click", (e) => {
+    if (!window.matchMedia("(min-width: 992px)").matches) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    sidebar.classList.toggle("pst-sidebar-hidden");
+  }, true);
+});
