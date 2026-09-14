@@ -53,6 +53,12 @@ Every agent, from a forty-line script to a commercial product, is made of the sa
 
 **The loop.** The code that carries messages to the model, executes the tool it asks for, appends the result, and goes again. It is also where the guardrails live: the step budget, the timeout, the log, and the human approval gate for anything that writes.
 
+You already own a version of all three. Hover a part on either figure:
+
+```{raw} html
+:file: widgets/ch01-agent-vs-human.html
+```
+
 The split matters because it tells you where to look when something goes wrong. A wrong answer with the right tool calls is a model or prompt problem. A tool called with nonsense arguments is a contract problem. A run that never ends is a loop problem. Chapters 2, 6, and this one map onto those three.
 
 ```{code-block} python

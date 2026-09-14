@@ -1,0 +1,112 @@
+<div class="wk-widget wk-analogy" id="w-analogy">
+  <style>
+    .wk-analogy { --c-model: var(--wk-navy); --c-tools: var(--wk-orange); --c-loop: #1a7f5a; }
+    .wk-analogy .figs { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .wk-analogy .fig { background: #fff; border: 1px solid var(--wk-line); border-radius: 10px; padding: 12px 12px 6px; text-align: center; }
+    .wk-analogy .cap { font: 700 11px ui-monospace, Menlo, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 4px; }
+    .wk-analogy svg { width: 100%; height: auto; display: block; }
+    .wk-analogy .part { transition: opacity .15s; cursor: pointer; }
+    .wk-analogy .figs.focus .part:not(.on) { opacity: .25; }
+    .wk-analogy .tag { font: 700 11px system-ui, sans-serif; }
+    .wk-analogy .sub { font: 11px system-ui, sans-serif; fill: var(--wk-muted); }
+    .wk-analogy .legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .wk-analogy .leg { border: 2px solid var(--wk-line); border-radius: 8px; padding: 9px 12px; background: #fff; cursor: pointer; transition: border-color .15s, background .15s; }
+    .wk-analogy .leg .k { display: block; font: 700 12.5px system-ui, sans-serif; margin-bottom: 2px; }
+    .wk-analogy .leg .d { font-size: 12px; color: var(--wk-muted); line-height: 1.4; }
+    .wk-analogy .leg[data-p="model"] .k { color: var(--c-model); }
+    .wk-analogy .leg[data-p="tools"] .k { color: var(--c-tools); }
+    .wk-analogy .leg[data-p="loop"] .k { color: var(--c-loop); }
+    .wk-analogy .leg.on { background: #fff3ea; border-color: var(--wk-orange); }
+    .wk-analogy .note { margin-top: 12px; font-size: 12.5px; color: var(--wk-muted); }
+    @media (max-width: 640px) { .wk-analogy .figs, .wk-analogy .legend { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Same three parts, two bodies</div>
+  <div class="figs">
+
+    <div class="fig">
+      <div class="cap">A compliance officer</div>
+      <svg viewBox="0 0 312 300" role="img" aria-label="A stick figure with brain, hands and senses, and a habit ring labeled">
+        <g class="part" data-p="loop">
+          <path d="M150 20 A130 130 0 1 1 149 20" fill="none" stroke="var(--c-loop)" stroke-width="3" stroke-dasharray="8 7"/>
+          <polygon points="149,10 162,20 149,30" fill="var(--c-loop)"/>
+          <text x="150" y="292" text-anchor="middle" class="tag" fill="var(--c-loop)">HABIT · notice → act → check → again</text>
+        </g>
+        <line x1="150" y1="95" x2="150" y2="180" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="180" x2="122" y2="248" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="180" x2="178" y2="248" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="115" x2="100" y2="150" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="115" x2="200" y2="150" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <g class="part" data-p="model">
+          <circle cx="150" cy="70" r="24" fill="#e8ecf5" stroke="var(--c-model)" stroke-width="3"/>
+          <path d="M138 66 q6 -12 14 -6 q8 -8 14 4 q6 8 -4 14 q-10 6 -18 0 q-10 -2 -6 -12z" fill="var(--c-model)" opacity=".85"/>
+          <line x1="176" y1="62" x2="204" y2="50" stroke="var(--c-model)" stroke-width="1.5"/>
+          <text x="208" y="46" class="tag" fill="var(--c-model)">BRAIN</text>
+          <text x="208" y="60" class="sub">decides next move</text>
+        </g>
+        <g class="part" data-p="tools">
+          <circle cx="100" cy="150" r="9" fill="#ffe4d3" stroke="var(--c-tools)" stroke-width="3"/>
+          <circle cx="200" cy="150" r="9" fill="#ffe4d3" stroke="var(--c-tools)" stroke-width="3"/>
+          <circle cx="143" cy="66" r="2.5" fill="var(--c-tools)"/><circle cx="157" cy="66" r="2.5" fill="var(--c-tools)"/>
+          <line x1="90" y1="156" x2="52" y2="190" stroke="var(--c-tools)" stroke-width="1.5"/>
+          <text x="14" y="206" class="tag" fill="var(--c-tools)">HANDS &amp; SENSES</text>
+          <text x="14" y="220" class="sub">reach, look, read</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="fig">
+      <div class="cap">The agent</div>
+      <svg viewBox="0 0 312 300" role="img" aria-label="A robot figure with model, tools, and a loop ring labeled">
+        <g class="part" data-p="loop">
+          <path d="M150 20 A130 130 0 1 1 149 20" fill="none" stroke="var(--c-loop)" stroke-width="3" stroke-dasharray="8 7"/>
+          <polygon points="149,10 162,20 149,30" fill="var(--c-loop)"/>
+          <text x="150" y="292" text-anchor="middle" class="tag" fill="var(--c-loop)">LOOP · ask → run tool → append → again</text>
+        </g>
+        <rect x="126" y="100" width="48" height="80" rx="8" fill="#fff" stroke="#1f2430" stroke-width="4"/>
+        <line x1="138" y1="180" x2="132" y2="246" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="162" y1="180" x2="168" y2="246" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="126" y1="118" x2="96" y2="150" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <line x1="174" y1="118" x2="204" y2="150" stroke="#1f2430" stroke-width="5" stroke-linecap="round"/>
+        <g class="part" data-p="model">
+          <rect x="124" y="46" width="52" height="48" rx="8" fill="#e8ecf5" stroke="var(--c-model)" stroke-width="3"/>
+          <line x1="150" y1="46" x2="150" y2="32" stroke="var(--c-model)" stroke-width="3"/><circle cx="150" cy="29" r="4" fill="var(--c-model)"/>
+          <rect x="138" y="62" width="24" height="16" rx="2" fill="var(--c-model)" opacity=".85"/>
+          <line x1="178" y1="62" x2="204" y2="50" stroke="var(--c-model)" stroke-width="1.5"/>
+          <text x="208" y="46" class="tag" fill="var(--c-model)">MODEL</text>
+          <text x="208" y="60" class="sub">decides next move</text>
+        </g>
+        <g class="part" data-p="tools">
+          <path d="M86 144 l10 -6 v14 z M106 144 l-10 -6 v14 z" fill="#ffe4d3" stroke="var(--c-tools)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M194 144 l10 -6 v14 z M214 144 l-10 -6 v14 z" fill="#ffe4d3" stroke="var(--c-tools)" stroke-width="2.5" stroke-linejoin="round"/>
+          <rect x="140" y="52" width="20" height="6" rx="3" fill="var(--c-tools)"/>
+          <line x1="86" y1="156" x2="52" y2="190" stroke="var(--c-tools)" stroke-width="1.5"/>
+          <text x="14" y="206" class="tag" fill="var(--c-tools)">TOOLS</text>
+          <text x="14" y="220" class="sub">get_trade_request</text>
+          <text x="14" y="234" class="sub">search_docs</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="leg" data-p="model"><span class="k">Model ↔ Brain</span><span class="d">Reads what it has so far and decides what to do next. Never touches anything directly.</span></div>
+    <div class="leg" data-p="tools"><span class="k">Tools ↔ Hands &amp; senses</span><span class="d">The only way either one reaches the world. What you give it decides what it can do.</span></div>
+    <div class="leg" data-p="loop"><span class="k">Loop ↔ Habit</span><span class="d">Act, look at what came back, decide again — until done, or until a limit says stop.</span></div>
+  </div>
+  <div class="note">A brain with no hands can't act. Hands with no brain can't decide. Either one without the habit of checking the result never learns it got something wrong.</div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-analogy");
+  const figs = w.querySelector(".figs");
+  const all = w.querySelectorAll("[data-p]");
+  const set = (p) => {
+    figs.classList.toggle("focus", !!p);
+    all.forEach((el) => el.classList.toggle("on", el.dataset.p === p));
+  };
+  all.forEach((el) => {
+    el.addEventListener("mouseenter", () => set(el.dataset.p));
+    el.addEventListener("mouseleave", () => set(null));
+  });
+})();
+</script>
