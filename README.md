@@ -9,7 +9,7 @@ An interactive textbook for the Gies MSBA workshop series. Nine chapters in four
 | III · Systems and decisions | 6 Agent Systems · 7 When to Use ML, Agents, or Neither |
 | IV · Finance | 8 Financial Markets and AI as an Investment Theme · 9 AI for Financial and Investment Research |
 
-Every chapter is set at a fictional equity research firm, Champaign Capital Research (see `book/the-firm.md`), and has runnable Python cells that execute in the browser (Pyodide, no server), one interactive explainer widget, a checkpoint quiz, and a Colab notebook for the exercise against the real Anthropic API.
+Every chapter is set at a fictional equity research firm, Champaign Capital Research (see `book/the-firm.md`), and has runnable Python cells that execute in the browser (Pyodide, no server), one interactive explainer widget, a checkpoint quiz, and a Colab notebook for the exercise against a real model on Lumen, the campus LLM service.
 
 ## Layout
 

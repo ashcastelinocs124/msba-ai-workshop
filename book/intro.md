@@ -16,7 +16,7 @@ Each chapter follows the same shape so you always know where to look:
 2. **Concepts** — the idea, kept short, with a picture you can step through.
 3. **Try it** — a Python cell that runs in your browser. Edit it, break it, run it again. No installs.
 4. **Checkpoint** — one question with instant feedback.
-5. **Exercise** — the thing you actually build, in Colab against the real Anthropic API.
+5. **Exercise** — the thing you actually build, in Colab against a real model on Lumen, the campus LLM service.
 
 ## The four parts
 

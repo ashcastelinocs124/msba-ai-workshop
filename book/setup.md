@@ -17,21 +17,31 @@ print(sum(range(1, 101)))
 
 ## 2. A Google account for Colab
 
-Each chapter has an **Open in Colab** button. Colab is a free hosted Jupyter notebook. The notebooks call the real Anthropic API, which the in-page cells cannot do without exposing your key.
+Each chapter has an **Open in Colab** button. Colab is a free hosted Jupyter notebook. The notebooks call a real model through Lumen, which the in-page cells cannot do without exposing your key.
 
-## 3. An Anthropic API key
+## 3. A Lumen API key
 
-1. Create an account at [console.anthropic.com](https://console.anthropic.com) and add a small credit balance. Five dollars covers the whole workshop.
-2. Create a key under **API Keys**.
-3. In Colab, open the **Secrets** panel (the key icon in the left sidebar), add a secret named `ANTHROPIC_API_KEY`, paste the key, and enable notebook access.
+[Lumen](https://lumen.ncsa.illinois.edu/chat) is the University of Illinois campus LLM service, run by NCSA. It is free with your Illinois account, so there is nothing to pay for.
 
-Every notebook reads the key with:
+1. Sign in at [lumen.ncsa.illinois.edu/chat](https://lumen.ncsa.illinois.edu/chat) with your Illinois account.
+2. Open your [profile page](https://lumen.ncsa.illinois.edu/profile), scroll down to **API key**, and create one. Copy it now; it is shown once.
+3. In Colab, open the **Secrets** panel (the key icon in the left sidebar), add a secret named `LUMEN_API_KEY`, paste the key, and enable notebook access.
+
+Every notebook reads the key and opens a client with:
 
 ```python
-from google.colab import userdata
 import os
-os.environ["ANTHROPIC_API_KEY"] = userdata.get("ANTHROPIC_API_KEY")
+from google.colab import userdata
+from openai import OpenAI
+
+os.environ["LUMEN_API_KEY"] = userdata.get("LUMEN_API_KEY")
+client = OpenAI(
+    base_url="https://lumen.ncsa.illinois.edu/v1",
+    api_key=os.environ["LUMEN_API_KEY"],
+)
 ```
+
+Lumen speaks the OpenAI API format, which is why the `openai` package is used. The model for this workshop is **`glm-5.3-flash`**: it is fast, handles tool calls well, and is the one every notebook is tested against. Use it unless a section says otherwise.
 
 Never paste a key into a cell. Never commit one to a repository.
 

@@ -3,7 +3,7 @@
 It looks at the last user question and the tool results seen so far, and returns
 either a tool call or a final text answer, in the same shape the real loop expects:
   {"type": "tool_call", "tool": name, "args": {...}}   or   {"type": "text", "text": "..."}
-Colab notebooks swap this for the real Anthropic API.
+Colab notebooks swap this for a real model on Lumen (glm-5.3-flash).
 """
 import re
 

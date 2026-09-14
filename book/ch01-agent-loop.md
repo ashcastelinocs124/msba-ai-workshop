@@ -99,7 +99,7 @@ Three things to notice. The model never runs code; it only *asks* for a tool by 
 
 ## 1.5 Try it: a minimal loop
 
-This cell runs in your browser against a **mock model**: a small function that behaves like an LLM for the questions in this book, so no API key is needed. The Colab notebook swaps in the real Anthropic API with the same loop.
+This cell runs in your browser against a **mock model**: a small function that behaves like an LLM for the questions in this book, so no API key is needed. The Colab notebook swaps in a real model (`glm-5.3-flash` on Lumen) with the same loop.
 
 ```{code-block} python
 :class: pyodide
@@ -353,7 +353,7 @@ Read the log. Did the model look up the request? Did it search the handbook for 
 
 ## 1.11 Exercise
 
-Open the Colab notebook. It contains the same loop, wired to the real Anthropic API with `strict: true` schemas.
+Open the Colab notebook. It contains the same loop, wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key) with `strict: true` schemas.
 
 1. Classify three tasks from your own work or internship as single call, workflow, or agent, using the four questions in 1.3. One sentence each.
 2. Run the pre-clearance scenario for all four requests against the real model and compare its tool sequence and recommendations with the mock's.
@@ -364,4 +364,4 @@ Open the Colab notebook. It contains the same loop, wired to the real Anthropic 
 ## Further reading
 
 - Anthropic, *Building effective agents* — the "augmented LLM" and the argument for simple loops over frameworks.
-- The Anthropic tool-use documentation on `strict` schemas and `additionalProperties`.
+- The OpenAI function-calling documentation on `strict` schemas and `additionalProperties` — the format Lumen uses.

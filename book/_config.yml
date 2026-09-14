@@ -40,4 +40,4 @@ sphinx:
         text: "AI · ML · Markets"
       repository_url: https://github.com/ashcastelinocs124/msba-ai-workshop
       use_repository_button: true
-      extra_footer: 'Runnable cells execute in your browser via Pyodide. Colab notebooks call the Anthropic API with your own key. Built by <a href="https://github.com/ashcastelinocs124">@ashcastelinocs124</a>.'
+      extra_footer: 'Runnable cells execute in your browser via Pyodide. Colab notebooks call Lumen, the campus LLM service, with your own key. Built by <a href="https://github.com/ashcastelinocs124">@ashcastelinocs124</a>.'
