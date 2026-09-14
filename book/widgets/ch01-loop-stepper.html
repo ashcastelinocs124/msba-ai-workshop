@@ -1,38 +1,112 @@
-<div class="wk-widget" id="w-loop">
-  <div class="wk-title">/// Interactive · step the loop</div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-    <span class="wk-node on">User asks</span><span style="color:#aaa">→</span>
-    <span class="wk-node">Model</span><span style="color:#aaa">→</span>
-    <span class="wk-node">Tool call?</span><span style="color:#aaa">→</span>
-    <span class="wk-node">Run tool</span><span style="color:#aaa">→</span>
-    <span class="wk-node">Append result</span><span style="color:#aaa">↺</span>
-  </div>
-  <div class="wk-log">▸ user: "What was Deere's revenue growth last quarter?"</div>
-  <div style="display:flex;gap:8px;margin-top:10px">
-    <button type="button" class="primary" data-step>Step ▶</button>
+<div class="wk-widget wk-loop" id="w-loop">
+  <style>
+    .wk-loop { --ok: #1a7f5a; }
+    .wk-loop .ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .wk-loop .ctl .sp { flex: 1; }
+    .wk-loop .ctl label { font-size: 12px; color: var(--wk-muted); display: inline-flex; gap: 6px; align-items: center; }
+    .wk-loop input[type=range] { width: 90px; }
+    .wk-loop .grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
+    .wk-loop svg { display: block; width: 100%; height: auto; }
+    .wk-loop .node rect { fill: #fff; stroke: var(--wk-line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+    .wk-loop .node text { font: 600 11.5px system-ui, sans-serif; fill: #1f2430; }
+    .wk-loop .node.on rect { stroke: var(--wk-orange); fill: #fff3ea; }
+    .wk-loop .token { fill: var(--wk-orange); filter: drop-shadow(0 0 4px rgba(255, 95, 5, .6)); }
+    .wk-loop .counter { font: 700 9.5px ui-monospace, Menlo, monospace; fill: var(--wk-muted); letter-spacing: .06em; }
+    .wk-loop .status { font-size: 12.5px; color: var(--wk-muted); min-height: 18px; margin-top: 6px; }
+    .wk-loop .status b { color: #1f2430; font: 600 12px ui-monospace, Menlo, monospace; }
+    .wk-loop .conv { display: flex; flex-direction: column; gap: 6px; }
+    .wk-loop .conv .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 2px; }
+    .wk-loop .msg { border: 1px solid var(--wk-line); border-left-width: 4px; border-radius: 6px; padding: 6px 10px; font: 12px/1.45 ui-monospace, Menlo, monospace; background: #fff; opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; }
+    .wk-loop .msg.in { opacity: 1; transform: none; }
+    .wk-loop .msg .r { font-weight: 700; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+    .wk-loop .msg.user { border-left-color: var(--wk-navy); } .wk-loop .msg.user .r { color: var(--wk-navy); }
+    .wk-loop .msg.model { border-left-color: var(--wk-orange); background: #fffaf5; } .wk-loop .msg.model .r { color: var(--wk-orange); }
+    .wk-loop .msg.tool { border-left-color: var(--ok); background: #f2faf6; } .wk-loop .msg.tool .r { color: var(--ok); }
+    .wk-loop .msg.final { border-left-color: var(--wk-orange); background: #fff3ea; font-weight: 600; }
+    @media (max-width: 640px) { .wk-loop .grid { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · watch the loop run</div>
+  <div class="ctl">
+    <button type="button" class="primary" data-play>▶ Play</button>
+    <button type="button" data-step>Step</button>
     <button type="button" data-reset>Reset</button>
+    <span class="sp"></span>
+    <label>speed <input type="range" min="1" max="3" value="2" data-speed></label>
+  </div>
+  <div class="grid">
+    <div>
+      <svg viewBox="0 0 300 260" role="img" aria-label="The agent loop as a ring: Model, Tool call?, Run tool, Append result">
+        <path data-ring d="M150 40 A95 95 0 1 1 149.9 40" fill="none" stroke="#e6e8ee" stroke-width="3" stroke-dasharray="6 6"/>
+        <circle class="token" data-token r="7" cx="150" cy="40"/>
+        <g class="node" data-n="0" transform="translate(150,40)"><rect x="-44" y="-16" width="88" height="32" rx="8"/><text text-anchor="middle" y="4">Model</text></g>
+        <g class="node" data-n="1" transform="translate(245,135)"><rect x="-44" y="-16" width="88" height="32" rx="8"/><text text-anchor="middle" y="4">Tool call?</text></g>
+        <g class="node" data-n="2" transform="translate(150,230)"><rect x="-44" y="-16" width="88" height="32" rx="8"/><text text-anchor="middle" y="4">Run tool</text></g>
+        <g class="node" data-n="3" transform="translate(55,135)"><rect x="-44" y="-16" width="88" height="32" rx="8"/><text text-anchor="middle" y="4">Append result</text></g>
+        <text class="counter" x="150" y="172" text-anchor="middle" data-count>STEP 0 / 6</text>
+        <text class="counter" x="150" y="188" text-anchor="middle" data-calls>0 model calls · 0 tool calls</text>
+      </svg>
+      <div class="status" data-status>Press Play. The dot is where the loop is right now.</div>
+    </div>
+    <div class="conv" data-conv><div class="h">msgs — what the model sees on the next call</div></div>
   </div>
 </div>
 <script>
 (() => {
   const w = document.getElementById("w-loop");
-  const steps = [
-    [1, "▸ model: tool_call get_financials(ticker='DE', period='Q2-2026')"],
-    [2, "▸ loop: the reply is a tool call, not text → run it"],
-    [3, "▸ tool: {\"name\": \"Deere\", \"revenue\": 13.8e9, \"yoy\": 0.064}"],
-    [4, "▸ loop: append the result to messages, call the model again"],
-    [1, "▸ model: text → \"Deere revenue grew 6.4% YoY to $13.8B in Q2-2026.\""],
-    [0, "▸ loop: reply is text → stop. 2 model calls, 1 tool call, 5 log lines. ✔"],
+  const QUESTION = "What was Deere's revenue growth last quarter?";
+  const RUN = [
+    { n: 0, s: "model → tool_call get_financials(ticker='DE', period='Q2-2026')", msg: ["model", "assistant · tool_call", "get_financials(ticker='DE', period='Q2-2026')"] },
+    { n: 1, s: "loop → the reply is a tool call, not text — run it" },
+    { n: 2, s: "tool → {name: 'Deere', revenue: 13.8e9, yoy: 0.064}", msg: ["tool", "tool · get_financials", '{"name": "Deere", "revenue": 13.8e9, "yoy": 0.064}'] },
+    { n: 3, s: "loop → append the result to msgs, call the model again" },
+    { n: 0, s: 'model → text: "Deere revenue grew 6.4% YoY to $13.8B in Q2-2026."', msg: ["final", "assistant · text", "Deere revenue grew 6.4% YoY to $13.8B in Q2-2026."] },
+    { n: 1, s: "loop → reply is text → stop. 2 model calls, 1 tool call. ✔" },
   ];
-  const start = w.querySelector(".wk-log").textContent;
-  const nodes = w.querySelectorAll(".wk-node");
-  let i = 0;
-  const light = (n) => { nodes.forEach((x) => x.classList.remove("on")); nodes[n].classList.add("on"); };
-  w.querySelector("[data-step]").onclick = () => {
-    if (i >= steps.length) return;
-    w.querySelector(".wk-log").textContent += "\n" + steps[i][1];
-    light(steps[i][0]); i++;
+  const $ = (s) => w.querySelector(s);
+  const ring = $("[data-ring]"), tok = $("[data-token]"), nodes = w.querySelectorAll(".node"), conv = $("[data-conv]"), status = $("[data-status]");
+  const count = $("[data-count]"), calls = $("[data-calls]"), play = $("[data-play]"), speed = $("[data-speed]");
+  const L = ring.getTotalLength();
+  let i = 0, timer = null, glide = null, mc = 0, tc = 0;
+  const card = (kind, role, text) => {
+    const d = document.createElement("div");
+    d.className = "msg " + kind;
+    d.innerHTML = `<span class="r">${role}</span>${text.replace(/</g, "&lt;")}`;
+    conv.append(d);
+    void d.offsetWidth;
+    d.classList.add("in");
   };
-  w.querySelector("[data-reset]").onclick = () => { i = 0; w.querySelector(".wk-log").textContent = start; light(0); };
+  const pos = (f) => { const p = ring.getPointAtLength(((f % 4) / 4) * L); tok.setAttribute("cx", p.x); tok.setAttribute("cy", p.y); };
+  const light = (n) => nodes.forEach((x) => x.classList.toggle("on", +x.dataset.n === n));
+  const stop = () => { clearInterval(timer); timer = null; play.textContent = "▶ Play"; };
+  const reset = () => {
+    stop(); clearInterval(glide); i = mc = tc = 0;
+    conv.querySelectorAll(".msg").forEach((m) => m.remove());
+    card("user", "user", QUESTION); light(-1); pos(0);
+    count.textContent = `STEP 0 / ${RUN.length}`;
+    calls.textContent = "0 model calls · 0 tool calls";
+    status.textContent = "Press Play. The dot is where the loop is right now.";
+  };
+  const step = () => {
+    if (i >= RUN.length) return stop();
+    const st = RUN[i], from = i ? RUN[i - 1].n : 3, dist = (st.n - from + 4) % 4 || 4;
+    clearInterval(glide);
+    let t = 0;
+    glide = setInterval(() => { t = Math.min(t + 0.1, 1); pos(from + t * dist); if (t >= 1) clearInterval(glide); }, 30);
+    light(st.n);
+    status.innerHTML = "<b>" + st.s.replace(/</g, "&lt;") + "</b>";
+    if (st.n === 0) mc++;
+    if (st.n === 2) tc++;
+    if (st.msg) card(...st.msg);
+    i++;
+    count.textContent = `STEP ${i} / ${RUN.length}`;
+    calls.textContent = `${mc} model call${mc === 1 ? "" : "s"} · ${tc} tool call${tc === 1 ? "" : "s"}`;
+    if (i >= RUN.length) stop();
+  };
+  const start = () => { if (i >= RUN.length) reset(); play.textContent = "❚❚ Pause"; step(); timer = setInterval(step, 2400 / +speed.value); };
+  play.onclick = () => (timer ? stop() : start());
+  $("[data-step]").onclick = () => { stop(); step(); };
+  $("[data-reset]").onclick = reset;
+  speed.oninput = () => { if (timer) { clearInterval(timer); timer = setInterval(step, 2400 / +speed.value); } };
+  reset();
 })();
 </script>

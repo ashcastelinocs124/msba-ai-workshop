@@ -89,7 +89,7 @@ Chapter 7 turns these four questions into a full decision framework, with the "n
 
 Now the third ingredient. Strip away the frameworks and an agent is a loop. You send the conversation to the model. If the reply contains a tool call, you run the tool, append the result to the conversation, and send it again. You stop when the model answers in plain text, or when a step budget runs out.
 
-That is the whole thing. Every agent product you will see this year is this loop plus opinions about what goes into the conversation and which tools exist. Step through one run:
+That is the whole thing. Every agent product you will see this year is this loop plus opinions about what goes into the conversation and which tools exist. Watch one run:
 
 ```{raw} html
 :file: widgets/ch01-loop-stepper.html
