@@ -4,6 +4,20 @@
 <p class="wk-lede">An interactive textbook for the Gies MSBA workshop series on AI, machine learning, and financial markets. Nine chapters in four parts. Every chapter has code you can run in the page, a visual explainer you can poke, a checkpoint quiz, and a Colab notebook for the real thing.</p>
 ```
 
+## Start here: the seven-minute overview
+
+A walkthrough of what the series covers, how each chapter works, and what to do before the first session. The slides it uses are below the video.
+
+```{raw} html
+<figure class="wk-intro-video">
+  <video controls preload="metadata" poster="_static/media/intro-walkthrough-poster.jpg">
+    <source src="_static/media/intro-walkthrough.mp4" type="video/mp4">
+    Your browser cannot play this video. <a href="_static/media/intro-walkthrough.mp4">Download it</a> instead.
+  </video>
+  <figcaption>Series overview · 7 min · <a href="_static/media/msba-workshop-intro.pptx">Download the slides (PowerPoint)</a></figcaption>
+</figure>
+```
+
 ## The story
 
 Every chapter is set at **Champaign Capital Research**, a fictional independent equity research firm that is adopting agents and machine learning one careful step at a time. The firm, its people, its problems, and its plan for the year are on [the firm page](the-firm.md). Read it first; every chapter picks up a task from that plan.

@@ -5,6 +5,9 @@ h1, h2 { color: var(--wk-navy); letter-spacing: -0.02em; }
 .bd-sidebar-primary .caption-text { color: var(--wk-orange); font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .bd-sidebar-primary li.active > a { border-left: 3px solid var(--wk-orange); }
 .wk-lede { color: var(--wk-muted); font-size: 1.1rem; max-width: 42rem; }
+.wk-intro-video { margin: 0 0 1.5rem; }
+.wk-intro-video video { width: 100%; border: 1px solid var(--wk-line); border-radius: 10px; background: #000; }
+.wk-intro-video figcaption { margin-top: 6px; font-size: 0.85rem; color: var(--wk-muted); }
 .wk-colab { display: inline-block; border: 1px solid #f9ab00; color: #7a5200; background: #fff8e6; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; text-decoration: none; margin: 4px 0 14px; }
 .wk-colab:hover { background: #ffefc2; color: #7a5200; text-decoration: none; }
 
