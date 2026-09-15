@@ -42,9 +42,14 @@ def _describe_result(result):
         return f"nothing found — {result['error']}"
     if isinstance(result, list):
         n = len(result)
-        return "no matches" if n == 0 else f"{n} match{'es' if n != 1 else ''} found"
+        if n == 0:
+            return "no matches"
+        # Name the matched handbook sections so the reader (and the Watch view) can see which.
+        ids = ", ".join(str(m["id"]) for m in result if isinstance(m, dict) and "id" in m)
+        return f"{n} match{'es' if n != 1 else ''} found" + (f" ({ids})" if ids else "")
     if isinstance(result, dict):
-        return ", ".join(f"{k.replace('_', ' ')} {_fmt_value(v)}" for k, v in result.items())
+        # "field: value" pairs — the Watch view splits on this to draw the record.
+        return ", ".join(f"{k.replace('_', ' ')}: {_fmt_value(v)}" for k, v in result.items())
     return str(result)
 
 
