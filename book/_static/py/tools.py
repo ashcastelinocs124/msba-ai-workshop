@@ -67,7 +67,7 @@ def describe_schema(schema):
 # The schemas the model sees. Chapter 1 is about why these matter.
 TOOL_SCHEMAS = [
     {"name": "get_financials",
-     "description": "Quarterly revenue and YoY growth for one ticker. Use only when the user asks about revenue, growth, or earnings.",
+     "description": "Quarterly revenue and YoY growth for one ticker. Use only when the user asks about revenue, growth, or earnings; call it once per company when comparing.",
      "input_schema": {"type": "object",
                       "properties": {"ticker": {"type": "string", "enum": list(PRICES)},
                                      "period": {"type": "string", "enum": ["Q2-2026"]}},

@@ -112,6 +112,11 @@ if __name__ == "__main__":
     ans, log = agent("What was Deere's revenue growth last quarter?", verbose=False)
     assert "6.4%" in ans, ans
     assert log[0]["kind"] == "tool_call" and log[0]["tool"] == "get_financials"
+    ans, log = agent("Compare Deere's revenue growth with Caterpillar's last quarter", verbose=False)
+    assert "6.4%" in ans and "3.1%" in ans and "[source:" in ans, ans
+    assert [e.get("tool") for e in log[:2]] == ["get_financials", "get_financials"] and log[2]["kind"] == "text", log
+    ans, log = agent("Compare Deere with Tesla", verbose=False)
+    assert "no data for TSLA" in ans and len(log) == 3, (ans, log)
     ans, _ = agent("What does the handbook say about the blackout window?", verbose=False)
     assert "[source: personal-trading" in ans, ans
     for rid, expect in [("7101", "APPROVE"), ("7102", "DECLINE"), ("7103", "DECLINE"), ("7104", "HOLD")]:

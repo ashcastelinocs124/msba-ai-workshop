@@ -19,16 +19,46 @@ def _tool_results(msgs):
     return [m for m in msgs if m["role"] == "tool"]
 
 
-def _ticker(text):
-    m = re.search(r"\b(DE|AAPL|MSFT|NVDA|CAT)\b", text.upper())
-    return m.group(1) if m else "DE"
+# Company names and symbols the mock recognises. Tesla is on purpose: the firm has no data for it,
+# so asking about it exercises the tool's error path (chapter 1, §1.9).
+_NAMES = {"deere": "DE", "caterpillar": "CAT", "nvidia": "NVDA", "apple": "AAPL", "microsoft": "MSFT", "tesla": "TSLA"}
+
+
+def _tickers(text):
+    """Every company the question names, in the order named; defaults to Deere."""
+    found = []
+    for m in re.finditer(r"\b(deere|caterpillar|nvidia|apple|microsoft|tesla|de|cat|nvda|aapl|msft|tsla)\b", text.lower()):
+        t = _NAMES.get(m.group(1), m.group(1).upper())
+        if t not in found:
+            found.append(t)
+    return found or ["DE"]
+
+
+def _compare(rows):
+    """The client memo: both figures, the gap, and a source tag (the handbook requires one)."""
+    missing = [r["error"].split("for ", 1)[-1] for r in rows if "error" in r]
+    if missing:
+        have = [f"{r['name']} ({r['yoy']*100:.1f}% YoY to ${r['revenue']/1e9:.1f}B)" for r in rows if "error" not in r]
+        return (f"I can't complete this comparison: the firm holds no data for {', '.join(missing)}. "
+                f"I have {', '.join(have) if have else 'nothing'} but no basis for a comparison. "
+                "Ask the data team to add the missing name before I draft the memo.")
+    figs = "; ".join(f"{r['name']} grew revenue {r['yoy']*100:.1f}% YoY to ${r['revenue']/1e9:.1f}B" for r in rows)
+    fast = max(rows, key=lambda r: r["yoy"]); big = max(rows, key=lambda r: r["revenue"])
+    slow = min(rows, key=lambda r: r["yoy"])
+    ratio = fast["yoy"] / slow["yoy"] if slow["yoy"] > 0 else float("inf")
+    if fast is big:
+        verdict = f"{fast['name']} is growing {ratio:.1f}× as fast and is also the larger company."
+    else:
+        verdict = f"{fast['name']} is growing {ratio:.1f}× as fast, from a smaller base; {big['name']} is the larger company."
+    return f"{figs} in {rows[0]['period']}. {verdict} [source: {rows[0]['period']} filings via get_financials]"
 
 
 def model(msgs, tools=None):
     """Return the mock model's reply for the current message list."""
     q = _last_user(msgs)
     seen = _tool_results(msgs)
-    t = _ticker(q)
+    tickers = _tickers(q)
+    t = tickers[0]
 
     req = re.search(r"#\s?(\d{4})", q)
     if req and ("trade" in q or "clear" in q or "sell" in q or "buy" in q or "request" in q):
@@ -48,11 +78,17 @@ def model(msgs, tools=None):
             return {"type": "text", "text": f"RECOMMEND: DECLINE. {who}: the position has been held {r['holding_days']} days, under the 30-day minimum. [source: personal-trading-3]"}
         return {"type": "text", "text": f"RECOMMEND: APPROVE. {who}: not restricted, outside the blackout window, holding period satisfied. Pre-clearance is required and is granted by compliance, not by this assistant. [source: personal-trading-1]"}
 
-    if "revenue" in q or "growth" in q or "financial" in q:
-        if not seen:
-            return {"type": "tool_call", "tool": "get_financials", "args": {"ticker": t, "period": "Q2-2026"}}
-        r = seen[-1]["content"]
-        return {"type": "text", "text": f"{r['name']} revenue grew {r['yoy']*100:.1f}% YoY to ${r['revenue']/1e9:.1f}B in {r['period']}."}
+    if "revenue" in q or "growth" in q or "financial" in q or "compar" in q or "grew" in q:
+        # One lookup per company named, in order; then the answer. Two or more names → the client memo.
+        if len(seen) < len(tickers):
+            return {"type": "tool_call", "tool": "get_financials", "args": {"ticker": tickers[len(seen)], "period": "Q2-2026"}}
+        rows = [m["content"] for m in seen]
+        if len(rows) == 1:
+            r = rows[0]
+            if "error" in r:
+                return {"type": "text", "text": f"The firm holds no data for {r['error'].split('for ', 1)[-1]}."}
+            return {"type": "text", "text": f"{r['name']} revenue grew {r['yoy']*100:.1f}% YoY to ${r['revenue']/1e9:.1f}B in {r['period']}."}
+        return {"type": "text", "text": _compare(rows)}
 
     if "price" in q:
         if not seen:
@@ -71,4 +107,4 @@ def model(msgs, tools=None):
         top = hits[0]
         return {"type": "text", "text": f"{top['text']} [source: {top['id']}]"}
 
-    return {"type": "text", "text": "I can answer questions about revenue, prices, trade pre-clearance requests, or the firm policy handbook."}
+    return {"type": "text", "text": "I can answer questions about revenue and growth (one company or a comparison), prices, trade pre-clearance requests, or the firm policy handbook."}

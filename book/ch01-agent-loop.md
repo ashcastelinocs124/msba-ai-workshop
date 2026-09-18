@@ -1,20 +1,22 @@
 # 1. Introduction to AI Agents
 
 ```{raw} html
-<p class="wk-lede">What an agent is, what it is made of, and when to use one. Then build the loop yourself, design the tools it is allowed to call, and read every step it took.</p>
+<p class="wk-lede">A client wants Deere's revenue growth last quarter, compared with Caterpillar, by noon. Build the agent that answers it, design the tools it is allowed to call, and read every step it took.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch01-agent-loop.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
 ```{admonition} Learning objectives
 :class: note
 - Say what an agent is and tell it apart from a single model call and from a workflow.
-- Trace the model → tool → model cycle and name exactly what enters each call.
-- Design a tool schema that a model cannot misuse, and log every step so a reviewer can audit the run.
+- Trace the model → tool → model cycle on a two-company comparison and name exactly what enters each call.
+- Design a tool schema that a model cannot misuse, and log every step so an analyst can check the memo before it goes to the client.
 ```
 
 ## 1.1 What an agent is
 
-It is Monday morning at Champaign Capital Research and the first item in your inbox is a client asking for Deere's revenue growth last quarter. If you have not read [the firm page](the-firm.md), do that first; this chapter, and every chapter after it, is one task from that firm's plan.
+It is Monday morning at Champaign Capital Research and the first item in your inbox is from a portfolio manager at a pension-fund client: *Deere's revenue growth last quarter, compared with Caterpillar, by noon.* If you have not read [the firm page](the-firm.md), do that first; this chapter, and every chapter after it, is one task from that firm's plan.
+
+Priya's team answers about thirty requests like this a week. Each one is two lookups in filings the analyst has already read, then a paragraph saying who grew faster and by how much. It takes forty minutes, and the forty minutes is not the hard part of the job. This chapter builds the thing that does the lookups and drafts the paragraph, and leaves the sending to Priya.
 
 An agent is a language model that decides what to do next, does it through a tool, looks at what came back, and repeats until the job is done or a limit stops it.
 
@@ -26,7 +28,7 @@ It helps to put the agent next to the two things it is most often confused with.
 |---|---|---|---|
 | **Single model call** | nobody; there is one step | reads the input, writes the output | "Summarize this earnings call transcript." |
 | **Workflow** | your code, in advance | fills in a slot at each fixed step | Extract the vendor, then classify the invoice, then draft an email. Three calls, fixed order. |
-| **Agent** | the model, as it goes | chooses which tool to call, reads the result, chooses again | "Can Marcus sell his Caterpillar shares today?" The model decides it needs the request first, then the trading policy, then answers. |
+| **Agent** | the model, as it goes | chooses which tool to call, reads the result, chooses again | "Compare Deere's revenue growth with Caterpillar's." The model decides it needs Deere's figures, then Caterpillar's, then writes the comparison. |
 
 A workflow is a recipe. An agent is a cook. Most business problems are recipes, and a recipe is cheaper, faster, and easier to test. You reach for an agent when you cannot write the recipe in advance because the steps depend on what the data turns out to say.
 
@@ -49,7 +51,7 @@ Every agent, from a forty-line script to a commercial product, is made of the sa
 
 **The model.** It reads the conversation so far and produces either a tool request or a final answer. It has no memory between calls and no access to anything outside the text it is given. In this book the model is a mock for the in-page cells and a real one in Colab and on the campus copy of this site; the other two ingredients do not change.
 
-**The tools.** Named functions with a typed contract: a name, a description of when to use them, and a schema for their arguments. The model sees only the contract. Your code owns the implementation, and with it every decision about what the agent is allowed to reach. A read-only `get_trade_request` is a very different risk from a `clear_trade`, and the difference lives entirely in this layer.
+**The tools.** Named functions with a typed contract: a name, a description of when to use them, and a schema for their arguments. The model sees only the contract. Your code owns the implementation, and with it every decision about what the agent is allowed to reach. A read-only `get_financials` is a very different risk from a `send_to_client`, and the difference lives entirely in this layer.
 
 **The loop.** The code that carries messages to the model, executes the tool it asks for, appends the result, and goes again. It is also where the guardrails live: the step budget, the timeout, the log, and the human approval gate for anything that writes.
 
@@ -68,8 +70,8 @@ from tools import TOOLS, TOOL_SCHEMAS
 print("tools the agent can call:", list(TOOLS))
 print()
 print("what the model sees for one of them:")
-print(TOOL_SCHEMAS[2]["name"], "-", TOOL_SCHEMAS[2]["description"])
-print("arguments:", ", ".join(TOOL_SCHEMAS[2]["input_schema"]["properties"]))
+print(TOOL_SCHEMAS[0]["name"], "-", TOOL_SCHEMAS[0]["description"])
+print("arguments:", ", ".join(TOOL_SCHEMAS[0]["input_schema"]["properties"]))
 ```
 
 Notice what is *not* in the list: nothing that sends an email, clears a trade, publishes a note, or changes a record. That is a design choice you will make on purpose in 1.9, and chapter 6 is about how to relax it safely.
@@ -81,7 +83,7 @@ Because an agent decides its own steps, it costs more per task than a workflow, 
 1. **Can you write the steps down in advance?** If yes, write a workflow. Invoice matching, monthly report generation, and document classification are recipes.
 2. **Do the steps depend on what the data says?** A client question that might need a filing lookup, a data-vendor pull, a policy check, or none of them, depending on what the client wrote, is agent territory.
 3. **What does a mistake cost, and will anyone see it?** An agent that recommends and a human who approves is a cheap mistake. An agent that acts on a live system is not. Start with the first.
-4. **Is the task worth the latency and the tokens?** Three model calls to pre-clear one trade request is fine. Three model calls per row of a million-row price table is not.
+4. **Is the task worth the latency and the tokens?** Three model calls to compare two companies for a client is fine. Three model calls per row of a million-row price table is not.
 
 Chapter 7 turns these four questions into a full decision framework, with the "neither" answer treated seriously. For now the rule of thumb is: workflow by default, agent when the recipe cannot be written, and never let an agent hold a pen until its log has earned your trust.
 
@@ -97,7 +99,7 @@ That is the whole thing. Every agent product you will see this year is this loop
 
 Three things to notice. The model never runs code; it only *asks* for a tool by name. The loop is the only place with access to real data. And the conversation grows on every step, so whatever the model sees on step three includes everything from steps one and two.
 
-## 1.5 Try it: a minimal loop
+## 1.5 Try it: the comparison
 
 This cell runs in your browser against a **mock model**: a small function that behaves like an LLM for the questions in this book, so no API key is needed. The Colab notebook swaps in a real model (`glm-5.3-flash` on Lumen) with the same loop.
 
@@ -106,13 +108,15 @@ This cell runs in your browser against a **mock model**: a small function that b
 from agent import agent
 from tools import TOOLS
 
-answer, log = agent("What was Deere's revenue growth last quarter?", TOOLS)
+answer, log = agent("Compare Deere's revenue growth with Caterpillar's last quarter", TOOLS)
 print()
 print("ANSWER:", answer)
 print("STEPS :", len(log))
 ```
 
-Now change the question to `"What is the current price of NVDA?"` and run again. The model picks a different tool, and the loop does not care; it only checks whether the reply is a tool call or text.
+Three steps: look up Deere, look up Caterpillar, write the memo. The model could not write the memo from the question alone, and it could not skip either lookup, because the memo needs both figures. In the Watch view you see the analyst open Firm Records twice, then type the memo and file it.
+
+Now swap Caterpillar for NVIDIA and run again. The model needs a different second lookup, and the loop does not care; it only checks whether each reply is a tool call or text. Then try `"What is the current price of NVDA?"`: a different tool, one step, same loop.
 
 Here is the loop itself, shortened. Read it once slowly; the rest of Part I builds on it.
 
@@ -156,13 +160,13 @@ for m in msgs:
 
 This is what "transparent" means in this chapter. A transparent agent is one where you can print the messages list at any step and every line is something a human put there or a tool returned. Nothing is hidden inside a framework object.
 
-The `agent()` function in this book returns a **log** alongside the answer: one dict per step with the tool name, arguments, result, and elapsed time. In a business setting that log is the audit trail. When a stakeholder asks "why did it say that?", you open the log, not the model.
+The `agent()` function in this book returns a **log** alongside the answer: one dict per step with the tool name, arguments, result, and elapsed time. In a business setting that log is the audit trail. When the client asks "where did that figure come from?", you open the log, not the model.
 
 ```{code-block} python
 :class: pyodide
 from agent import agent, narrate
 
-answer, log = agent("What does the handbook say about the blackout window?", verbose=False)
+answer, log = agent("Compare Deere's revenue growth with Caterpillar's last quarter", verbose=False)
 print(answer)
 print()
 for line in narrate(log):
@@ -235,59 +239,72 @@ print()
 print(answer)
 ```
 
-## 1.9 A live business example: trade pre-clearance
+## 1.9 A live business example: the client comparison, by noon
 
-Everything so far used a research question because the numbers are easy to check. Here is the same loop doing a job the firm pays two people to do: pre-clearing employees' personal trades.
+Everything so far used one question because the numbers are easy to check. Here is the same loop doing the job the firm actually wants automated: the comparison memo a client is waiting for.
 
-The scenario. Everyone at Champaign Capital must ask compliance before trading a stock in a sector the firm covers. Elena Ruiz's team gets about thirty requests a week by email. Each one means opening the request, checking the restricted list, checking when the firm last published on that name, checking how long the position has been held, and writing back a decision with the policy clause that supports it. The rules fit on one page. Applying them the same way at 4:55 on a Friday is the hard part, and two officers reading the same handbook have reached different answers on the same request.
+The scenario. Thirty times a week someone asks Priya's team how one company's last quarter compares with another's. The figures are in filings the analyst has already read. Finding them, checking them, and writing the paragraph takes forty minutes, and two analysts answering the same request have been known to lead with different numbers. The firm's research-process rule says every figure in anything that leaves the building must cite its source, so the paragraph also has to say where the numbers came from.
 
-The agent gets two tools: `get_trade_request`, which returns the request record, and `search_docs`, which returns the relevant handbook chunks. It does not get a `clear_trade` tool. It recommends; a compliance officer approves. That split is the single most important design decision in the example, and it is a tool-API decision, not a prompt decision.
+The agent gets one tool, `get_financials`, which returns one company's quarter. It does not get a `send_to_client` tool. It drafts; Priya reads the memo and the log, then sends. That split is the single most important design decision in the example, and it is a tool-API decision, not a prompt decision.
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 
-answer, log = agent("Can compliance clear trade request #7102?")
+answer, log = agent("Compare Deere's revenue growth with Caterpillar's last quarter")
 print()
 print(answer)
 ```
 
-Read the steps. The model asked for the request first, then the policy, then decided. It could not have decided from the question alone, and it could not have skipped the lookup, because every rule hinges on a field in the request.
+Read the steps. Two lookups, in the order the question named the companies, then a memo with both figures, the gap, and a source tag. The model could not have written the memo from the question, and it could not have skipped a lookup, because the memo needs both numbers.
 
-Now change the request number. Each request in the fixture data trips a different clause of the handbook:
+Now change the pair. Each one in the fixture data makes a different point:
 
-| Request | Employee | What is different | Expected recommendation |
-|---|---|---|---|
-| 7101 | Priya Natarajan, buy 50 DE | firm last published on Deere 41 days ago | Approve |
-| 7102 | Marcus Bell, sell 200 CAT | position held 12 days | Decline, 30-day minimum holding period |
-| 7103 | Jordan Lee, buy 30 NVDA | NVIDIA is on the restricted list | Decline |
-| 7104 | Tom Okafor, sell 80 DE | firm published on Deere 6 days ago | Hold until the 14-day blackout ends |
+| Pair | What is different | What the memo should say |
+|---|---|---|
+| Deere vs Caterpillar | same sector; Deere is smaller and growing faster | the growth gap, the size gap, both figures |
+| NVIDIA vs Apple | NVIDIA is half the size and growing ten times faster | lead with growth, note the base |
+| Microsoft vs Apple | Apple is larger; Microsoft is growing three times faster | size and growth point different ways |
+| Deere vs Tesla | the firm holds no data for Tesla | the tool returns an error; the agent must say so, not guess |
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 
-for request_id in ["7101", "7102", "7103", "7104"]:
-    answer, log = agent(f"Can compliance clear trade request #{request_id}?", verbose=False)
-    print(f"#{request_id}: {answer}\n")
+for pair in ["Deere and Caterpillar", "NVIDIA and Apple", "Microsoft and Apple"]:
+    answer, log = agent(f"Compare revenue growth for {pair} last quarter", verbose=False)
+    print(f"{pair}: {answer}\n")
 ```
 
-Every recommendation ends with a `[source: …]` tag naming the handbook chunk it relied on. Chapter 3 makes that mandatory. For now, notice what it buys you: an employee who disagrees with a decision can read the clause, not argue with a model.
+Every memo ends with a `[source: …]` tag. Chapter 3 makes that mandatory and makes the tag point at a document. For now, notice what it buys you: a client who questions a number can be shown where it came from, not argued with.
 
-The log is the audit trail. This is what you would store per request, and what you would show the firm's annual compliance review:
+The fourth pair is the one that matters most. The client asks about a company the firm does not cover:
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+
+answer, log = agent("Compare Deere's revenue growth with Tesla's")
+print()
+print(answer)
+```
+
+The tool returned an error instead of a number, the loop passed the error to the model as data (section 1.8), and the model said it could not complete the comparison. A model without the tool would have written a confident paragraph with a made-up figure in it. The error is the feature.
+
+The log is what Priya reads before she sends. This is what you would store per request, and what you would show a client who asks how the firm produces its numbers:
 
 ```{code-block} python
 :class: pyodide
 from agent import agent, narrate
 
-answer, log = agent("Can compliance clear trade request #7104?", verbose=False)
+answer, log = agent("Compare Deere's revenue growth with Caterpillar's last quarter", verbose=False)
 for line in narrate(log):
     print(line)
 ```
 
-What the firm gets from this loop, compared with an officer doing it by hand: the same handbook applied the same way every time, a written reason with a citation on every decision, a log that can be reviewed, and a compliance officer who now approves thirty recommendations instead of researching thirty requests. What it does not get is an agent that clears trades. That stays behind a human click until the log has earned trust, which is the subject of chapter 6.
+What the firm gets from this loop, compared with an analyst doing it by hand: the same figures pulled the same way every time, a memo with a source on every number, a log that can be reviewed, and an analyst who now reads thirty drafts instead of researching thirty requests. What it does not get is an agent that talks to clients. That stays behind a human click until the log has earned trust, which is the subject of chapter 6.
 
-The Colab notebook runs this exact scenario against the real model. Compare its tool sequence with the mock's; a well-designed schema should make them match.
+The Colab notebook runs this exact comparison against the real model. Compare its tool sequence with the mock's; a well-designed schema should make them match.
 
 ## Checkpoint
 
@@ -307,17 +324,17 @@ The Colab notebook runs this exact scenario against the real model. Compare its 
 <div class="quiz" data-answer="b"
      data-ok="Correct. Constraints belong in the contract the model sees. A retry hides the bug and a plea in the prompt is unenforceable."
      data-no="Not quite. That treats the symptom. Where does the model learn what a valid call looks like, before it decides to make one?">
-  <p class="q">The model keeps calling <code>search_docs</code> with an empty query. Where is the fix most likely to live?</p>
-  <label><input type="radio" name="q1" value="a"> In the loop: retry the call when the query is empty</label>
-  <label><input type="radio" name="q1" value="b"> In the tool schema: make <code>query</code> required with a minimum length, and say in the description when not to search</label>
-  <label><input type="radio" name="q1" value="c"> In the system prompt: "please be careful with search"</label>
+  <p class="q">The model keeps calling <code>get_financials</code> with <code>ticker="Deere Corp"</code> and getting errors back. Where is the fix most likely to live?</p>
+  <label><input type="radio" name="q1" value="a"> In the loop: retry the call with the ticker guessed from the name</label>
+  <label><input type="radio" name="q1" value="b"> In the tool schema: make <code>ticker</code> an enum of the symbols the firm covers, so the invalid call cannot be made</label>
+  <label><input type="radio" name="q1" value="c"> In the system prompt: "please use ticker symbols"</label>
   <div class="fb"></div>
 </div>
 ```
 
 ## 1.10 Run it against a real model
 
-The mock model answered every question so far. This section sends the same loop, the same tool schemas, and the same pre-clearance request to a GPT deployment on Illinois Azure.
+The mock model answered every question so far. This section sends the same loop, the same tool schemas, and the same client comparison to a GPT deployment on Illinois Azure.
 
 Your browser never sees a key. The page calls `/api/chat` on this site, a small proxy that holds the key, checks that you are signed in with your campus account, and forwards the request. That is the same "no write tools, a human approves" idea from 1.9 applied to the key itself: the model is reachable, the credential is not.
 
@@ -330,12 +347,12 @@ Your browser never sees a key. The page calls `/api/chat` on this site, a small 
 from agent import agent
 from llm import azure_model      # real model, via /api/chat on this site
 
-answer, log = agent("Can compliance clear trade request #7102?", model=azure_model)
+answer, log = agent("Compare Deere's revenue growth with Caterpillar's last quarter", model=azure_model)
 print()
 print(answer)
 ```
 
-Compare with the mock's run in 1.9. The tool order should match, because the schema made it the only sensible order. The wording will differ; the citation should not.
+Compare with the mock's run in 1.9. Both lookups should be there, because the schema only returns one company at a time. The wording will differ; the two figures should not.
 
 Now the question the mock could never handle, because it only knows the scripts in this book:
 
@@ -344,22 +361,23 @@ Now the question the mock could never handle, because it only knows the scripts 
 from agent import agent
 from llm import azure_model
 
-answer, log = agent("Priya Natarajan (request #7101) wants to buy Deere, but says she will probably publish a note on Deere within two weeks. Approve now, hold, or decline, and what should compliance tell her?", model=azure_model)
+answer, log = agent("Which of Deere, Caterpillar and NVIDIA grew revenue fastest last quarter, and is the fastest also the largest? Two sentences for a client.", model=azure_model)
 print()
 print(answer)
 ```
 
-Read the log. Did the model look up the request? Did it search the handbook for the blackout rule, the pre-clearance rule, or both? Every extra tool call costs tokens and time, so a good loop is not the one that calls the most tools, it is the one that calls exactly the ones the question needs. Your token budget for the day is in the header of this page.
+Read the log. Did the model look up all three, and nothing else? Did the memo cite where the figures came from? Every extra tool call costs tokens and time, so a good loop is not the one that calls the most tools, it is the one that calls exactly the ones the question needs. Your token budget for the day is in the header of this page.
 
 ## 1.11 Exercise
 
 Open the Colab notebook. It contains the same loop, wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key) with `strict: true` schemas.
 
 1. Classify three tasks from your own work or internship as single call, workflow, or agent, using the four questions in 1.3. One sentence each.
-2. Run the pre-clearance scenario for all four requests against the real model and compare its tool sequence and recommendations with the mock's.
-3. Add a second data tool, `get_price(ticker)`, with a closed schema, and run *"Is Deere's revenue growth better than Caterpillar's, and what are both trading at?"* It should show four tool calls and one text answer.
-4. Extend the step log with the total elapsed time of the whole run.
-5. In three sentences, explain one tool call the model made that you would not have made, and what schema change would prevent it.
+2. Run the Deere-vs-Caterpillar comparison against the real model and compare its tool sequence and memo with the mock's. Did it ask for both companies in one reply or one at a time?
+3. Add a second data tool, `get_price(ticker)`, with a closed schema, and run *"Is Deere's revenue growth better than Caterpillar's, and what are both trading at?"* It should show four tool calls and one memo.
+4. Ask for Deere compared with Tesla. The schema's enum does not allow `TSLA`. Write two sentences on what the model did instead, and whether a client could tell.
+5. Extend the step log with the total elapsed time of the whole run.
+6. In three sentences, explain one tool call the model made that you would not have made, and what schema change would prevent it.
 
 ## Further reading
 
