@@ -5,6 +5,20 @@
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch01-agent-loop.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
+## Watch the lecture
+
+The session 1 recording. Watch it before or alongside the sections below; the cells on this page are the ones it walks through.
+
+```{raw} html
+<figure class="wk-intro-video">
+  <video controls preload="metadata" poster="_static/media/ch01-lecture-poster.jpg">
+    <source src="_static/media/ch01-lecture.mp4" type="video/mp4">
+    Your browser cannot play this video. <a href="_static/media/ch01-lecture.mp4">Download it</a> instead.
+  </video>
+  <figcaption>Session 1 · Introduction to AI Agents · 47 min</figcaption>
+</figure>
+```
+
 ```{admonition} Learning objectives
 :class: note
 - Say what an agent is and tell it apart from a single model call and from a workflow.
