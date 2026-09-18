@@ -11,11 +11,8 @@ The session 1 recording. Watch it before or alongside the sections below; the ce
 
 ```{raw} html
 <figure class="wk-intro-video">
-  <video controls preload="metadata" poster="_static/media/ch01-lecture-poster.jpg">
-    <source src="_static/media/ch01-lecture.mp4" type="video/mp4">
-    Your browser cannot play this video. <a href="_static/media/ch01-lecture.mp4">Download it</a> instead.
-  </video>
-  <figcaption>Session 1 · Introduction to AI Agents · 47 min</figcaption>
+  <iframe src="https://www.youtube.com/embed/TuWWd335S1c" title="Session 1 · Introduction to AI Agents" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Session 1 · Introduction to AI Agents · 47 min · <a href="https://youtu.be/TuWWd335S1c">Open on YouTube</a> · <a href="_static/media/ch01-lecture.mp4">Download the recording</a></figcaption>
 </figure>
 ```
 
