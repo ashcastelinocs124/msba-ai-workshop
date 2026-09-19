@@ -98,6 +98,20 @@ Because an agent decides its own steps, it costs more per task than a workflow, 
 
 Chapter 7 turns these four questions into a full decision framework, with the "neither" answer treated seriously. For now the rule of thumb is: workflow by default, agent when the recipe cannot be written, and never let an agent hold a pen until its log has earned your trust.
 
+**Checkpoint.** One question before moving on.
+
+```{raw} html
+<div class="quiz" data-answer="c"
+     data-ok="Correct. The steps are fixed and known in advance, so code should decide them. A model call fills each slot; no agent is needed."
+     data-no="Look at who decides the order of steps. If you can write the recipe before seeing the data, you do not need the model to choose.">
+  <p class="q">Every month, Champaign Capital's data team needs each data-vendor invoice extracted into fields, matched to the contract, and flagged if the amounts differ. Which shape fits?</p>
+  <label><input type="radio" name="q0" value="a"> An agent, because it involves several steps and a model</label>
+  <label><input type="radio" name="q0" value="b"> A single model call, because it is one document at a time</label>
+  <label><input type="radio" name="q0" value="c"> A workflow: code runs the three fixed steps and the model only extracts fields</label>
+  <div class="fb"></div>
+</div>
+```
+
 ## 1.4 The loop, in four lines
 
 Now the third ingredient. Strip away the frameworks and an agent is a loop. You send the conversation to the model. If the reply contains a tool call, you run the tool, append the result to the conversation, and send it again. You stop when the model answers in plain text, or when a step budget runs out.
@@ -230,6 +244,20 @@ print(", ".join(validate(fin, {"ticker": "DE", "period": "Q2-2026", "currency": 
 print(", ".join(validate(search, {"query": ""})))
 ```
 
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="b"
+     data-ok="Correct. Constraints belong in the contract the model sees. A retry hides the bug and a plea in the prompt is unenforceable."
+     data-no="Not quite. That treats the symptom. Where does the model learn what a valid call looks like, before it decides to make one?">
+  <p class="q">The model keeps calling <code>get_financials</code> with <code>ticker="Deere Corp"</code> and getting errors back. Where is the fix most likely to live?</p>
+  <label><input type="radio" name="q1" value="a"> In the loop: retry the call with the ticker guessed from the name</label>
+  <label><input type="radio" name="q1" value="b"> In the tool schema: make <code>ticker</code> an enum of the symbols the firm covers, so the invalid call cannot be made</label>
+  <label><input type="radio" name="q1" value="c"> In the system prompt: "please use ticker symbols"</label>
+  <div class="fb"></div>
+</div>
+```
+
 ## 1.8 Two failure modes and their guards
 
 **The runaway loop.** A model that keeps calling tools never returns text. `max_steps` is the guard. Six is a good default for a single question; set it from the task, not from hope. When the budget is exhausted the loop returns a message that says so, and the log records it. Never let the loop end silently.
@@ -317,32 +345,6 @@ What the firm gets from this loop, compared with an analyst doing it by hand: th
 
 The Colab notebook runs this exact comparison against the real model. Compare its tool sequence with the mock's; a well-designed schema should make them match.
 
-## Checkpoint
-
-```{raw} html
-<div class="quiz" data-answer="c"
-     data-ok="Correct. The steps are fixed and known in advance, so code should decide them. A model call fills each slot; no agent is needed."
-     data-no="Look at who decides the order of steps. If you can write the recipe before seeing the data, you do not need the model to choose.">
-  <p class="q">Every month, Champaign Capital's data team needs each data-vendor invoice extracted into fields, matched to the contract, and flagged if the amounts differ. Which shape fits?</p>
-  <label><input type="radio" name="q0" value="a"> An agent, because it involves several steps and a model</label>
-  <label><input type="radio" name="q0" value="b"> A single model call, because it is one document at a time</label>
-  <label><input type="radio" name="q0" value="c"> A workflow: code runs the three fixed steps and the model only extracts fields</label>
-  <div class="fb"></div>
-</div>
-```
-
-```{raw} html
-<div class="quiz" data-answer="b"
-     data-ok="Correct. Constraints belong in the contract the model sees. A retry hides the bug and a plea in the prompt is unenforceable."
-     data-no="Not quite. That treats the symptom. Where does the model learn what a valid call looks like, before it decides to make one?">
-  <p class="q">The model keeps calling <code>get_financials</code> with <code>ticker="Deere Corp"</code> and getting errors back. Where is the fix most likely to live?</p>
-  <label><input type="radio" name="q1" value="a"> In the loop: retry the call with the ticker guessed from the name</label>
-  <label><input type="radio" name="q1" value="b"> In the tool schema: make <code>ticker</code> an enum of the symbols the firm covers, so the invalid call cannot be made</label>
-  <label><input type="radio" name="q1" value="c"> In the system prompt: "please use ticker symbols"</label>
-  <div class="fb"></div>
-</div>
-```
-
 ## 1.10 Run it against a real model
 
 The mock model answered every question so far. This section sends the same loop, the same tool schemas, and the same client comparison to a GPT deployment on Illinois Azure.
@@ -392,5 +394,5 @@ Open the Colab notebook. It contains the same loop, wired to `glm-5.3-flash` on 
 
 ## Further reading
 
-- Anthropic, *Building effective agents* — the "augmented LLM" and the argument for simple loops over frameworks.
-- The OpenAI function-calling documentation on `strict` schemas and `additionalProperties` — the format Lumen uses.
+- Anthropic, [*Building effective agents*](https://www.anthropic.com/engineering/building-effective-agents) — the "augmented LLM" and the argument for simple loops over frameworks.
+- The OpenAI [function-calling documentation](https://platform.openai.com/docs/guides/function-calling) on `strict` schemas and `additionalProperties` — the format Lumen uses.
