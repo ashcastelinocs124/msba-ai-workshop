@@ -125,6 +125,20 @@ The memo now has the header and the sign-off from the examples. It also has Priy
 
 Two rules of thumb from all of this. First, **a prompt block changes the shape of the answer, never its facts.** Every figure in every memo above came from `get_financials`; the blocks decided the header, the table, the refusal and the sign-off. Second, **add blocks one at a time and run the same question after each.** A prompt assembled all at once is a prompt whose parts you cannot tell apart when one of them misbehaves.
 
+**Checkpoint.** One question before moving on.
+
+```{raw} html
+<div class="quiz" data-answer="c"
+     data-ok="Correct. The facts are right and the tool calls are right; the shape of the answer is wrong. That is a format block, and it should fire only when a table is asked for."
+     data-no="Look at what is wrong: the numbers, the lookups, or the shape? Only one of the three is a prompt problem.">
+  <p class="q">A client asks for a comparison "as a table" and gets two correct sentences with both figures and a source tag. Which block is missing?</p>
+  <label><input type="radio" name="q1" value="a"> Rules: the model broke a handbook rule</label>
+  <label><input type="radio" name="q1" value="b"> History: the model forgot the previous exchange</label>
+  <label><input type="radio" name="q1" value="c"> Format: the model does not know what shape to answer in when a table is asked for</label>
+  <div class="fb"></div>
+</div>
+```
+
 ## 2.4 Where prompts stop working
 
 By the end of 2.3 the prompt fixed two of the four replies from 2.1, the table and the buy question. Look at what it cost and what it still cannot do.
@@ -154,15 +168,29 @@ The examples block alone costs more than the other three together. That is fine 
 
 **A request is not a contract.** Chapter 1's checkpoint made this point about ticker symbols: "please use ticker symbols" in the prompt is a plea, an enum in the schema is a guarantee. The same holds for every rule in 2.3. The no-recommendation rule worked because the mock honours it; a real model honours it most of the time. For a rule that must hold every time, the enforcement belongs in code, after the model answers, not in the prompt before it.
 
-**Long prompts decay.** Liu and colleagues showed in 2023 that models recall instructions and facts at the start and end of a long context much better than ones in the middle, and later models still show the effect on very long inputs. A twelve-page prompt with the no-recommendation rule on page seven is a rule the model will sometimes miss. The mock does not imitate this; 2.7 tests it against a real model, with the rule buried and then moved.
+**Long prompts decay.** [Liu and colleagues](https://arxiv.org/abs/2307.03172) showed in 2023 that models recall instructions and facts at the start and end of a long context much better than ones in the middle, and later models still show the effect on very long inputs. A twelve-page prompt with the no-recommendation rule on page seven is a rule the model will sometimes miss. The mock does not imitate this; 2.7 tests it against a real model, with the rule buried and then moved.
 
 Add these up and the picture is: prompts are the right tool for standing instructions, and the wrong tool for facts, for history, and for anything that changes. The industry's response, since about 2024, has been to stop thinking about the prompt as the thing you write and start thinking about the whole desk.
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="c"
+     data-ok="Correct. A standing rule is what a prompt is for. A figure comes from a tool on the call that needs it, and the last question is history, placed on the desk by code."
+     data-no="Ask which of the three is the same on every call and true for every client. Only that one belongs in a block written once.">
+  <p class="q">Which of these belongs in the system prompt?</p>
+  <label><input type="radio" name="q2" value="a"> Caterpillar's revenue last quarter</label>
+  <label><input type="radio" name="q2" value="b"> The question this client asked two hours ago</label>
+  <label><input type="radio" name="q2" value="c"> "Every figure names its source"</label>
+  <div class="fb"></div>
+</div>
+```
 
 ## 2.5 From prompts to context
 
 The **context** is everything the model reads on one call. In the loop from chapter 1 that is the messages list: the system prompt, any earlier turns, the tool results so far, and the question. **Context engineering** is deciding what goes in that list, in what order, at what cost, for every call, and having code do it rather than a person.
 
-Anthropic's engineering team put it as the shift from finding the right words to finding the right *configuration of context*, and Andrej Karpathy called it the delicate art of filling the window with just the right information for the next step. The picture this book uses is the analyst's desk. There is a fixed amount of room on it. Before each call, something has to decide what is on the desk and what stays in the filing cabinet.
+[Anthropic's engineering team](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) put it as the shift from finding the right words to finding the right *configuration of context*, and [Andrej Karpathy](https://x.com/karpathy/status/1937902205765607626) called it the delicate art of filling the window with just the right information for the next step. The picture this book uses is the analyst's desk. There is a fixed amount of room on it. Before each call, something has to decide what is on the desk and what stays in the filing cabinet.
 
 ```{raw} html
 :file: widgets/ch02-context-window.html
@@ -248,7 +276,7 @@ Four calls, and each one reads more than the last, because every tool result sta
 
 What the firm gets from this, compared with 2.3's prompt alone: the same standing instructions, plus the client's preferences, plus the right handbook clause, plus the last exchange, each placed by code on the call that needs it, and a token count per call that Priya can read. What it does not get is an agent that reads the whole handbook every time, or one that remembers every client forever. Both of those are choices the firm made on purpose.
 
-## Checkpoint
+**Checkpoint.**
 
 ```{raw} html
 <div class="quiz" data-answer="b"
@@ -258,18 +286,6 @@ What the firm gets from this, compared with 2.3's prompt alone: the same standin
   <label><input type="radio" name="q0" value="a"> In the system prompt, pasted in full, updated by hand each Monday</label>
   <label><input type="radio" name="q0" value="b"> In a record the loop reads into the context on calls that mention a ticker, with a code check on the answer</label>
   <label><input type="radio" name="q0" value="c"> In a few-shot example that shows the model declining a restricted name</label>
-  <div class="fb"></div>
-</div>
-```
-
-```{raw} html
-<div class="quiz" data-answer="c"
-     data-ok="Correct. The facts are right and the tool calls are right; the shape of the answer is wrong. That is a format block, and it should fire only when a table is asked for."
-     data-no="Look at what is wrong: the numbers, the lookups, or the shape? Only one of the three is a prompt problem.">
-  <p class="q">A client asks for a comparison "as a table" and gets two correct sentences with both figures and a source tag. Which block is missing?</p>
-  <label><input type="radio" name="q1" value="a"> Rules: the model broke a handbook rule</label>
-  <label><input type="radio" name="q1" value="b"> History: the model forgot the previous exchange</label>
-  <label><input type="radio" name="q1" value="c"> Format: the model does not know what shape to answer in when a table is asked for</label>
   <div class="fb"></div>
 </div>
 ```
@@ -353,7 +369,7 @@ Open the Colab notebook. It has the chapter 1 loop with `system` and `history` a
 
 ## Further reading
 
-- Anthropic, *Effective context engineering for AI agents* (2025) — the shift from prompt to context, and the "smallest set of high-signal tokens" principle this chapter's desk picture is drawn from.
-- Anthropic, *Prompt engineering overview* in the Claude documentation — the role, example and format techniques from 2.3, with the reasons each one works.
-- Nelson F. Liu et al., *Lost in the Middle: How Language Models Use Long Contexts* (2023) — the decay effect tested in 2.7.
-- Andrej Karpathy on "context engineering" (2025) — the phrase, and the argument that the prompt is the small part.
+- Anthropic, [*Effective context engineering for AI agents*](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (2025) — the shift from prompt to context, and the "smallest set of high-signal tokens" principle this chapter's desk picture is drawn from.
+- Anthropic, [*Prompt engineering overview*](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview) in the Claude documentation — the role, example and format techniques from 2.3, with the reasons each one works.
+- Nelson F. Liu et al., [*Lost in the Middle: How Language Models Use Long Contexts*](https://arxiv.org/abs/2307.03172) (2023) — the decay effect tested in 2.7.
+- Andrej Karpathy, [the post that named "context engineering"](https://x.com/karpathy/status/1937902205765607626) (2025) — the phrase, and the argument that the prompt is the small part.
