@@ -74,13 +74,18 @@ def narrate(log):
     return lines
 
 
-def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True):
+def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True, system=None, history=None):
     """Run a tool-using loop until the model answers in text or the step budget runs out.
 
     Returns (answer, log). The log is a list of dicts, one per step, so it can be
     inspected, tested, or written to disk.
+
+    `system` is the standing instructions and `history` the earlier turns, as (role, text)
+    pairs (chapter 2). Both only seed the message list; the loop itself is unchanged.
     """
-    msgs = [{"role": "user", "content": question}]
+    msgs = [{"role": "system", "content": system}] if system else []
+    msgs += [{"role": r, "content": c} for r, c in (history or [])]
+    msgs.append({"role": "user", "content": question})
     log = []
     for step in range(max_steps):
         reply = model(msgs)
@@ -123,4 +128,18 @@ if __name__ == "__main__":
         ans, log = agent(f"Can compliance clear trade request #{rid}?", verbose=False)
         assert expect in ans, (rid, ans)
         assert [e.get("tool") for e in log[:2]] == ["get_trade_request", "search_docs"], log
+    # chapter 2: the prompt and the history change the answer
+    from context import build_context, ROLE, RULES
+    ans, _ = agent("Should we buy Deere on the back of that growth?", verbose=False)
+    assert "looks like a buy" in ans, ans
+    ans, _ = agent("Should we buy Deere on the back of that growth?", system=ROLE + "\n" + RULES, verbose=False)
+    assert "client-service-1" in ans and "looks like a buy" not in ans, ans
+    memo, _ = agent("Compare Deere's revenue growth with Caterpillar's last quarter", verbose=False)
+    ans, log = agent("And NVIDIA?", history=[("user", "Compare Deere's revenue growth with Caterpillar's last quarter"), ("assistant", memo)], verbose=False)
+    assert "58.0%" in ans and "6.4%" in ans and len(log) == 2, ans
+    ans, _ = agent("And NVIDIA?", verbose=False)
+    assert ans.startswith("NVIDIA what?"), ans
+    sysm, hist = build_context("And the raw vendor numbers behind that?", client="meridian")
+    ans, _ = agent("And the raw vendor numbers behind that?", system=sysm, verbose=False)
+    assert "data-licensing-1" in ans, ans
     print("ok")

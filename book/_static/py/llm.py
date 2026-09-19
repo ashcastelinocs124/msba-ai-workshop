@@ -50,11 +50,15 @@ def _post(path, body):
 
 
 def _openai_messages(msgs, system):
-    out = [{"role": "system", "content": system}]
+    # A system message the caller put in msgs (chapter 2's agent(system=…)) wins over the default.
+    given = [m["content"] for m in msgs if m["role"] == "system"]
+    out = [{"role": "system", "content": given[0] if given else system}]
     i = 0
     for m in msgs:
         if m["role"] == "user":
             out.append({"role": "user", "content": m["content"]})
+        elif m["role"] == "assistant" and "tool_call" not in m:
+            out.append({"role": "assistant", "content": m["content"]})   # an earlier turn from history
         elif m["role"] == "assistant" and "tool_call" in m:
             i += 1
             tc = m["tool_call"]

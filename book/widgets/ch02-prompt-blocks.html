@@ -1,0 +1,74 @@
+<div class="wk-widget wk-pb" id="w-pb">
+  <style>
+    .wk-pb .q { font-size: 12.5px; margin: 0 0 10px; color: var(--wk-muted); }
+    .wk-pb .q b { color: #1f2430; }
+    .wk-pb .grid { display: grid; grid-template-columns: 170px 1fr; gap: 14px; align-items: start; }
+    .wk-pb .right { display: flex; flex-direction: column; gap: 12px; }
+    .wk-pb .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 6px; }
+    .wk-pb .blk { display: flex; gap: 8px; align-items: flex-start; border: 2px solid var(--wk-line); border-radius: 8px; padding: 8px 10px; background: #fff; margin-bottom: 8px; cursor: pointer; font-size: 12.5px; font-weight: 600; transition: border-color .15s, background .15s; }
+    .wk-pb .blk.on { border-color: var(--wk-orange); background: #fff3ea; }
+    .wk-pb .blk input { margin-top: 3px; accent-color: var(--wk-orange); }
+    .wk-pb .blk small { display: block; color: var(--wk-muted); font-size: 11px; font-weight: 400; }
+    .wk-pb .stat { font-size: 12px; color: var(--wk-muted); margin-top: 6px; }
+    .wk-pb .stat b { color: #1f2430; font-family: ui-monospace, Menlo, monospace; }
+    .wk-pb .box { background: #fff; border: 1px solid var(--wk-line); border-radius: 6px; padding: 10px; font: 12px/1.5 ui-monospace, Menlo, monospace; min-height: 72px; white-space: pre-wrap; color: #333; overflow-x: auto; }
+    .wk-pb .box .seg { display: block; border-left: 3px solid var(--wk-line); padding-left: 8px; margin-bottom: 8px; }
+    .wk-pb .box .seg.role { border-color: var(--wk-navy); } .wk-pb .box .seg.rules { border-color: #1a7f5a; }
+    .wk-pb .box .seg.format { border-color: var(--wk-orange); } .wk-pb .box .seg.ex { border-color: #8a5cf6; }
+    .wk-pb .box.memo { background: #fffaf5; border-color: #f4c9ad; }
+    .wk-pb .empty { color: #999; }
+    .wk-pb .bad { color: #a33; } .wk-pb .good { color: #1a7f5a; } .wk-pb .dim { color: var(--wk-muted); }
+    @media (max-width: 760px) { .wk-pb .grid { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · build the prompt, read the memo</div>
+  <p class="q">The client's email: <b>"Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?"</b> Tick a block to add it to the system prompt. The memo on the right is what the mock model returns with that prompt on the desk.</p>
+  <div class="grid">
+    <div>
+      <div class="h">Blocks in the system prompt</div>
+      <label class="blk" data-k="role"><input type="checkbox"><span>Role<small>who it works for</small></span></label>
+      <label class="blk" data-k="rules"><input type="checkbox"><span>Rules<small>what it must never do</small></span></label>
+      <label class="blk" data-k="format"><input type="checkbox"><span>Format<small>the shape of the answer</small></span></label>
+      <label class="blk" data-k="ex"><input type="checkbox"><span>Examples<small>two memos Priya sent</small></span></label>
+      <div class="stat">about <b data-tok>0</b> tokens of instructions, every call</div>
+    </div>
+    <div class="right">
+      <div><div class="h">what the model reads before the question</div><div class="box" data-sys></div></div>
+      <div><div class="h">the memo that comes out</div><div class="box memo" data-memo></div></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-pb");
+  // The same block text as context.py, so the token counts here match the cells.
+  const BLOCK = {
+    role: "You are a research associate at Champaign Capital Research, an independent equity research firm. You are drafting a reply for a portfolio manager at a pension-fund client. You draft; Priya reads and sends.",
+    rules: "Rules. Never give an investment recommendation; those appear only in published notes [client-service-1]. Every figure must name its source [research-process-1]. If the firm holds no data for a company, say so instead of guessing.",
+    format: "Format. When the client asks for a table, answer as a table with columns: company, revenue, YoY growth, source. Otherwise, two sentences.",
+    ex: "Example 1.\nMEMO · Deere vs Caterpillar · Q2-2026\nDeere grew revenue 6.4% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B. Deere is growing 2.1× as fast, from a smaller base. [source: Q2-2026 filings]\n— Priya Natarajan, Industrials\n\nExample 2.\nMEMO · NVIDIA vs Apple · Q2-2026\nNVIDIA grew revenue 58.0% YoY to $52.4B; Apple grew revenue 5.0% YoY to $96.1B. NVIDIA is growing 11.6× as fast, from a smaller base. [source: Q2-2026 filings]\n— Priya Natarajan, Industrials",
+  };
+  const tokens = (t) => Math.floor(t.split(/\s+/).length * 1.3) + 1;
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const on = {};
+  const sys = w.querySelector("[data-sys]"), memo = w.querySelector("[data-memo]"), tok = w.querySelector("[data-tok]");
+  function render() {
+    const keys = Object.keys(BLOCK).filter((k) => on[k]);
+    sys.innerHTML = keys.length ? keys.map((k) => `<span class="seg ${k}">${esc(BLOCK[k])}</span>`).join("")
+                                : '<span class="empty">(nothing — the model sees only the question)</span>';
+    tok.textContent = keys.reduce((a, k) => a + tokens(BLOCK[k]), 0);
+    const table = "company      revenue   YoY growth   source\nDeere        $13.8B    6.4%         Q2-2026 filing\nCaterpillar  $16.9B    3.1%         Q2-2026 filing\nDeere is growing 2.1× as fast, from a smaller base; Caterpillar is the larger company.";
+    const prose = "Deere grew revenue 6.4% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B in Q2-2026. Deere is growing 2.1× as fast, from a smaller base; Caterpillar is the larger company. [source: Q2-2026 filings via get_financials]";
+    let out = on.format ? table : prose;
+    out += on.rules
+      ? '\n<span class="good">On whether to buy: the firm gives investment recommendations only in published notes, so I can\'t answer that here. [source: client-service-1]</span>'
+      : '\n<span class="bad">On that growth, yes — Deere looks like a buy.</span>';
+    if (on.ex) out = "MEMO · Deere vs Caterpillar · Q2-2026\n" + out + "\n— Priya Natarajan, Industrials";
+    else if (on.role) out = '<span class="dim">Champaign Capital Research · draft for Priya\'s review</span>\n' + out;
+    memo.innerHTML = out;
+  }
+  w.querySelectorAll(".blk").forEach((b) => b.addEventListener("change", (e) => {
+    on[b.dataset.k] = e.target.checked; b.classList.toggle("on", e.target.checked); render();
+  }));
+  render();
+})();
+</script>

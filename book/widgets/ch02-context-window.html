@@ -1,0 +1,83 @@
+<div class="wk-widget wk-cw" id="w-cw">
+  <style>
+    .wk-cw .grid { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
+    .wk-cw .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 6px; }
+    .wk-cw .item { display: flex; gap: 8px; align-items: center; border: 2px solid var(--wk-line); border-radius: 8px; padding: 7px 10px; background: #fff; margin-bottom: 7px; cursor: pointer; font-size: 12.5px; font-weight: 600; transition: border-color .15s, background .15s; }
+    .wk-cw .item.on { border-color: var(--wk-orange); background: #fff3ea; }
+    .wk-cw .item.fixed { cursor: default; }
+    .wk-cw .item input { accent-color: var(--wk-orange); }
+    .wk-cw .item .tk { margin-left: auto; font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    .wk-cw .legend { font-size: 11.5px; color: var(--wk-muted); margin-top: 6px; }
+    .wk-cw .bar { height: 26px; border: 1px solid var(--wk-line); border-radius: 6px; background: #fff; display: flex; overflow: hidden; }
+    .wk-cw .bar i { display: block; height: 100%; transition: width .3s; }
+    .wk-cw .bar .role { background: var(--wk-navy); } .wk-cw .bar .hb { background: #b83232; } .wk-cw .bar .clause { background: #1a7f5a; }
+    .wk-cw .bar .hist { background: #8a5cf6; } .wk-cw .bar .tool { background: #2b7fb8; } .wk-cw .bar .q { background: var(--wk-orange); }
+    .wk-cw .meter { display: flex; justify-content: space-between; font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); margin: 6px 0 12px; }
+    .wk-cw .meter .over { color: #b83232; }
+    .wk-cw .desk { background: #fff; border: 1px solid var(--wk-line); border-radius: 6px; padding: 10px; font: 12px/1.5 ui-monospace, Menlo, monospace; min-height: 150px; color: #333; }
+    .wk-cw .desk .row { display: flex; gap: 8px; margin-bottom: 4px; }
+    .wk-cw .desk .row .k { min-width: 100px; color: var(--wk-muted); font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
+    .wk-cw .desk .row.cut { color: #b83232; text-decoration: line-through; opacity: .7; }
+    .wk-cw .note { border-radius: 6px; padding: 8px 10px; font-size: 12.5px; margin-top: 8px; }
+    .wk-cw .note.warn { border: 1px solid #f0b4b4; background: #fff2f2; color: #8a1f1f; }
+    .wk-cw .note.ok { border: 1px solid #b9e2cf; background: #f2faf6; color: #155f42; }
+    @media (max-width: 760px) { .wk-cw .grid { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · what is on the desk for this one call</div>
+  <div class="grid">
+    <div>
+      <div class="h">Put on the desk</div>
+      <div class="item fixed on" data-k="role" data-t="120"><input type="checkbox" checked disabled> Role, rules, format <span class="tk">120</span></div>
+      <div class="item" data-k="hb" data-t="6000"><input type="checkbox"> Paste the whole handbook <span class="tk">6,000</span></div>
+      <div class="item" data-k="clause" data-t="30"><input type="checkbox"> Retrieve the one clause that matters <span class="tk">30</span></div>
+      <div class="item" data-k="hist" data-t="180"><input type="checkbox"> The client's last exchange <span class="tk">180</span></div>
+      <div class="item" data-k="tool" data-t="140"><input type="checkbox"> Tool results so far (2 lookups) <span class="tk">140</span></div>
+      <div class="item fixed on" data-k="q" data-t="12"><input type="checkbox" checked disabled> The question <span class="tk">12</span></div>
+      <div class="legend">Budget for this call: 4,000 tokens. Real windows are larger; the cost per call and the crowding are the same. Token counts are estimates.</div>
+    </div>
+    <div>
+      <div class="h">the context window</div>
+      <div class="bar" data-bar></div>
+      <div class="meter"><span data-used></span><span data-left></span></div>
+      <div class="h">what the model reads, in order</div>
+      <div class="desk" data-desk></div>
+      <div class="note warn" data-warn hidden>Over budget. The window fills from the top, so whatever is last on the desk falls off, and the last thing is the question. This is what a twelve-page handbook in the prompt does; chapter 3 retrieves instead of pasting.</div>
+      <div class="note ok" data-ok>Fits. Everything on the desk reaches the model.</div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-cw"), BUDGET = 4000;
+  const LABEL = { role: "system", hb: "handbook, 12 pages", clause: "retrieved clause", hist: "history", tool: "tool results", q: "user" };
+  const TEXT = {
+    role: "role + rules + format (the blocks from 2.3)",
+    hb: "personal-trading-1 … security-2, every page, every call",
+    clause: "data-licensing-1: raw vendor data may not be redistributed to clients",
+    hist: "client: Deere vs Caterpillar last quarter? · assistant: Deere grew revenue 6.4% …",
+    tool: "get_financials(DE) → 6.4% · get_financials(CAT) → 3.1%",
+    q: "And the raw vendor numbers behind that?",
+  };
+  const bar = w.querySelector("[data-bar]"), desk = w.querySelector("[data-desk]"), used = w.querySelector("[data-used]"),
+        left = w.querySelector("[data-left]"), warn = w.querySelector("[data-warn]"), ok = w.querySelector("[data-ok]");
+  function render() {
+    const items = [...w.querySelectorAll(".item")].filter((i) => i.querySelector("input").checked);
+    let sum = 0; bar.innerHTML = ""; desk.innerHTML = "";
+    items.forEach((i) => {
+      const t = +i.dataset.t, k = i.dataset.k, start = sum; sum += t;
+      const seg = document.createElement("i"); seg.className = k;
+      seg.style.width = (Math.min(t, Math.max(0, BUDGET - start)) / BUDGET * 100) + "%"; bar.appendChild(seg);
+      const row = document.createElement("div"); row.className = "row" + (start >= BUDGET ? " cut" : "");
+      row.innerHTML = `<span class="k">${LABEL[k]}</span><span>${TEXT[k]}${start < BUDGET && sum > BUDGET ? " … (cut off)" : ""}</span>`;
+      desk.appendChild(row);
+    });
+    const over = sum > BUDGET;
+    used.textContent = `${sum.toLocaleString()} / ${BUDGET.toLocaleString()} tokens`;
+    left.textContent = over ? `${(sum - BUDGET).toLocaleString()} over` : `${(BUDGET - sum).toLocaleString()} free`;
+    left.className = over ? "over" : "";
+    warn.hidden = !over; ok.hidden = over;
+  }
+  w.querySelectorAll(".item:not(.fixed)").forEach((i) => i.addEventListener("change", (e) => { i.classList.toggle("on", e.target.checked); render(); }));
+  render();
+})();
+</script>

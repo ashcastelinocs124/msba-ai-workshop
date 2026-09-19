@@ -3,7 +3,7 @@
 // so cells can `from agent import agent`, `from tools import TOOLS`, etc.
 (() => {
   const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/";
-  const PY_FILES = ["mock_model.py", "tools.py", "agent.py", "docs.py", "llm.py"];
+  const PY_FILES = ["mock_model.py", "tools.py", "agent.py", "docs.py", "llm.py", "context.py"];
   const BASE = document.currentScript.src.replace(/pyodide-cell\.js.*$/, "");
   let pyodidePromise = null;
   // The handbook, parsed out of docs.py's source once it is fetched — the Watch view's
@@ -84,7 +84,13 @@
   const sectionOf = (id) => title(id.replace(/-\d+$/, "").replace(/-/g, " "));
 
   function setWatchSteps(cell, text) {
-    const lines = text.split("\n").filter((l) => STEP_LINE.test(l));
+    // An indented line continues the step above it (a table row, a memo sign-off); anything else
+    // between steps (a blank line, "ANSWER: …") is not part of the run.
+    const lines = [];
+    for (const l of text.split("\n")) {
+      if (STEP_LINE.test(l)) lines.push(l);
+      else if (lines.length && /^\s+\S/.test(l)) lines[lines.length - 1] += "\n" + l.trim();
+    }
     const btn = cell.querySelector('.wk-seg [data-v="watch"]');
     btn.disabled = lines.length < 2;
     btn.title = btn.disabled ? "This output isn't step-shaped" : "";
