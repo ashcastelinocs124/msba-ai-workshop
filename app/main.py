@@ -6,6 +6,7 @@ Entra Easy Auth in front of the app supplies X-MS-CLIENT-PRINCIPAL-NAME; request
 import base64
 import csv
 import html
+import io
 import json
 import os
 from datetime import date
@@ -99,7 +100,9 @@ def signins(request: Request, format: str = "html"):
         raise HTTPException(403, "admins only")
     rows = _signins()
     if format == "csv":
-        return PlainTextResponse("day,user,name\n" + "".join(f"{d},{u},{n}\n" for d, u, n in rows), media_type="text/csv")
+        out = io.StringIO()
+        csv.writer(out, lineterminator="\n").writerows([("day", "user", "name"), *rows])
+        return PlainTextResponse(out.getvalue(), media_type="text/csv")
     people = len({u for _, u, _ in rows})
     body = "".join(f"<tr><td>{html.escape(d)}</td><td>{html.escape(u)}</td><td>{html.escape(n)}</td></tr>" for d, u, n in rows)
     return HTMLResponse(f"""<!doctype html><meta charset="utf-8"><title>Sign-ins</title>
