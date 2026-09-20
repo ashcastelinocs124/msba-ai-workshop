@@ -41,3 +41,22 @@ def test_proxy(monkeypatch):
     assert named["name"] == "Priya Natarajan" and named["user"] == "student@illinois.edu"
     assert c.post("/api/chat", json={"messages": [], "max_tokens": 99999}, headers=H).status_code == 200
     assert c.post("/api/chat", json={"messages": []}, headers=H).status_code == 429   # cap reached
+
+
+def test_signins(tmp_path):
+    m.SIGNIN_LOG = str(tmp_path / "data" / "signins.csv")
+    m.ADMIN_USERS = {"admin@illinois.edu"}
+    m._seen.clear()
+    c = TestClient(m.app)
+    ADMIN = {"x-ms-client-principal-name": "admin@illinois.edu"}
+    assert c.get("/api/whoami", headers=H_NAMED).status_code == 200
+    assert c.get("/api/whoami", headers=H_NAMED).status_code == 200      # same person, same day: one row
+    assert open(m.SIGNIN_LOG).read().count("\n") == 1
+    m._seen.clear()                                                        # a restart forgets; the reader still dedupes
+    assert c.get("/api/whoami", headers=H).status_code == 200
+    assert c.get("/admin/signins").status_code == 401                      # not signed in
+    assert c.get("/admin/signins", headers=H).status_code == 403           # signed in, not an admin
+    page = c.get("/admin/signins", headers=ADMIN)
+    assert page.status_code == 200 and "1 people, 1 person-days" in page.text and "Priya Natarajan" in page.text
+    csv_ = c.get("/admin/signins?format=csv", headers=ADMIN).text
+    assert csv_.startswith("day,user,name\n") and csv_.count("student@illinois.edu") == 1
