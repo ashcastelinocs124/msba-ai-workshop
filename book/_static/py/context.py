@@ -17,6 +17,7 @@ EXAMPLES = ("Example 1.\nMEMO · Deere vs Caterpillar · Q2-2026\nDeere grew rev
             "Deere is growing 2.1× as fast, from a smaller base. [source: Q2-2026 filings]\n— Priya Natarajan, Industrials\n\n"
             "Example 2.\nMEMO · NVIDIA vs Apple · Q2-2026\nNVIDIA grew revenue 58.0% YoY to $52.4B; Apple grew revenue 5.0% YoY to $96.1B. "
             "NVIDIA is growing 11.6× as fast, from a smaller base. [source: Q2-2026 filings]\n— Priya Natarajan, Industrials")
+REASONING = "Before calling any tool, list every figure the question needs. Then look each one up, once."
 
 # The client card. About 120 institutions subscribe; this is the one from the firm page's "first Monday".
 CLIENTS = {

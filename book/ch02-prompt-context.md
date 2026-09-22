@@ -63,7 +63,7 @@ answer, log = agent("Should we buy Deere on the back of that growth?", system=RO
 
 Two things changed and one did not. The memo now carries a header saying whose draft it is and who reviews it: the model knows its role. The tool calls are identical, because the role changed nothing about what the model needed to look up. And it still said yes to the buy question, because a role is not a rule. That is the next block.
 
-## 2.3 Five kinds of prompt, one memo
+## 2.3 Six kinds of prompt, one memo
 
 Prompts come in a few kinds, and each fixes a different gap from 2.1. The names vary between textbooks; the jobs do not.
 
@@ -78,11 +78,47 @@ Prompts come in a few kinds, and each fixes a different gap from 2.1. The names 
 | **Rules** | the model does not know the handbook | "Never give an investment recommendation; those appear only in published notes. Every figure names its source." |
 | **Format** | the model does not know the shape the client wants | "When asked for a table, answer as a table: company, revenue, YoY growth, source." |
 | **Few-shot examples** | the house style is easier to show than describe | two memos Priya sent last week, pasted in full |
-| **Reasoning** | it skips lookups on multi-part questions | "List the figures you need before calling any tool." Real model only; see 2.7. |
+| **Reasoning** | it skips lookups on multi-part questions | "List every figure the question needs before calling any tool." |
 
-Now the same blocks as code. Each cell adds one block and runs the email that combines two of the four replies. Read what changes in the memo each time and, just as important, what does not.
+Each kind below has a definition, the firm's example, and a cell. The first five run the same email, which combines two of the four replies, so you can read what changes in the memo each time and, just as important, what does not.
 
-**Rules.** The handbook says investment recommendations appear only in published notes (chunk `client-service-1`). Put that sentence in front of the model:
+### Zero-shot instruction
+
+**Definition.** The bare question, with no role, rules, format or examples in front of it. The model falls back on whatever it learned in training.
+
+**Example.** "Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?"
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+
+answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?")
+```
+
+Prose instead of a table, and a yes to the buy question. This is where chapter 1 stopped: the figures are right, and everything the firm knows is missing. Every kind below adds one block to fix one of those gaps.
+
+### Role
+
+**Definition.** A role tells the model who it is, who it works for, and who reads what it writes.
+
+**Example.** `ROLE`: "You are a research associate at Champaign Capital Research… You draft; Priya reads and sends."
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+from context import ROLE
+
+answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?",
+                    system=ROLE)
+```
+
+The memo gains a header saying whose draft it is, as it did in 2.2. It is still prose and it still says buy: a role sets who is speaking, not what they may say.
+
+### Rules
+
+**Definition.** Rules are standing constraints the model must follow whatever the question. At a firm they usually come straight from the handbook.
+
+**Example.** The handbook says investment recommendations appear only in published notes (chunk `client-service-1`). `RULES` puts that sentence in front of the model:
 
 ```{code-block} python
 :class: pyodide
@@ -95,7 +131,11 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 The buy question now gets a refusal with a source tag. The comparison is unchanged, and it is still prose.
 
-**Format.** The client asked for a table. Say what a table is:
+### Format
+
+**Definition.** A format block describes the shape of the answer: a table, a length, a fixed set of fields.
+
+**Example.** The client asked for a table. `FORMAT` says what a table is: "When the client asks for a table, answer as a table with columns: company, revenue, YoY growth, source. Otherwise, two sentences."
 
 ```{code-block} python
 :class: pyodide
@@ -108,7 +148,11 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 Notice that the format block is conditional: a table when the client asks for one, two sentences otherwise. A format rule that fires every time produces tables for people who wanted a sentence.
 
-**Examples.** Instead of describing the house style, show it. `EXAMPLES` holds two memos Priya actually sent, header and sign-off included:
+### Few-shot examples
+
+**Definition.** Instead of describing the style you want, you show two to five finished examples of it. The model copies the pattern.
+
+**Example.** `EXAMPLES` holds two memos Priya actually sent, header and sign-off included:
 
 ```{code-block} python
 :class: pyodide
@@ -121,7 +165,25 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 The memo now has the header and the sign-off from the examples. It also has Priya's name on it, because the examples did. The model copies the shape it is shown, including the parts you did not mean. Few-shot prompts are the most powerful block and the one to read most carefully.
 
-**Reasoning.** The last kind asks the model to plan before it acts: "list the figures you need, then look them up." It matters on questions like *which of three companies grew fastest, and is the fastest also the largest*, where a model that starts calling tools before it has thought may stop one lookup short. The mock cannot show this honestly, because the loop ends at the first text reply and the mock never plans; the campus copy runs it against a real model in 2.7.
+### Reasoning
+
+**Definition.** A reasoning block asks the model to plan before it acts: list what the question needs, then fetch it. It matters on questions with several parts, where a model that starts calling tools before it has thought may stop one lookup short.
+
+**Example.** `REASONING`: "Before calling any tool, list every figure the question needs. Then look each one up, once." The email above has only two companies, so this cell asks a three-company question instead, with and without the block:
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+from context import ROLE, REASONING
+
+q = "Which of Deere, Caterpillar and NVIDIA grew revenue fastest last quarter, and is the fastest also the largest?"
+print("Without the planning block:")
+answer, log = agent(q, system=ROLE)
+print("\nWith it:")
+answer, log = agent(q, system=ROLE + "\n\n" + REASONING)
+```
+
+Without a plan, the agent looked up Deere and Caterpillar and answered. It never looked up NVIDIA, which is the right answer. With the plan it listed three companies, made three lookups, and got it right. Be careful with this cell: the mock is *scripted* to stop short every time. A real model stops short only sometimes, which is harder to catch. Section 2.7 runs the same pair against one.
 
 Two rules of thumb from all of this. First, **a prompt block changes the shape of the answer, never its facts.** Every figure in every memo above came from `get_financials`; the blocks decided the header, the table, the refusal and the sign-off. Second, **add blocks one at a time and run the same question after each.** A prompt assembled all at once is a prompt whose parts you cannot tell apart when one of them misbehaves.
 
@@ -316,21 +378,20 @@ for q in ["Deere vs Caterpillar last quarter — as a table please",
 
 Did the table have the four columns the format block named? Did the refusal cite `client-service-1`, or did the model just decline? A real model paraphrases; the mock quotes. Decide which you would want in a client memo.
 
-Second, the reasoning prompt the mock could not run. Ask the three-company question with and without a planning instruction, and count the lookups:
+Second, the reasoning block from 2.3, where the mock was scripted to fail. Ask the three-company question with and without it, run each a few times, and count the lookups:
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 from llm import azure_model
-from context import ROLE, RULES
+from context import ROLE, RULES, REASONING
 
 q = "Which of Deere, Caterpillar and NVIDIA grew revenue fastest last quarter, and is the fastest also the largest?"
-plan = "Before calling any tool, list every figure the question needs. Then look each one up, once."
 
 print("Without the planning instruction:")
 answer, log = agent(q, model=azure_model, system=ROLE + "\n\n" + RULES)
 print("\nWith it:")
-answer, log = agent(q, model=azure_model, system=ROLE + "\n\n" + RULES + "\n\n" + plan)
+answer, log = agent(q, model=azure_model, system=ROLE + "\n\n" + RULES + "\n\n" + REASONING)
 ```
 
 Third, the decay claim from 2.4. Bury the no-recommendation rule in the middle of the whole handbook, ask the buy question, then move the rule to the end and ask again. Run each a few times; the point is the rate, not one answer:

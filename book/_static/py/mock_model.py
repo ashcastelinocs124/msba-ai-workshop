@@ -8,8 +8,10 @@ Colab notebooks swap this for a real model on Lumen (glm-5.3-flash).
 
 What the mock honours in a system prompt (chapter 2, §2.3): a role (adds a draft header), a rule
 against investment recommendations, a table format, few-shot memo examples (copies their header
-and sign-off), a client card that "prefers tables", and a retrieved data-licensing clause. It
-does not imitate effects it cannot honestly show, such as long-prompt attention decay.
+and sign-off), a client card that "prefers tables", a retrieved data-licensing clause, and a
+planning instruction. The planning branch is scripted: on a "fastest" question naming three or more
+companies, the mock without a plan stops one lookup short, every time. A real model does this only
+sometimes, and §2.7 measures it. The mock does not imitate long-prompt attention decay.
 """
 import re
 
@@ -40,6 +42,7 @@ def _style(msgs):
         "table": "as a table" in s or "prefers tables" in s,
         "fewshot": "memo ·" in s,
         "no_raw": "may not be redistributed" in s,
+        "plan": "before calling any tool" in s,
     }
 
 
@@ -170,6 +173,9 @@ def model(msgs, tools=None):
         want = named or _tickers(" ".join(m["content"] for m in earlier if m["role"] == "user")) or ["DE"]
         known = {r["name"] for r in prior_rows}
         todo = [t for t in want if _DISPLAY[t] not in known]
+        if len(todo) >= 3 and "fastest" in q and not style["plan"]:
+            # ponytail: scripted failure for §2.3's reasoning block; a real model stops short only sometimes (§2.7).
+            todo = todo[:2]
         if len(seen) < len(todo):
             return {"type": "tool_call", "tool": "get_financials", "args": {"ticker": todo[len(seen)], "period": "Q2-2026"}}
         rows = prior_rows + [m["content"] for m in seen]
@@ -182,6 +188,9 @@ def model(msgs, tools=None):
                 text = _table(rows)
             return {"type": "text", "text": _finish(text, style, rows, q)}
         text = _compare(rows, style)
+        if style["plan"]:
+            names = [_DISPLAY[t] for t in want]
+            text = f"Plan: revenue and YoY growth for {', '.join(names[:-1])} and {names[-1]} ({len(names)} lookups).\n{text}"
         if prior_rows and "error" not in rows[-1]:
             text = f"Adding {rows[-1]['name']} to the comparison. {text}"
         return {"type": "text", "text": _finish(text, style, rows, q)}

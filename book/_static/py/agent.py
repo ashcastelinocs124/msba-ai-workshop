@@ -142,4 +142,10 @@ if __name__ == "__main__":
     sysm, hist = build_context("And the raw vendor numbers behind that?", client="meridian")
     ans, _ = agent("And the raw vendor numbers behind that?", system=sysm, verbose=False)
     assert "data-licensing-1" in ans, ans
+    from context import REASONING
+    q = "Which of Deere, Caterpillar and NVIDIA grew revenue fastest last quarter, and is the fastest also the largest?"
+    ans, log = agent(q, verbose=False)
+    assert len(log) == 3 and "NVIDIA" not in ans, (ans, log)
+    ans, log = agent(q, system=REASONING, verbose=False)
+    assert len(log) == 4 and ans.startswith("Plan:") and "NVIDIA is growing" in ans, (ans, log)
     print("ok")
