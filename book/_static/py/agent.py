@@ -74,6 +74,14 @@ def narrate(log):
     return lines
 
 
+def messages(question, system=None, history=None):
+    """The labelled list the model reads: the system prompt, earlier turns, then the user prompt (chapter 2, §2.2)."""
+    msgs = [{"role": "system", "content": system}] if system else []
+    msgs += [{"role": r, "content": c} for r, c in (history or [])]
+    msgs.append({"role": "user", "content": question})
+    return msgs
+
+
 def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True, system=None, history=None):
     """Run a tool-using loop until the model answers in text or the step budget runs out.
 
@@ -83,9 +91,7 @@ def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True, s
     `system` is the standing instructions and `history` the earlier turns, as (role, text)
     pairs (chapters 2 and 3). Both only seed the message list; the loop itself is unchanged.
     """
-    msgs = [{"role": "system", "content": system}] if system else []
-    msgs += [{"role": r, "content": c} for r, c in (history or [])]
-    msgs.append({"role": "user", "content": question})
+    msgs = messages(question, system, history)
     log = []
     for step in range(max_steps):
         reply = model(msgs)
@@ -142,6 +148,7 @@ if __name__ == "__main__":
     sysm, hist = build_context("And the raw vendor numbers behind that?", client="meridian")
     ans, _ = agent("And the raw vendor numbers behind that?", system=sysm, verbose=False)
     assert "data-licensing-1" in ans, ans
+    assert [m["role"] for m in messages("q", system=ROLE, history=[("user", "a"), ("assistant", "b")])] == ["system", "user", "assistant", "user"]
     from context import REASONING
     q = "Which of Deere, Caterpillar and NVIDIA grew revenue fastest last quarter, and is the fastest also the largest?"
     ans, log = agent(q, verbose=False)

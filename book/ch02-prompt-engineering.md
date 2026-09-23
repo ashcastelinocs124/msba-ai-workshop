@@ -64,6 +64,36 @@ This chapter and the next are about putting it there. The first tool for that is
 
 A **prompt** is text you put in front of the question. In practice it is the *system prompt*: a block the model reads first on every call, before any user message, that says who it is, what it is for, and how it should behave. Think of it as the one-page memo a new associate gets on Monday morning. Priya does not repeat it every time she hands over a task; it stands.
 
+### System prompt vs user prompt
+
+Every call hands the model a list of messages, and each message carries a label. The **system prompt** is the message labelled `system`: the firm writes it once, and it sits at the top of every call. The **user prompt** is the message labelled `user`: the client's question, and it is different every time.
+
+| | System prompt | User prompt |
+|---|---|---|
+| **Who writes it** | The firm, once | The client, on each email |
+| **When it changes** | Rarely; the same on every call | Every call |
+| **What it is for** | Who the model is, the rules, the house format | The task in front of it right now |
+| **Who sees it** | Not the client | The client wrote it |
+| **The firm's version** | `ROLE`, `RULES`, `FORMAT` | "Should we buy Deere on the back of that growth?" |
+
+Run the cell to see the list the model actually receives for two client emails:
+
+```{code-block} python
+:class: pyodide
+from agent import messages
+from context import ROLE
+
+emails = ["Should we buy Deere on the back of that growth?",
+          "Deere vs Caterpillar last quarter — as a table please"]
+for n, q in enumerate(emails, 1):
+    print(f"Call {n}")
+    for m in messages(q, system=ROLE):
+        print(f"  {m['role']:<7}│ {m['content']}")
+    print()
+```
+
+The `system` line is word for word the same on both calls; only the `user` line changed. Models are trained to give the system message more weight than a user message, which is why the firm's rules go there and not in the email. More weight is not a lock, though: a client can still type "ignore your instructions". Anything that must never happen is enforced in code, not only in a prompt, as chapter 1's read-only tools are.
+
 The loop from chapter 1 gains one argument, and nothing else changes:
 
 ```{code-block} python
