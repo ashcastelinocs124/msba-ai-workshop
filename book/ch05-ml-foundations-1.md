@@ -1,7 +1,7 @@
-# 6. Agent Systems
+# 5. ML Foundations I
 
 ```{raw} html
-<p class="wk-lede">Add harness, observability, security, evaluation, and orchestration.</p>
+<p class="wk-lede">Translate a business question into a valid modeling problem.</p>
 ```
 
 ```{admonition} Coming soon

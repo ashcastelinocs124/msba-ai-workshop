@@ -81,7 +81,7 @@ def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True, s
     inspected, tested, or written to disk.
 
     `system` is the standing instructions and `history` the earlier turns, as (role, text)
-    pairs (chapter 2). Both only seed the message list; the loop itself is unchanged.
+    pairs (chapters 2 and 3). Both only seed the message list; the loop itself is unchanged.
     """
     msgs = [{"role": "system", "content": system}] if system else []
     msgs += [{"role": r, "content": c} for r, c in (history or [])]

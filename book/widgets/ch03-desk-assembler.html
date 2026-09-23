@@ -1,0 +1,94 @@
+<div class="wk-widget wk-da" id="w-da">
+  <style>
+    .wk-da .qs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .wk-da .qs button[aria-pressed="true"] { background: var(--wk-navy); color: #fff; }
+    .wk-da .qs button:focus-visible, .wk-da .card:focus-visible { outline: 3px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-da .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .wk-da .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 6px; }
+    .wk-da .zone { border: 1px dashed #c9ced8; border-radius: 8px; padding: 8px; min-height: 250px; background: #fff; }
+    .wk-da .desk { border-style: solid; border-color: var(--wk-navy); background: #fbfcfe; }
+    .wk-da .card { border: 2px solid var(--wk-line); border-left-width: 6px; border-radius: 7px; padding: 7px 10px; margin-bottom: 7px; background: #fff; font-size: 12.5px; animation: wk-da-in .35s ease-out; }
+    .wk-da .card b { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: #1f2430; }
+    .wk-da .card b span { font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); white-space: nowrap; }
+    .wk-da .card .why { color: #3d4555; margin-top: 3px; line-height: 1.4; }
+    .wk-da .card .why::before { content: "Why: "; font-weight: 700; }
+    .wk-da .cab .card { opacity: .75; }
+    .wk-da .cab .card .why::before { content: "Stays because: "; }
+    .wk-da .k-inst { border-left-color: var(--wk-navy); } .wk-da .k-client { border-left-color: #1a7f5a; }
+    .wk-da .k-clause { border-left-color: #b8560b; } .wk-da .k-hist { border-left-color: #6d45d6; } .wk-da .k-q { border-left-color: var(--wk-orange); }
+    .wk-da .total { display: flex; justify-content: space-between; font: 700 11.5px ui-monospace, Menlo, monospace; color: var(--wk-navy); border-top: 1px solid var(--wk-line); padding-top: 6px; margin-top: 4px; }
+    .wk-da .out { margin-top: 12px; border: 1px solid #b9e2cf; background: #f2faf6; color: #155f42; border-radius: 6px; padding: 9px 12px; font-size: 13px; }
+    .wk-da .out b { color: #0f4a33; }
+    @keyframes wk-da-in { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .wk-da .card { animation: none; } }
+    @media (max-width: 700px) { .wk-da .grid { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · what build_context puts on the desk</div>
+  <div class="h" id="w-da-lbl">Pick the client's reply</div>
+  <div class="qs" role="group" aria-labelledby="w-da-lbl">
+    <button type="button" data-q="nvda" aria-pressed="true">“And NVIDIA?”</button>
+    <button type="button" data-q="vendor" aria-pressed="false">“And the raw vendor numbers behind that?”</button>
+    <button type="button" data-q="deere" aria-pressed="false">“What was Deere's revenue growth last quarter?” (new thread)</button>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="h" id="w-da-cab">Filing cabinet · not read on this call</div>
+      <div class="zone cab" data-cab aria-labelledby="w-da-cab"></div>
+    </div>
+    <div>
+      <div class="h" id="w-da-desk">The desk · what the model reads, in order</div>
+      <div class="zone desk" data-desk aria-labelledby="w-da-desk"></div>
+    </div>
+  </div>
+  <div class="out" data-out aria-live="polite"></div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-da");
+  // Token counts are estimate_tokens() on the real blocks in context.py (words × 1.3).
+  const B = {
+    inst:   { k: "inst",   t: 116, name: "Role, rules, format (chapter 2)" },
+    client: { k: "client", t: 20,  name: "Client card · Meridian: prefers tables" },
+    clause: { k: "clause", t: 29,  name: "Handbook clause · data-licensing-1" },
+    rest:   { k: "clause", t: 240, name: "The other 11 handbook clauses" },
+    hist:   { k: "hist",   t: 58,  name: "Last exchange · the Deere vs Caterpillar memo" },
+    old:    { k: "hist",   t: 0,   name: "Every earlier exchange with this client" },
+  };
+  const Q = {
+    nvda: {
+      q: "And NVIDIA?", qt: 3,
+      desk: [["inst", "read on every call"], ["client", "the firm knows who is asking"], ["hist", "“And NVIDIA?” means nothing without the memo it follows"]],
+      cab: [["clause", "nothing in the question sounds like policy"], ["rest", "nothing in the question sounds like policy"], ["old", "build_context keeps only the last exchange"]],
+      out: "<b>Result:</b> one lookup (NVIDIA). Deere's and Caterpillar's figures are reused from the memo on the desk. Without the memo, the model has nothing to attach “And NVIDIA?” to.",
+    },
+    vendor: {
+      q: "And the raw vendor numbers behind that?", qt: 10,
+      desk: [["inst", "read on every call"], ["client", "the firm knows who is asking"], ["clause", "“raw” and “vendor” sound like policy, so the handbook was searched; this clause matched"], ["hist", "“that” refers to the memo"]],
+      cab: [["rest", "only the best match is retrieved, not the whole handbook"], ["old", "build_context keeps only the last exchange"]],
+      out: "<b>Result:</b> the memo declines and cites <code>data-licensing-1</code>. The rules block in chapter 2 never mentioned vendor data; the clause came onto the desk for this one question.",
+    },
+    deere: {
+      q: "What was Deere's revenue growth last quarter?", qt: 10,
+      desk: [["inst", "read on every call"], ["client", "the card says the portfolio manager prefers tables"]],
+      cab: [["clause", "nothing in the question sounds like policy"], ["rest", "nothing in the question sounds like policy"], ["hist", "a new question, not a follow-up"]],
+      out: "<b>Result:</b> the answer comes back as a table, though the question never asked for one. That preference lives in the client's record, not in the prompt.",
+    },
+  };
+  const card = (key, why, onDesk) => {
+    const b = B[key];
+    return `<div class="card k-${b.k}"><b>${b.name}<span>${onDesk ? b.t + " tok" : ""}</span></b><div class="why">${why}</div></div>`;
+  };
+  function show(id) {
+    const s = Q[id];
+    w.querySelectorAll(".qs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.q === id)));
+    const total = s.desk.reduce((n, [k]) => n + B[k].t, 0) + s.qt;
+    w.querySelector("[data-desk]").innerHTML = s.desk.map(([k, why]) => card(k, why, true)).join("") +
+      `<div class="card k-q"><b>The question · “${s.q}”<span>${s.qt} tok</span></b><div class="why">always last: the model reads it right before it answers</div></div>` +
+      `<div class="total"><span>On the desk</span><span>${total} tokens</span></div>`;
+    w.querySelector("[data-cab]").innerHTML = s.cab.map(([k, why]) => card(k, why, false)).join("");
+    w.querySelector("[data-out]").innerHTML = s.out;
+  }
+  w.querySelectorAll(".qs button").forEach((b) => b.addEventListener("click", () => show(b.dataset.q)));
+  show("nvda");
+})();
+</script>

@@ -1,0 +1,66 @@
+<div class="wk-widget wk-pu" id="w-pu">
+  <style>
+    .wk-pu .ctl { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; margin-bottom: 12px; }
+    .wk-pu label { font-size: 13px; font-weight: 600; color: #1f2430; }
+    .wk-pu .ctl output { font: 700 13px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    .wk-pu .seg-g { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+    .wk-pu .seg-g button[aria-pressed="true"] { background: var(--wk-navy); color: #fff; }
+    .wk-pu button:focus-visible, .wk-pu input:focus-visible { outline: 3px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-pu .chart { background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 10px 12px; }
+    .wk-pu .row { display: grid; grid-template-columns: 58px 1fr 76px; gap: 8px; align-items: center; margin-bottom: 4px; font: 11.5px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    .wk-pu .bar { display: flex; height: 16px; border-radius: 3px; overflow: hidden; background: #f1f2f5; }
+    .wk-pu .bar i { display: block; height: 100%; transition: width .25s; }
+    .wk-pu .bar .base { background: var(--wk-navy); }
+    .wk-pu .bar .res { background: #2b7fb8; background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.35) 4px 6px); }
+    .wk-pu .row .n { text-align: right; color: #1f2430; font-weight: 700; }
+    .wk-pu .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #3d4555; margin-top: 8px; }
+    .wk-pu .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -2px; }
+    .wk-pu .legend .l-base::before { background: var(--wk-navy); }
+    .wk-pu .legend .l-res::before { background: #2b7fb8; background-image: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.35) 4px 6px); }
+    .wk-pu .say { margin-top: 10px; font-size: 13px; color: #1f2430; background: #fff3ea; border: 1px solid #ffd2b3; border-radius: 6px; padding: 8px 12px; }
+    @media (max-width: 600px) { .wk-pu .ctl { grid-template-columns: 1fr; } .wk-pu .row { grid-template-columns: 48px 1fr 64px; } }
+  </style>
+  <div class="wk-title">/// Interactive · every tool result stays on the desk</div>
+  <div class="ctl">
+    <label for="w-pu-n">Companies in the comparison</label><output id="w-pu-out" for="w-pu-n">3</output>
+    <input id="w-pu-n" type="range" min="2" max="10" value="3" aria-describedby="w-pu-say">
+  </div>
+  <div class="ctl">
+    <span class="lbl" id="w-pu-size-l" style="font-size:13px;font-weight:600">Size of each tool result</span>
+    <div class="seg-g" role="group" aria-labelledby="w-pu-size-l">
+      <button type="button" data-t="14" aria-pressed="true">This book's fixture row · 14 tokens</button>
+      <button type="button" data-t="600" aria-pressed="false">A real filing extract · ~600 tokens</button>
+    </div>
+  </div>
+  <div class="chart" data-chart role="img" aria-labelledby="w-pu-say"></div>
+  <div class="legend"><span class="l-base">Instructions + question (the same on every call)</span><span class="l-res">Tool results so far (striped)</span></div>
+  <div class="say" id="w-pu-say" aria-live="polite"></div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-pu");
+  const BASE = 86 + 13; // estimate_tokens(ROLE + RULES) + the question, as in the cell above
+  let per = 14;
+  const n = w.querySelector("#w-pu-n"), out = w.querySelector("#w-pu-out"), chart = w.querySelector("[data-chart]"), say = w.querySelector("#w-pu-say");
+  function render() {
+    const k = +n.value, calls = k + 1, max = BASE + k * per;
+    out.textContent = k;
+    let html = "";
+    for (let c = 1; c <= calls; c++) {
+      const res = (c - 1) * per, tot = BASE + res;
+      html += `<div class="row"><span>call ${c}</span><div class="bar"><i class="base" style="width:${BASE / max * 100}%"></i><i class="res" style="width:${res / max * 100}%"></i></div><span class="n">${tot.toLocaleString()}</span></div>`;
+    }
+    chart.innerHTML = html;
+    const share = Math.round(k * per / max * 100);
+    say.textContent = `${calls} model calls. The last one reads ${max.toLocaleString()} tokens, and ${share}% of that is old tool results. ` +
+      (share > 50 ? "The tool results are now the biggest thing on the desk, and most of them were only needed once." : "Still fine: the instructions and the question dominate.");
+  }
+  n.addEventListener("input", render);
+  w.querySelectorAll(".seg-g button").forEach((b) => b.addEventListener("click", () => {
+    per = +b.dataset.t;
+    w.querySelectorAll(".seg-g button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  }));
+  render();
+})();
+</script>

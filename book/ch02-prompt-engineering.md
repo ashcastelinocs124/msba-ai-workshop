@@ -1,15 +1,15 @@
-# 2. Prompt and Context Engineering
+# 2. Prompt Engineering
 
 ```{raw} html
-<p class="wk-lede">The chapter 1 agent writes a good memo when the question is the one you scripted. Now four clients reply to that memo in their own words, one wants a table, one asks for something the handbook forbids, and one asks a three-word follow-up. Decide what the model reads before it decides.</p>
-<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-prompt-context.ipynb" target="_blank">▶ Open in Colab</a>
+<p class="wk-lede">The chapter 1 agent writes a good memo when the question is the one you scripted. Now four clients reply to that memo in their own words, one wants a table, one asks for something the handbook forbids, and one asks a three-word follow-up. Write the standing instructions the model reads first, and find where they stop working. Chapter 3 picks up from there, in the same session.</p>
+<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-prompt-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
 ```{admonition} Learning objectives
 :class: note
 - Name the four things the chapter 1 agent does not know, and say which of them a prompt can fix.
 - Write role, rule, format and example prompts for the firm, and predict what each one changes in the memo.
-- Assemble the context for one call from instructions, a retrieved policy clause, the client's history and tool results, and count what it costs.
+- Count what a prompt costs, and say which problems a prompt cannot fix.
 ```
 
 ## 2.1 Where the chapter 1 agent breaks
@@ -44,7 +44,21 @@ The loop did nothing wrong and every figure is right. Read the four answers agai
 
 None of these is a tool problem or a loop problem. Chapter 1 said a wrong answer with the right tool calls is a model or prompt problem. More precisely, it is an *information* problem: the model's entire world is the messages list, and in chapter 1 that list held one line, the question. Everything the firm knows, and everything that happened before this call, was not on the desk.
 
-This chapter is about putting it there. The first tool for that is the prompt.
+This chapter and the next are about putting it there. The first tool for that is the prompt.
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="b"
+     data-ok="Correct. The tools returned the right figures. What was missing was everything the firm knows: the client's preferred format, the handbook, and the memo from two hours ago."
+     data-no="Look at the figures first: every one was right. So the problem is not the data or the loop. Ask what the model could see.">
+  <p class="q">Every figure in the four answers was right, yet three of the answers were wrong for the firm. Why?</p>
+  <label><input type="radio" name="q1" value="a"> The financials tool returned last year's figures</label>
+  <label><input type="radio" name="q1" value="b"> The model read only the question; the firm's rules, the client's preferences and the earlier memo were not in front of it</label>
+  <label><input type="radio" name="q1" value="c"> The loop stopped before the model finished its lookups</label>
+  <div class="fb"></div>
+</div>
+```
 
 ## 2.2 The prompt: standing instructions
 
@@ -62,6 +76,20 @@ answer, log = agent("Should we buy Deere on the back of that growth?", system=RO
 ```
 
 Two things changed and one did not. The memo now carries a header saying whose draft it is and who reviews it: the model knows its role. The tool calls are identical, because the role changed nothing about what the model needed to look up. And it still said yes to the buy question, because a role is not a rule. That is the next block.
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="a"
+     data-ok="Correct. A role says who is speaking and who reads the draft. Nothing in it says what the associate may not say, so the buy question still gets a yes."
+     data-no="The role did change the memo: it added a header. Ask what the role says about recommendations. Nothing.">
+  <p class="q">After the role was added, the agent still said yes to the buy question. Why?</p>
+  <label><input type="radio" name="q2" value="a"> A role says who the model is, not what it may say; no rule forbade recommendations yet</label>
+  <label><input type="radio" name="q2" value="b"> The model reads the system prompt only on its first call</label>
+  <label><input type="radio" name="q2" value="c"> The role changed which tools the model called</label>
+  <div class="fb"></div>
+</div>
+```
 
 ## 2.3 Six kinds of prompt, one memo
 
@@ -97,6 +125,20 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 Prose instead of a table, and a yes to the buy question. This is where chapter 1 stopped: the figures are right, and everything the firm knows is missing. Every kind below adds one block to fix one of those gaps.
 
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="c"
+     data-ok="Correct. Zero-shot means the question alone: no role, no rules, no format, no examples. The model falls back on what it learned in training."
+     data-no="Zero-shot means zero examples, and here nothing else in front of the question either.">
+  <p class="q">What does the model read when you give it a zero-shot instruction?</p>
+  <label><input type="radio" name="q3" value="a"> The question plus the firm's handbook</label>
+  <label><input type="radio" name="q3" value="b"> The question plus two example memos</label>
+  <label><input type="radio" name="q3" value="c"> Only the question; it falls back on what it learned in training</label>
+  <div class="fb"></div>
+</div>
+```
+
 ### Role
 
 **Definition.** A role tells the model who it is, who it works for, and who reads what it writes.
@@ -113,6 +155,20 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 ```
 
 The memo gains a header saying whose draft it is, as it did in 2.2. It is still prose and it still says buy: a role sets who is speaking, not what they may say.
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="b"
+     data-ok="Correct. That line says who the model is and who reads its work. The other two tell it what it must or must not do, which makes them rules or format."
+     data-no="A role describes who is speaking. Which line describes a person and a job, rather than an instruction?">
+  <p class="q">Which of these lines is a role, not a rule or a format?</p>
+  <label><input type="radio" name="q4" value="a"> "Never give an investment recommendation."</label>
+  <label><input type="radio" name="q4" value="b"> "You draft; Priya reads and sends."</label>
+  <label><input type="radio" name="q4" value="c"> "Answer as a table: company, revenue, YoY growth, source."</label>
+  <div class="fb"></div>
+</div>
+```
 
 ### Rules
 
@@ -131,6 +187,20 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 The buy question now gets a refusal with a source tag. The comparison is unchanged, and it is still prose.
 
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="a"
+     data-ok="Correct. The rules block changed how the answer treats the buy question. The lookups and the figures came from the tools, exactly as before."
+     data-no="Compare this memo with the one before it. Which parts came from the tools, and did any of them move?">
+  <p class="q">The rules block made the agent decline the buy question. What did it leave unchanged?</p>
+  <label><input type="radio" name="q5" value="a"> The tool calls and the figures in the memo</label>
+  <label><input type="radio" name="q5" value="b"> The refusal</label>
+  <label><input type="radio" name="q5" value="c"> The source tag on the refusal</label>
+  <div class="fb"></div>
+</div>
+```
+
 ### Format
 
 **Definition.** A format block describes the shape of the answer: a table, a length, a fixed set of fields.
@@ -148,6 +218,20 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 Notice that the format block is conditional: a table when the client asks for one, two sentences otherwise. A format rule that fires every time produces tables for people who wanted a sentence.
 
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="c"
+     data-ok="Correct. The facts are right and the tool calls are right; the shape of the answer is wrong. That is a format block, and it should fire only when a table is asked for."
+     data-no="Look at what is wrong: the numbers, the lookups, or the shape? Only one of the three is a prompt problem.">
+  <p class="q">A client asks for a comparison "as a table" and gets two correct sentences with both figures and a source tag. Which block is missing?</p>
+  <label><input type="radio" name="q6" value="a"> Rules: the model broke a handbook rule</label>
+  <label><input type="radio" name="q6" value="b"> History: the model forgot the previous exchange</label>
+  <label><input type="radio" name="q6" value="c"> Format: the model does not know what shape to answer in when a table is asked for</label>
+  <div class="fb"></div>
+</div>
+```
+
 ### Few-shot examples
 
 **Definition.** Instead of describing the style you want, you show two to five finished examples of it. The model copies the pattern.
@@ -164,6 +248,20 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 ```
 
 The memo now has the header and the sign-off from the examples. It also has Priya's name on it, because the examples did. The model copies the shape it is shown, including the parts you did not mean. Few-shot prompts are the most powerful block and the one to read most carefully.
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="a"
+     data-ok="Correct. The model copies the whole pattern it is shown, including the name. Read every example as if each detail will be copied, because it will be."
+     data-no="The name was not in any rule or format block. Where else could the model have copied it from?">
+  <p class="q">After you add the two example memos, Priya's name appears on your draft. What does that tell you?</p>
+  <label><input type="radio" name="q7" value="a"> The model copies everything in the examples, including parts you did not mean it to copy</label>
+  <label><input type="radio" name="q7" value="b"> The role block told the model to sign as Priya</label>
+  <label><input type="radio" name="q7" value="c"> Examples change only the tone of the memo, never its content</label>
+  <div class="fb"></div>
+</div>
+```
 
 ### Reasoning
 
@@ -183,23 +281,23 @@ print("\nWith it:")
 answer, log = agent(q, system=ROLE + "\n\n" + REASONING)
 ```
 
-Without a plan, the agent looked up Deere and Caterpillar and answered. It never looked up NVIDIA, which is the right answer. With the plan it listed three companies, made three lookups, and got it right. Be careful with this cell: the mock is *scripted* to stop short every time. A real model stops short only sometimes, which is harder to catch. Section 2.7 runs the same pair against one.
+Without a plan, the agent looked up Deere and Caterpillar and answered. It never looked up NVIDIA, which is the right answer. With the plan it listed three companies, made three lookups, and got it right. Be careful with this cell: the mock is *scripted* to stop short every time. A real model stops short only sometimes, which is harder to catch. Section 2.5 runs the same pair against one.
 
-Two rules of thumb from all of this. First, **a prompt block changes the shape of the answer, never its facts.** Every figure in every memo above came from `get_financials`; the blocks decided the header, the table, the refusal and the sign-off. Second, **add blocks one at a time and run the same question after each.** A prompt assembled all at once is a prompt whose parts you cannot tell apart when one of them misbehaves.
-
-**Checkpoint.** One question before moving on.
+**Checkpoint.**
 
 ```{raw} html
 <div class="quiz" data-answer="c"
-     data-ok="Correct. The facts are right and the tool calls are right; the shape of the answer is wrong. That is a format block, and it should fire only when a table is asked for."
-     data-no="Look at what is wrong: the numbers, the lookups, or the shape? Only one of the three is a prompt problem.">
-  <p class="q">A client asks for a comparison "as a table" and gets two correct sentences with both figures and a source tag. Which block is missing?</p>
-  <label><input type="radio" name="q1" value="a"> Rules: the model broke a handbook rule</label>
-  <label><input type="radio" name="q1" value="b"> History: the model forgot the previous exchange</label>
-  <label><input type="radio" name="q1" value="c"> Format: the model does not know what shape to answer in when a table is asked for</label>
+     data-ok="Correct. A plan helps when the question has several parts, so a model that starts looking things up too early can miss one. A one-company question has nothing to miss."
+     data-no="In the cell, what went wrong without the plan? It missed one company of three. When can that happen?">
+  <p class="q">When does a reasoning block matter most?</p>
+  <label><input type="radio" name="q8" value="a"> On a question about one company's revenue</label>
+  <label><input type="radio" name="q8" value="b"> When the client wants the answer as a table</label>
+  <label><input type="radio" name="q8" value="c"> On a question with several parts, where the model might stop one lookup short</label>
   <div class="fb"></div>
 </div>
 ```
+
+Two rules of thumb from all of this. First, **a prompt block changes the shape of the answer, never its facts.** Every figure in every memo above came from `get_financials`; the blocks decided the header, the table, the refusal and the sign-off. Second, **add blocks one at a time and run the same question after each.** A prompt assembled all at once is a prompt whose parts you cannot tell apart when one of them misbehaves.
 
 ## 2.4 Where prompts stop working
 
@@ -230,9 +328,9 @@ The examples block alone costs more than the other three together. That is fine 
 
 **A request is not a contract.** Chapter 1's checkpoint made this point about ticker symbols: "please use ticker symbols" in the prompt is a plea, an enum in the schema is a guarantee. The same holds for every rule in 2.3. The no-recommendation rule worked because the mock honours it; a real model honours it most of the time. For a rule that must hold every time, the enforcement belongs in code, after the model answers, not in the prompt before it.
 
-**Long prompts decay.** [Liu and colleagues](https://arxiv.org/abs/2307.03172) showed in 2023 that models recall instructions and facts at the start and end of a long context much better than ones in the middle, and later models still show the effect on very long inputs. A twelve-page prompt with the no-recommendation rule on page seven is a rule the model will sometimes miss. The mock does not imitate this; 2.7 tests it against a real model, with the rule buried and then moved.
+**Long prompts decay.** [Liu and colleagues](https://arxiv.org/abs/2307.03172) showed in 2023 that models recall instructions and facts at the start and end of a long context much better than ones in the middle, and later models still show the effect on very long inputs. A twelve-page prompt with the no-recommendation rule on page seven is a rule the model will sometimes miss. The mock does not imitate this; 2.5 tests it against a real model, with the rule buried and then moved.
 
-Add these up and the picture is: prompts are the right tool for standing instructions, and the wrong tool for facts, for history, and for anything that changes. The industry's response, since about 2024, has been to stop thinking about the prompt as the thing you write and start thinking about the whole desk.
+Add these up and the picture is: prompts are the right tool for standing instructions, and the wrong tool for facts, for history, and for anything that changes. The industry's response, since about 2024, has been to stop thinking about the prompt as the thing you write and start thinking about the whole desk. That is chapter 3.
 
 **Checkpoint.**
 
@@ -241,123 +339,19 @@ Add these up and the picture is: prompts are the right tool for standing instruc
      data-ok="Correct. A standing rule is what a prompt is for. A figure comes from a tool on the call that needs it, and the last question is history, placed on the desk by code."
      data-no="Ask which of the three is the same on every call and true for every client. Only that one belongs in a block written once.">
   <p class="q">Which of these belongs in the system prompt?</p>
-  <label><input type="radio" name="q2" value="a"> Caterpillar's revenue last quarter</label>
-  <label><input type="radio" name="q2" value="b"> The question this client asked two hours ago</label>
-  <label><input type="radio" name="q2" value="c"> "Every figure names its source"</label>
+  <label><input type="radio" name="q9" value="a"> Caterpillar's revenue last quarter</label>
+  <label><input type="radio" name="q9" value="b"> The question this client asked two hours ago</label>
+  <label><input type="radio" name="q9" value="c"> "Every figure names its source"</label>
   <div class="fb"></div>
 </div>
 ```
 
-## 2.5 From prompts to context
-
-The **context** is everything the model reads on one call. In the loop from chapter 1 that is the messages list: the system prompt, any earlier turns, the tool results so far, and the question. **Context engineering** is deciding what goes in that list, in what order, at what cost, for every call, and having code do it rather than a person.
-
-[Anthropic's engineering team](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) put it as the shift from finding the right words to finding the right *configuration of context*, and [Andrej Karpathy](https://x.com/karpathy/status/1937902205765607626) called it the delicate art of filling the window with just the right information for the next step. The picture this book uses is the analyst's desk. There is a fixed amount of room on it. Before each call, something has to decide what is on the desk and what stays in the filing cabinet.
-
-```{raw} html
-:file: widgets/ch02-context-window.html
-```
-
-Compare the two ways of getting the data-licensing rule in front of the model. Paste the handbook and it is always there, at 6,000 tokens a call, and it crowds out the question. Retrieve the one clause when the question mentions vendor data and it costs thirty tokens, and it is only there when it matters. Same rule, same model; the difference is who chose what was on the desk.
-
-Prompt engineering picks the words in one block. Context engineering picks the blocks. The prompt did not go away; it became the first block, and usually the smallest.
-
-## 2.6 Context engineering at the firm
-
-Three things that happen every week at Champaign Capital, and what has to be on the desk for each. All three run on the chapter 1 loop; the only new code is `build_context`, which assembles the desk.
-
-**The follow-up.** The client reads the memo and replies with two words. Without the previous exchange, the model has nothing to attach them to:
-
-```{code-block} python
-:class: pyodide
-from agent import agent
-
-first = "Compare Deere's revenue growth with Caterpillar's last quarter"
-memo, log = agent(first, verbose=False)
-
-print("Without the last exchange on the desk:")
-agent("And NVIDIA?")
-
-print("\nWith it:")
-agent("And NVIDIA?", history=[("user", first), ("assistant", memo)])
-```
-
-With the history present, the model looked up the one company it did not have and reused the two figures from the memo it had already written. One lookup, not three. The history is doing two jobs at once: it tells the model what the question means, and it carries facts the model would otherwise have to fetch again. That second job is why history is both valuable and expensive, and why `build_context` keeps only the last exchange.
-
-**The rule the prompt did not cover.** The client asks for the raw vendor numbers. Nothing in 2.3's rules block mentions vendor data, and the mock's answer in 2.1 was to hand them over. `build_context` notices the question sounds like a policy question, searches the handbook, and puts the one matching clause on the desk with its id:
-
-```{code-block} python
-:class: pyodide
-from agent import agent
-from context import build_context, describe_context
-
-q = "And the raw vendor numbers behind that?"
-system, history = build_context(q, client="meridian", history=[("user", first), ("assistant", memo)])
-
-print("On the desk for this call:")
-describe_context(system, history, q)
-print()
-answer, log = agent(q, system=system, history=history)
-```
-
-Read the desk first. The role, rules and format from 2.3 are there. So is a client card, because the firm knows who is asking. So is `data-licensing-1`, retrieved for this question and no other. The memo declines and cites the clause. Chapter 3 is entirely about making that retrieval step reliable: how the handbook is chunked, how the search finds the right clause, and what to do when it finds the wrong one.
-
-Notice the client card did something on its own. Meridian's card says the portfolio manager prefers tables, so any comparison for this client comes back as a table without anyone asking:
-
-```{code-block} python
-:class: pyodide
-from agent import agent
-from context import build_context
-
-q = "What was Deere's revenue growth last quarter?"
-system, history = build_context(q, client="meridian")
-answer, log = agent(q, system=system)
-```
-
-That is a fact about the client, held in a record, placed on the desk by code. It is not in the prompt and it is not in the question.
-
-**Tool results pile up.** The third case is the one chapter 1 left open. In a three-company comparison, each lookup's result is appended to the messages, so the model reads more on every call. Measure it:
-
-```{code-block} python
-:class: pyodide
-from agent import agent
-from context import ROLE, RULES, estimate_tokens
-
-q = "Compare revenue growth for Deere, Caterpillar and NVIDIA last quarter"
-answer, log = agent(q, system=ROLE + "\n\n" + RULES, verbose=False)
-
-on_desk = estimate_tokens(ROLE + RULES) + estimate_tokens(q)
-for entry in log:
-    if entry["kind"] == "tool_call":
-        print(f"call {entry['step'] + 1} read {on_desk:>4} tokens, then looked up {entry['args']['ticker']}")
-        on_desk += estimate_tokens(str(entry["result"]))
-print(f"call {len(log)} read {on_desk:>4} tokens, then wrote the memo")
-```
-
-Four calls, and each one reads more than the last, because every tool result stays on the desk. For three companies that is fine. For an agent that runs twenty steps, the tool results become the biggest thing on the desk, and most of them are no longer needed. Deciding what to keep, what to summarise, and what to drop is the part of context engineering that chapter 6 takes up when the agents get longer.
-
-What the firm gets from this, compared with 2.3's prompt alone: the same standing instructions, plus the client's preferences, plus the right handbook clause, plus the last exchange, each placed by code on the call that needs it, and a token count per call that Priya can read. What it does not get is an agent that reads the whole handbook every time, or one that remembers every client forever. Both of those are choices the firm made on purpose.
-
-**Checkpoint.**
-
-```{raw} html
-<div class="quiz" data-answer="b"
-     data-ok="Correct. It is a fact that changes weekly and is only needed on some calls, so code should fetch it into the context when the question needs it. A prompt is written once; a client-facing rule that must hold every time also gets checked in code after the model answers."
-     data-no="Think about how often it changes and how often it is needed. A prompt is written once and read on every call.">
-  <p class="q">Compliance updates the restricted list every Monday. The agent must never draft a note that recommends a restricted name. Where should the list live?</p>
-  <label><input type="radio" name="q0" value="a"> In the system prompt, pasted in full, updated by hand each Monday</label>
-  <label><input type="radio" name="q0" value="b"> In a record the loop reads into the context on calls that mention a ticker, with a code check on the answer</label>
-  <label><input type="radio" name="q0" value="c"> In a few-shot example that shows the model declining a restricted name</label>
-  <div class="fb"></div>
-</div>
-```
-
-## 2.7 Run it against a real model
+## 2.5 Run it against a real model
 
 The mock honours each prompt block because it was written to. A real model honours them most of the time, and the gap between "always" and "most of the time" is what this section measures. The cells below send the same blocks and the same client replies to the GPT deployment on Illinois Azure through this site's `/api/chat` proxy; your browser never sees a key.
 
 ```{raw} html
-<div class="wk-banner wk-pages-only">Model cells need the campus copy of this book: <a data-campus="/ch02-prompt-context.html#run-it-against-a-real-model" href="#">open it there</a> and sign in with your @illinois.edu account. Everything else on this page works here.</div>
+<div class="wk-banner wk-pages-only">Model cells need the campus copy of this book: <a data-campus="/ch02-prompt-engineering.html#run-it-against-a-real-model" href="#">open it there</a> and sign in with your @illinois.edu account. Everything else on this page works here.</div>
 ```
 
 First, the four replies from 2.1 with 2.3's full prompt. Compare each answer with the mock's:
@@ -415,22 +409,17 @@ print("\nRule at the end:")
 answer, log = agent(q, model=azure_model, system=at_end)
 ```
 
-Twelve short chunks is a small handbook, and a current model will usually find the rule either way. The effect grows with length. The lesson to carry is the one from 2.5: a rule that matters is retrieved onto the desk for the call that needs it, not buried in a prompt that every call reads.
+Twelve short chunks is a small handbook, and a current model will usually find the rule either way. The effect grows with length. The lesson to carry into chapter 3: a rule that matters is retrieved onto the desk for the call that needs it, not buried in a prompt that every call reads.
 
-## 2.8 Exercise
+## 2.6 Exercise
 
-Open the Colab notebook. It has the chapter 1 loop with `system` and `history` arguments, the four prompt blocks as Python strings, and `build_context`, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
+Open the Colab notebook. It has the chapter 1 loop with a `system` argument, and the four prompt blocks as Python strings, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
 
 1. Run the four client replies from 2.1 with no system prompt, then with each block added in turn. For each reply, write one line: which block fixed it, or "not a prompt problem".
 2. Rewrite the firm's standing instructions in at most 120 tokens (use `estimate_tokens`) so that the table and the buy question still come out right. What did you cut, and did anything break?
 3. Write a few-shot example in your *own* memo style, with your name on it, and run the comparison. Then remove your name from the example and run again. What did the model copy each time?
-4. `build_context` retrieves a handbook clause when the question mentions vendor data or policy. Add the trigger for expense questions, then ask *"Can I expense a $70 dinner on the Chicago trip?"* and check that the memo cites `expense-2`.
-5. Run the three-company comparison and print the token count on the desk at each call. Then change `build_context` so that after the memo is written, the history it returns is a one-sentence summary of the exchange instead of the full memo. How many tokens did the next follow-up save?
-6. In three sentences: one thing you would put in the prompt, one thing you would retrieve into the context per call, and one thing you would enforce in code after the model answers, with a reason for each.
 
 ## Further reading
 
-- Anthropic, [*Effective context engineering for AI agents*](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (2025) — the shift from prompt to context, and the "smallest set of high-signal tokens" principle this chapter's desk picture is drawn from.
 - Anthropic, [*Prompt engineering overview*](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview) in the Claude documentation — the role, example and format techniques from 2.3, with the reasons each one works.
-- Nelson F. Liu et al., [*Lost in the Middle: How Language Models Use Long Contexts*](https://arxiv.org/abs/2307.03172) (2023) — the decay effect tested in 2.7.
-- Andrej Karpathy, [the post that named "context engineering"](https://x.com/karpathy/status/1937902205765607626) (2025) — the phrase, and the argument that the prompt is the small part.
+- Nelson F. Liu et al., [*Lost in the Middle: How Language Models Use Long Contexts*](https://arxiv.org/abs/2307.03172) (2023) — the decay effect tested in 2.5.

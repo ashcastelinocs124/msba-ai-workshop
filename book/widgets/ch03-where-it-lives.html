@@ -1,0 +1,60 @@
+<div class="wk-widget wk-wl" id="w-wl">
+  <style>
+    .wk-wl .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .wk-wl .lane { border: 2px solid var(--wk-line); border-radius: 8px; padding: 8px 10px; background: #fff; font-size: 12px; color: #3d4555; }
+    .wk-wl .lane b { display: block; font-size: 13px; color: var(--wk-navy); }
+    .wk-wl .lane.p { border-top: 5px solid var(--wk-navy); } .wk-wl .lane.c { border-top: 5px solid #1a7f5a; } .wk-wl .lane.x { border-top: 5px solid #b8560b; }
+    .wk-wl ul { list-style: none; margin: 0; padding: 0; }
+    .wk-wl li { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 8px 10px; margin-bottom: 6px; }
+    .wk-wl .fact { font-size: 13px; font-weight: 600; color: #1f2430; }
+    .wk-wl .pick { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+    .wk-wl .pick button { padding: 4px 10px; font-size: 11.5px; }
+    .wk-wl .pick button[aria-pressed="true"] { background: var(--wk-navy); color: #fff; }
+    .wk-wl button:focus-visible { outline: 3px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-wl .fb { grid-column: 1 / -1; font-size: 12.5px; line-height: 1.45; }
+    .wk-wl .fb:empty { display: none; }
+    .wk-wl .fb.ok { color: #155f42; } .wk-wl .fb.no { color: #8a1f1f; }
+    .wk-wl .fb.ok::before { content: "✓ Right. "; font-weight: 700; } .wk-wl .fb.no::before { content: "✗ Not quite. "; font-weight: 700; }
+    .wk-wl .score { font: 700 12px ui-monospace, Menlo, monospace; color: var(--wk-navy); margin-top: 6px; }
+    @media (max-width: 700px) { .wk-wl .lanes { grid-template-columns: 1fr; } .wk-wl li { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · where does each thing live?</div>
+  <div class="lanes">
+    <div class="lane p"><b>Prompt</b>Written once, read on every call. Standing instructions.</div>
+    <div class="lane c"><b>Context, per call</b>Fetched by code onto the desk, only on the calls that need it.</div>
+    <div class="lane x"><b>Code check</b>Tested after the model answers, because it must hold every time.</div>
+  </div>
+  <ul data-list></ul>
+  <div class="score" data-score aria-live="polite"></div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-wl");
+  const L = { p: "Prompt", c: "Context", x: "Code check" };
+  const F = [
+    ["“You are a research associate at Champaign Capital Research.”", "p", "It is the same on every call and for every client: a standing instruction."],
+    ["Meridian's portfolio manager prefers tables", "c", "It is a fact about one client, kept in the client card and put on the desk when that client asks."],
+    ["The memo the client was sent two hours ago", "c", "It is history. Code keeps the last exchange and places it on the next call; a prompt cannot know it."],
+    ["Caterpillar's revenue last quarter", "c", "It is a figure. It comes from a tool on the call that needs it, never typed into a prompt that goes stale."],
+    ["data-licensing-1: raw vendor data may not go to clients", "c", "It is one handbook clause out of many, retrieved when the question sounds like it needs it."],
+    ["No memo goes out with a figure that has no source", "x", "A prompt can ask for sources, but the firm needs this every time. Code checks the draft for a [source: …] tag before it is sent."],
+  ];
+  const list = w.querySelector("[data-list]"), score = w.querySelector("[data-score]"), got = {};
+  F.forEach(([fact, ans, why], i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="fact" id="w-wl-f${i}">${fact}</span><span class="pick" role="group" aria-labelledby="w-wl-f${i}">` +
+      Object.entries(L).map(([k, v]) => `<button type="button" data-k="${k}" aria-pressed="false">${v}</button>`).join("") +
+      `</span><div class="fb" aria-live="polite"></div>`;
+    li.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      li.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      const ok = b.dataset.k === ans, fb = li.querySelector(".fb");
+      fb.className = "fb " + (ok ? "ok" : "no");
+      fb.textContent = ok ? why : `Try again. Ask how often it changes, and whether it must hold every single time.`;
+      got[i] = ok;
+      const right = Object.values(got).filter(Boolean).length;
+      score.textContent = `${right} of ${F.length} placed correctly`;
+    }));
+    list.appendChild(li);
+  });
+})();
+</script>

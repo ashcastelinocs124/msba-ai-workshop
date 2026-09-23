@@ -1,7 +1,7 @@
-# 9. AI for Financial and Investment Research
+# 6. ML Foundations II
 
 ```{raw} html
-<p class="wk-lede">Create a reproducible AI-assisted research workflow or signal.</p>
+<p class="wk-lede">Compare models and assess generalization, interpretation, and drift.</p>
 ```
 
 ```{admonition} Coming soon

@@ -8,17 +8,18 @@ parts:
   - caption: Part I · Agents
     chapters:
       - file: ch01-agent-loop
-      - file: ch02-prompt-context
-      - file: ch03-memory-rag
+      - file: ch02-prompt-engineering
+      - file: ch03-context-engineering
+      - file: ch04-memory-rag
   - caption: Part II · Machine learning
     chapters:
-      - file: ch04-ml-foundations-1
-      - file: ch05-ml-foundations-2
+      - file: ch05-ml-foundations-1
+      - file: ch06-ml-foundations-2
   - caption: Part III · Systems and decisions
     chapters:
-      - file: ch06-agent-systems
-      - file: ch07-ml-agents-or-neither
+      - file: ch07-agent-systems
+      - file: ch08-ml-agents-or-neither
   - caption: Part IV · Finance
     chapters:
-      - file: ch08-markets-and-ai
-      - file: ch09-ai-investment-research
+      - file: ch09-markets-and-ai
+      - file: ch10-ai-investment-research

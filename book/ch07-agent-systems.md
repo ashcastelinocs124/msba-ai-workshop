@@ -1,7 +1,7 @@
-# 8. Financial Markets and AI as an Investment Theme
+# 7. Agent Systems
 
 ```{raw} html
-<p class="wk-lede">Learn market fundamentals and map the AI investment value chain.</p>
+<p class="wk-lede">Add harness, observability, security, evaluation, and orchestration.</p>
 ```
 
 ```{admonition} Coming soon

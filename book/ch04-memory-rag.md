@@ -1,4 +1,4 @@
-# 3. Memory Retrieval and RAG
+# 4. Memory Retrieval and RAG
 
 ```{raw} html
 <p class="wk-lede">Build cited retrieval over a small knowledge base.</p>

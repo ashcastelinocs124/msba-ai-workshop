@@ -1,7 +1,7 @@
-# 7. When to Use ML, Agents, or Neither
+# 9. Financial Markets and AI as an Investment Theme
 
 ```{raw} html
-<p class="wk-lede">Recommend a fit-for-purpose architecture and defend the tradeoffs.</p>
+<p class="wk-lede">Learn market fundamentals and map the AI investment value chain.</p>
 ```
 
 ```{admonition} Coming soon

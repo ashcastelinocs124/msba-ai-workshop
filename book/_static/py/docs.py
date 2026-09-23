@@ -1,4 +1,4 @@
-"""Champaign Capital Research's policy handbook, chunked. Used by search_docs and by chapter 3 (retrieval)."""
+"""Champaign Capital Research's policy handbook, chunked. Used by search_docs and by chapter 4 (retrieval)."""
 DOCS = [
     {"id": "personal-trading-1", "text": "Employees must obtain compliance pre-clearance before trading any security in a sector the firm covers."},
     {"id": "personal-trading-2", "text": "Blackout window: no employee may trade a security within 14 days before or after the firm publishes research on it."},

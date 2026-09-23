@@ -41,7 +41,7 @@
       <div class="meter"><span data-used></span><span data-left></span></div>
       <div class="h">what the model reads, in order</div>
       <div class="desk" data-desk></div>
-      <div class="note warn" data-warn hidden>Over budget. The window fills from the top, so whatever is last on the desk falls off, and the last thing is the question. This is what a twelve-page handbook in the prompt does; chapter 3 retrieves instead of pasting.</div>
+      <div class="note warn" data-warn hidden>Over budget. The window fills from the top, so whatever is last on the desk falls off, and the last thing is the question. This is what a twelve-page handbook in the prompt does; chapter 4 retrieves instead of pasting.</div>
       <div class="note ok" data-ok>Fits. Everything on the desk reaches the model.</div>
     </div>
   </div>
@@ -51,7 +51,7 @@
   const w = document.getElementById("w-cw"), BUDGET = 4000;
   const LABEL = { role: "system", hb: "handbook, 12 pages", clause: "retrieved clause", hist: "history", tool: "tool results", q: "user" };
   const TEXT = {
-    role: "role + rules + format (the blocks from 2.3)",
+    role: "role + rules + format (chapter 2's blocks)",
     hb: "personal-trading-1 … security-2, every page, every call",
     clause: "data-licensing-1: raw vendor data may not be redistributed to clients",
     hist: "client: Deere vs Caterpillar last quarter? · assistant: Deere grew revenue 6.4% …",

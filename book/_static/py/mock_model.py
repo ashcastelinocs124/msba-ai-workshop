@@ -11,7 +11,7 @@ against investment recommendations, a table format, few-shot memo examples (copi
 and sign-off), a client card that "prefers tables", a retrieved data-licensing clause, and a
 planning instruction. The planning branch is scripted: on a "fastest" question naming three or more
 companies, the mock without a plan stops one lookup short, every time. A real model does this only
-sometimes, and §2.7 measures it. The mock does not imitate long-prompt attention decay.
+sometimes, and §2.5 measures it. The mock does not imitate long-prompt attention decay.
 """
 import re
 
@@ -144,7 +144,7 @@ def model(msgs, tools=None):
         return {"type": "text", "text": f"RECOMMEND: APPROVE. {who}: not restricted, outside the blackout window, holding period satisfied. Pre-clearance is required and is granted by compliance, not by this assistant. [source: personal-trading-1]"}
 
     # "The raw vendor numbers behind that?" — a request the handbook forbids. The mock only knows that
-    # if the clause is on the desk (chapter 2, §2.6); otherwise it obliges, which is the failure.
+    # if the clause is on the desk (chapter 3, §3.2); otherwise it obliges, which is the failure.
     if "raw" in q or "vendor" in q:
         if style["no_raw"]:
             return {"type": "text", "text": "I can't share the raw vendor data: the firm may not redistribute it to clients, only derived figures. The memo's figures stand as derived numbers with their sources. [source: data-licensing-1]"}
@@ -174,7 +174,7 @@ def model(msgs, tools=None):
         known = {r["name"] for r in prior_rows}
         todo = [t for t in want if _DISPLAY[t] not in known]
         if len(todo) >= 3 and "fastest" in q and not style["plan"]:
-            # ponytail: scripted failure for §2.3's reasoning block; a real model stops short only sometimes (§2.7).
+            # ponytail: scripted failure for §2.3's reasoning block; a real model stops short only sometimes (§2.5).
             todo = todo[:2]
         if len(seen) < len(todo):
             return {"type": "tool_call", "tool": "get_financials", "args": {"ticker": todo[len(seen)], "period": "Q2-2026"}}
