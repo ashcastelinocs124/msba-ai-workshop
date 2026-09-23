@@ -12,7 +12,7 @@ The session 1 recording. Watch it before or alongside the sections below; the ce
 ```{raw} html
 <figure class="wk-intro-video">
   <iframe src="https://www.youtube.com/embed/TuWWd335S1c" title="Session 1 · Introduction to AI Agents" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  <figcaption>Session 1 · Introduction to AI Agents · 47 min · <a href="https://youtu.be/TuWWd335S1c">Open on YouTube</a> · <a href="_static/media/ch01-lecture.mp4">Download the recording</a></figcaption>
+  <figcaption>Session 1 · Introduction to AI Agents · 47 min · <a href="https://youtu.be/TuWWd335S1c">Open on YouTube</a> · <a href="_static/media/ch01-lecture.mp4">Download the recording</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/workshop-lecture/msba-ch01-intro-to-ai-agents.pdf">Slides (PDF)</a></figcaption>
 </figure>
 ```
 
