@@ -19,13 +19,40 @@ print(sum(range(1, 101)))
 
 Each chapter has an **Open in Colab** button. Colab is a free hosted Jupyter notebook. The notebooks call a real model through Lumen, which the in-page cells cannot do without exposing your key.
 
+This walkthrough opens the chapter 1 notebook and adds your Lumen key to Colab's **Secrets** panel (step 4 below):
+
+```{raw} html
+<figure class="wk-intro-video">
+  <video controls preload="metadata" poster="_static/media/setup-colab-secret-poster.jpg">
+    <source src="_static/media/setup-colab-secret.mp4" type="video/mp4">
+    <track kind="captions" src="_static/media/setup-colab-secret.vtt" srclang="en" label="English" default>
+    Your browser cannot play this video. <a href="_static/media/setup-colab-secret.mp4">Download it</a> instead.
+  </video>
+  <figcaption>Setting up the Colab notebook · 44 s · captions on · <a href="_static/media/setup-colab-secret.mp4">Download the video</a></figcaption>
+</figure>
+```
+
 ## 3. A Lumen API key
 
 [Lumen](https://lumen.ncsa.illinois.edu/chat) is the University of Illinois campus LLM service, run by NCSA. It is free with your Illinois account, so there is nothing to pay for.
 
+Watch it once, then follow the steps. The key in the video is hidden on purpose; yours will be a long string starting with `sk_`.
+
+```{raw} html
+<figure class="wk-intro-video">
+  <video controls preload="metadata" poster="_static/media/setup-lumen-key-poster.jpg">
+    <source src="_static/media/setup-lumen-key.mp4" type="video/mp4">
+    <track kind="captions" src="_static/media/setup-lumen-key.vtt" srclang="en" label="English" default>
+    Your browser cannot play this video. <a href="_static/media/setup-lumen-key.mp4">Download it</a> instead.
+  </video>
+  <figcaption>Creating a Lumen API key and consenting to glm-5.3-flash · 54 s · captions on · <a href="_static/media/setup-lumen-key.mp4">Download the video</a></figcaption>
+</figure>
+```
+
 1. Sign in at [lumen.ncsa.illinois.edu/chat](https://lumen.ncsa.illinois.edu/chat) with your Illinois account.
 2. Open your [profile page](https://lumen.ncsa.illinois.edu/profile), scroll down to **API key**, and create one. Copy it now; it is shown once.
-3. In Colab, open the **Secrets** panel (the key icon in the left sidebar), add a secret named `LUMEN_API_KEY`, paste the key, and enable notebook access.
+3. On Lumen's **Models** page, open **glm-5.3-flash**. If it asks you to consent to the model's use, accept; the key will not work with it until you do.
+4. In Colab, open the **Secrets** panel (the key icon in the left sidebar), add a secret named `LUMEN_API_KEY`, paste the key, and enable notebook access.
 
 Every notebook reads the key and opens a client with:
 

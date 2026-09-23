@@ -1,0 +1,43 @@
+WEBVTT
+
+00:00:02.380 --> 00:00:07.380
+Hey, I'm going to show you how you can get the API set up
+
+00:00:07.380 --> 00:00:09.420
+for this environment.
+
+00:00:09.420 --> 00:00:16.580
+You need to go to Lumen, log in,
+
+00:00:16.580 --> 00:00:20.080
+then you go to profile, and you scroll down,
+
+00:00:20.980 --> 00:00:25.840
+you click new API key, and you just copy the key.
+
+00:00:27.580 --> 00:00:28.780
+Just to give you a background,
+
+00:00:28.780 --> 00:00:30.460
+if you don't have the model set up,
+
+00:00:30.460 --> 00:00:33.580
+you should go up here, to glm-5.3-flash,
+
+00:00:33.580 --> 00:00:37.020
+and consent, something will pop up here,
+
+00:00:37.020 --> 00:00:38.060
+asking you to consent.
+
+00:00:38.060 --> 00:00:42.460
+So make sure to consent the model to be used.
+
+00:00:42.460 --> 00:00:46.260
+And yeah, you should be all good to go.
+
+00:00:46.260 --> 00:00:48.860
+You should be good to go; it's just a sign-in.
+
+00:00:48.860 --> 00:00:52.020
+And yeah, let me know if you have any questions.
