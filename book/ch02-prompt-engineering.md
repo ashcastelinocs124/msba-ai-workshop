@@ -249,6 +249,12 @@ answer, log = agent("Deere vs Caterpillar last quarter — as a table please. Sh
 
 The memo now has the header and the sign-off from the examples. It also has Priya's name on it, because the examples did. The model copies the shape it is shown, including the parts you did not mean. Few-shot prompts are the most powerful block and the one to read most carefully.
 
+**Zero-shot and few-shot, side by side.** Put the bare question next to the same question with only the two example memos in front of it. Nothing else differs.
+
+```{raw} html
+:file: widgets/ch02-shot-compare.html
+```
+
 **Checkpoint.**
 
 ```{raw} html

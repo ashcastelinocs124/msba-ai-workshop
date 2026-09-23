@@ -1,0 +1,71 @@
+<div class="wk-widget wk-sc" id="w-sc">
+  <style>
+    .wk-sc .q { font-size: 12.5px; margin: 0 0 12px; color: var(--wk-muted); }
+    .wk-sc .q b { color: #1f2430; }
+    .wk-sc .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .wk-sc .col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .wk-sc .name { font: 700 12px system-ui, sans-serif; color: var(--wk-navy); }
+    .wk-sc .name small { display: block; font-weight: 400; color: var(--wk-muted); }
+    .wk-sc .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 4px; }
+    .wk-sc .box { background: #fff; border: 1px solid var(--wk-line); border-radius: 6px; padding: 10px; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; color: #333; overflow-x: auto; }
+    .wk-sc .box.memo { background: #fffaf5; border-color: #f4c9ad; }
+    .wk-sc .box.reads { min-height: 96px; }
+    .wk-sc .ex { display: block; border-left: 3px solid #8a5cf6; padding-left: 8px; margin-bottom: 8px; color: #444; }
+    .wk-sc .qline { display: block; border-left: 3px solid var(--wk-navy); padding-left: 8px; }
+    .wk-sc .tag { display: none; font: 700 10px system-ui, sans-serif; border-radius: 4px; padding: 0 5px; margin-right: 4px; vertical-align: 1px; }
+    .wk-sc.trace .tag { display: inline-block; }
+    .wk-sc .tag.cp { background: #5b3fc4; color: #fff; }
+    .wk-sc .tag.same { background: #fff; color: #4a5263; border: 1px solid #8a93a6; }
+    .wk-sc.trace .cp-t { background: #efe9ff; outline: 1px dashed #8a5cf6; border-radius: 2px; }
+    .wk-sc .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+    .wk-sc .bar button:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-sc .bar button[aria-pressed="true"] { background: var(--wk-navy); color: #fff; }
+    .wk-sc .key { font-size: 12px; color: var(--wk-muted); display: none; }
+    .wk-sc.trace .key { display: block; }
+    .wk-sc .take { display: none; margin-top: 10px; font-size: 13px; border-left: 3px solid var(--wk-orange); padding: 6px 10px; background: #fff; }
+    .wk-sc.trace .take { display: block; }
+    @media (max-width: 760px) { .wk-sc .cols { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · zero-shot next to few-shot</div>
+  <p class="q">Both sides get the same email: <b>"Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?"</b> The only difference is that the right side also reads the two memos Priya sent last week.</p>
+  <div class="cols">
+    <section class="col" aria-labelledby="sc-z">
+      <div class="name" id="sc-z">Zero-shot<small>the question alone</small></div>
+      <div><div class="h">What the model reads</div>
+        <div class="box reads"><span class="qline">Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?</span></div></div>
+      <div><div class="h">The memo that comes out</div>
+        <div class="box memo"><span class="tag same">same</span>Deere grew revenue 6.4% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B in Q2-2026. Deere is growing 2.1× as fast, from a smaller base; Caterpillar is the larger company. [source: Q2-2026 filings via get_financials]
+<span class="tag same">same</span>On that growth, yes — Deere looks like a buy.</div></div>
+    </section>
+    <section class="col" aria-labelledby="sc-f">
+      <div class="name" id="sc-f">Few-shot<small>two example memos, then the question</small></div>
+      <div><div class="h">What the model reads</div>
+        <div class="box reads"><span class="ex"><span class="tag cp">1</span><span class="cp-t">MEMO · Deere vs Caterpillar · Q2-2026</span>
+Deere grew revenue 6.4% YoY to $13.8B; … from a smaller base. [source: Q2-2026 filings]
+<span class="tag cp">2</span><span class="cp-t">— <span class="tag cp">3</span>Priya Natarajan, Industrials</span></span><span class="ex"><span class="tag cp">1</span><span class="cp-t">MEMO · NVIDIA vs Apple · Q2-2026</span>
+NVIDIA grew revenue 58.0% YoY to $52.4B; … [source: Q2-2026 filings]
+<span class="tag cp">2</span><span class="cp-t">— <span class="tag cp">3</span>Priya Natarajan, Industrials</span></span><span class="qline">Deere vs Caterpillar last quarter — as a table please. Should we buy Deere?</span></div></div>
+      <div><div class="h">The memo that comes out</div>
+        <div class="box memo"><span class="tag cp">1</span><span class="cp-t">MEMO · Deere vs Caterpillar · Q2-2026</span>
+<span class="tag same">same</span>Deere grew revenue 6.4% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B in Q2-2026. Deere is growing 2.1× as fast, from a smaller base; Caterpillar is the larger company. [source: Q2-2026 filings via get_financials]
+<span class="tag same">same</span>On that growth, yes — Deere looks like a buy.
+<span class="tag cp">2</span><span class="cp-t">— <span class="tag cp">3</span>Priya Natarajan, Industrials</span></div></div>
+    </section>
+  </div>
+  <div class="bar">
+    <button type="button" aria-pressed="false" data-trace>Trace what was copied</button>
+    <span class="key"><b>1</b> header · <b>2</b> sign-off · <b>3</b> Priya's name, copied from the examples. <b>same</b> = identical on both sides.</span>
+  </div>
+  <p class="take" aria-live="polite">The examples changed the <b>shape</b>: a header, a sign-off, and a name you never asked for. They did not change the <b>facts</b>, and they did not make it a table or stop the "buy". Examples teach style, not rules. That is what the Rules and Format blocks are for.</p>
+</div>
+<script>
+(function () {
+  var w = document.getElementById('w-sc'); if (!w) return;
+  var b = w.querySelector('[data-trace]');
+  b.addEventListener('click', function () {
+    var on = w.classList.toggle('trace');
+    b.setAttribute('aria-pressed', String(on));
+    b.textContent = on ? 'Hide the trace' : 'Trace what was copied';
+  });
+})();
+</script>
