@@ -10,6 +10,58 @@
   // Policy Handbook window shows the same passages the agent searched, from the same file.
   let HANDBOOK = [];
 
+  // One fetch per module, shared by the runtime loader and the "what this cell imports" drawer.
+  const sources = {};
+  function getSource(f) {
+    // revalidate: a stale module after a deploy would desync from this file
+    return (sources[f] ||= fetch(BASE + "py/" + f, { cache: "no-cache" }).then((r) => r.text()));
+  }
+
+  // ---- "Show what this cell imports": the source of every name a cell imports from _static/py ----
+  // Readers should not have to scroll back to find what ROLE says or what agent() does, so each
+  // cell lists its own imports, read from the same files the cell runs (no copy to drift).
+  function cellImports(code) {
+    const found = [];
+    for (const m of code.matchAll(/^from\s+(\w+)\s+import[ \t]+([\w \t,]+)$/gm)) {
+      const file = m[1] + ".py";
+      if (!PY_FILES.includes(file)) continue;
+      for (const n of m[2].split(",")) { const name = n.trim().split(/\s+/)[0]; if (name) found.push({ file, name }); }
+    }
+    return found;
+  }
+  function definitionOf(src, name) {
+    // A top-level def/class/assignment, its indented or bracket-closing continuation lines,
+    // and the comment lines directly above it.
+    const lines = src.split("\n");
+    const start = new RegExp("^(?:(?:def|class)\\s+" + name + "\\b|" + name + "\\s*=)");
+    let i = lines.findIndex((l) => start.test(l));
+    if (i < 0) return null;
+    let j = i + 1;
+    while (j < lines.length && (lines[j] === "" || /^[\s)\]}]/.test(lines[j]))) j++;
+    while (j > i + 1 && lines[j - 1] === "") j--;
+    while (i > 0 && lines[i - 1].startsWith("#")) i--;
+    return lines.slice(i, j).join("\n");
+  }
+  function addImportsDrawer(cell, code) {
+    const names = cellImports(code);
+    if (!names.length) return;
+    const d = document.createElement("details");
+    d.className = "wk-src";
+    d.innerHTML = "<summary>Show what this cell imports (" + names.map((n) => n.name).join(", ") + ")</summary><pre></pre>";
+    d.addEventListener("toggle", async () => {
+      const pre = d.querySelector("pre");
+      if (!d.open || pre.textContent) return;
+      pre.textContent = "Loading…";
+      const parts = [];
+      for (const { file, name } of names) {
+        const def = definitionOf(await getSource(file), name);
+        parts.push("# " + name + " — from " + file + "\n" + (def || "(defined in " + file + ")"));
+      }
+      pre.textContent = parts.join("\n\n");
+    });
+    cell.querySelector("textarea").after(d);
+  }
+
   function loadPyodideOnce(status) {
     if (pyodidePromise) return pyodidePromise;
     pyodidePromise = (async () => {
@@ -21,7 +73,7 @@
       });
       const py = await loadPyodide({ indexURL: PYODIDE_URL });
       for (const f of PY_FILES) {
-        const src = await (await fetch(BASE + "py/" + f, { cache: "no-cache" })).text(); // revalidate: a stale module after a deploy would desync from this file
+        const src = await getSource(f);
         py.FS.writeFile(f, src);
         if (f === "docs.py") HANDBOOK = [...src.matchAll(/"id":\s*"([^"]+)",\s*"text":\s*"([^"]+)"/g)].map((m) => ({ id: m[1], text: m[2] }));
       }
@@ -330,6 +382,7 @@
       cell.querySelector("textarea").rows = Math.min(30, code.split("\n").length + 1);
       cell.querySelector(".wk-run").addEventListener("click", () => run(cell));
       cell.querySelectorAll(".wk-seg button").forEach((b) => b.addEventListener("click", () => { if (!b.disabled) showView(cell, b.dataset.v); }));
+      addImportsDrawer(cell, code);
       cell._player = makePlayer(cell);
       block.replaceChildren(cell);
     });

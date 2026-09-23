@@ -23,6 +23,10 @@ h1, h2 { color: var(--wk-navy); letter-spacing: -0.02em; }
 .wk-cell .wk-out { border-top: 1px dashed var(--wk-line); background: #0d0d0d; color: #d6d6d6; font: 12.5px/1.5 ui-monospace, Menlo, monospace; padding: 10px 12px; white-space: pre-wrap; margin: 0; display: none; max-height: 420px; overflow: auto; }
 .wk-cell .wk-out.show { display: block; }
 .wk-cell .wk-out.err { color: #ff8a80; }
+.wk-cell .wk-src { border-top: 1px dashed var(--wk-line); background: #fafbfc; }
+.wk-cell .wk-src summary { cursor: pointer; padding: 6px 12px; font: 600 12px system-ui, sans-serif; color: var(--wk-navy); }
+.wk-cell .wk-src summary:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: -2px; }
+.wk-cell .wk-src pre { margin: 0; padding: 10px 12px; border-top: 1px solid var(--wk-line); background: #fff; color: #1f2430; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 360px; overflow: auto; }
 
 /* widgets (book/widgets/*.html) */
 .wk-widget { border: 1px solid var(--wk-line); border-radius: 10px; padding: 16px; margin: 1rem 0; background: #fafbfc; font-size: 14px; color: #1f2430; }
