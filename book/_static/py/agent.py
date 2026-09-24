@@ -75,7 +75,7 @@ def narrate(log):
 
 
 def messages(question, system=None, history=None):
-    """The labelled list the model reads: the system prompt, earlier turns, then the user prompt (chapter 2, §2.2)."""
+    """The labelled list the model reads: the system prompt, earlier turns, then the user prompt (§2.1.2)."""
     msgs = [{"role": "system", "content": system}] if system else []
     msgs += [{"role": r, "content": c} for r, c in (history or [])]
     msgs.append({"role": "user", "content": question})
@@ -89,7 +89,7 @@ def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True, s
     inspected, tested, or written to disk.
 
     `system` is the standing instructions and `history` the earlier turns, as (role, text)
-    pairs (chapters 2 and 3). Both only seed the message list; the loop itself is unchanged.
+    pairs (chapter 2). Both only seed the message list; the loop itself is unchanged.
     """
     msgs = messages(question, system, history)
     log = []

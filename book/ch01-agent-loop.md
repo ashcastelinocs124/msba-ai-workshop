@@ -74,7 +74,7 @@ You already own a version of all three. Hover a part on either figure:
 :file: widgets/ch01-agent-vs-human.html
 ```
 
-The split matters because it tells you where to look when something goes wrong. A wrong answer with the right tool calls is a model or prompt problem. A tool called with nonsense arguments is a contract problem. A run that never ends is a loop problem. Chapters 2, 6, and this one map onto those three.
+The split matters because it tells you where to look when something goes wrong. A wrong answer with the right tool calls is a model or prompt problem. A tool called with nonsense arguments is a contract problem. A run that never ends is a loop problem. Chapters 2, 5, and this one map onto those three.
 
 ```{code-block} python
 :class: pyodide
@@ -87,7 +87,7 @@ print(TOOL_SCHEMAS[0]["name"], "-", TOOL_SCHEMAS[0]["description"])
 print("arguments:", ", ".join(TOOL_SCHEMAS[0]["input_schema"]["properties"]))
 ```
 
-Notice what is *not* in the list: nothing that sends an email, clears a trade, publishes a note, or changes a record. That is a design choice you will make on purpose in 1.9, and chapter 7 is about how to relax it safely.
+Notice what is *not* in the list: nothing that sends an email, clears a trade, publishes a note, or changes a record. That is a design choice you will make on purpose in 1.9, and chapter 6 is about how to relax it safely.
 
 ## 1.3 When an agent is the right tool
 
@@ -98,7 +98,7 @@ Because an agent decides its own steps, it costs more per task than a workflow, 
 3. **What does a mistake cost, and will anyone see it?** An agent that recommends and a human who approves is a cheap mistake. An agent that acts on a live system is not. Start with the first.
 4. **Is the task worth the latency and the tokens?** Three model calls to compare two companies for a client is fine. Three model calls per row of a million-row price table is not.
 
-Chapter 8 turns these four questions into a full decision framework, with the "neither" answer treated seriously. For now the rule of thumb is: workflow by default, agent when the recipe cannot be written, and never let an agent hold a pen until its log has earned your trust.
+Chapter 7 turns these four questions into a full decision framework, with the "neither" answer treated seriously. For now the rule of thumb is: workflow by default, agent when the recipe cannot be written, and never let an agent hold a pen until its log has earned your trust.
 
 **Checkpoint.** One question before moving on.
 
@@ -317,7 +317,7 @@ for pair in ["Deere and Caterpillar", "NVIDIA and Apple", "Microsoft and Apple"]
     print(f"{pair}: {answer}\n")
 ```
 
-Every memo ends with a `[source: …]` tag. Chapter 4 makes that mandatory and makes the tag point at a document. For now, notice what it buys you: a client who questions a number can be shown where it came from, not argued with.
+Every memo ends with a `[source: …]` tag. Chapter 3 makes that mandatory and makes the tag point at a document. For now, notice what it buys you: a client who questions a number can be shown where it came from, not argued with.
 
 The fourth pair is the one that matters most. The client asks about a company the firm does not cover:
 
@@ -343,7 +343,7 @@ for line in narrate(log):
     print(line)
 ```
 
-What the firm gets from this loop, compared with an analyst doing it by hand: the same figures pulled the same way every time, a memo with a source on every number, a log that can be reviewed, and an analyst who now reads thirty drafts instead of researching thirty requests. What it does not get is an agent that talks to clients. That stays behind a human click until the log has earned trust, which is the subject of chapter 7.
+What the firm gets from this loop, compared with an analyst doing it by hand: the same figures pulled the same way every time, a memo with a source on every number, a log that can be reviewed, and an analyst who now reads thirty drafts instead of researching thirty requests. What it does not get is an agent that talks to clients. That stays behind a human click until the log has earned trust, which is the subject of chapter 6.
 
 The Colab notebook runs this exact comparison against the real model. Compare its tool sequence with the mock's; a well-designed schema should make them match.
 

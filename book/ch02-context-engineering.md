@@ -1,20 +1,20 @@
-# 3. Context Engineering
+# 2.2 Context Engineering
 
 ```{raw} html
-<p class="wk-lede">Chapter 2's prompt fixed two of the four client replies. The other two, the raw vendor numbers and "And NVIDIA?", were never prompt problems. Decide what the model reads on each call, and have code put it there. This chapter is taught in the same session as chapter 2.</p>
-<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch03-context-engineering.ipynb" target="_blank">▶ Open in Colab</a>
+<p class="wk-lede">Section 2.1's prompt fixed two of the four client replies. The other two, the raw vendor numbers and "And NVIDIA?", were never prompt problems. Decide what the model reads on each call, and have code put it there. This section is taught in the same session as section 2.1.</p>
+<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-context-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
 ```{admonition} Learning objectives
 :class: note
 - Say what the context is on one call, and how context engineering differs from writing a prompt.
 - Assemble the context for one call from instructions, a client card, a retrieved policy clause, the last exchange and tool results.
-- Count what each piece costs, and decide what belongs in the prompt, in the context per call, and in a code check after the answer.
+- Count what each piece costs, including the tool definitions and tool results, and decide what belongs in the prompt, in the context per call, and in a code check after the answer.
 ```
 
-## 3.1 From prompts to context
+## 2.2.1 From prompts to context
 
-Chapter 2 ended on a list of what a prompt cannot do. It costs every call, it cannot hold facts, it cannot hold what changes, and a long one gets ignored in the middle. The two replies it did not fix need exactly those things: a policy clause the prompt never mentioned, and the memo from two hours ago.
+Section 2.1 ended on a list of what a prompt cannot do. It costs every call, it cannot hold facts, it cannot hold what changes, and a long one gets ignored in the middle. The two replies it did not fix need exactly those things: a policy clause the prompt never mentioned, and the memo from two hours ago.
 
 The **context** is everything the model reads on one call. In the loop from chapter 1 that is the messages list: the system prompt, any earlier turns, the tool results so far, and the question. **Context engineering** is deciding what goes in that list, in what order, at what cost, for every call, and having code do it rather than a person.
 
@@ -28,19 +28,19 @@ What goes into the context on one call. The pieces overlap: a retrieved clause c
 [Anthropic's engineering team](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) put it as the shift from finding the right words to finding the right *configuration of context*, and [Andrej Karpathy](https://x.com/karpathy/status/1937902205765607626) called it the delicate art of filling the window with just the right information for the next step. The picture this book uses is the analyst's desk. There is a fixed amount of room on it. Before each call, something has to decide what is on the desk and what stays in the filing cabinet.
 
 ```{raw} html
-:file: widgets/ch03-context-window.html
+:file: widgets/ch02-context-window.html
 ```
 
 Tick *paste the whole handbook*, then swap it for *retrieve the one clause*. Same rule, same model: 6,000 tokens that push the question off the desk, or 30 that arrive only when they matter.
 
 Prompt engineering picks the words in one block. Context engineering picks the blocks. The prompt did not go away; it became the first block, and usually the smallest.
 
-## 3.2 Context engineering at the firm
+## 2.2.2 Context engineering at the firm
 
 Three client replies, three different desks. The only new code is `build_context`, which decides what comes out of the filing cabinet for each call. Pick a reply and read why each card is where it is:
 
 ```{raw} html
-:file: widgets/ch03-desk-assembler.html
+:file: widgets/ch02-desk-assembler.html
 ```
 
 Now run each desk for real.
@@ -79,7 +79,7 @@ print()
 answer, log = agent(q, system=system, history=history)
 ```
 
-The memo declines and cites `data-licensing-1`. Chapter 4 is about making that retrieval step reliable: how the handbook is chunked, how the search finds the right clause, and what to do when it finds the wrong one.
+The memo declines and cites `data-licensing-1`. Chapter 3 is about making that retrieval step reliable: how the handbook is chunked, how the search finds the right clause, and what to do when it finds the wrong one.
 
 **The client card**, with no history and no clause:
 
@@ -95,10 +95,69 @@ answer, log = agent(q, system=system)
 
 A table, though nobody asked for one. That preference is held in the client's record, and code puts it on the desk.
 
-**Tool results pile up.** Each lookup's result stays in the messages, so every call reads more than the one before. Drag the slider, then switch to a real filing extract:
+**Where does each thing live?** Sort what the firm needs the model to know:
 
 ```{raw} html
-:file: widgets/ch03-tool-pileup.html
+:file: widgets/ch02-where-it-lives.html
+```
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="b"
+     data-ok="Correct. It is a fact that changes weekly and is only needed on some calls, so code should fetch it into the context when the question needs it. A prompt is written once; a client-facing rule that must hold every time also gets checked in code after the model answers."
+     data-no="Think about how often it changes and how often it is needed. A prompt is written once and read on every call.">
+  <p class="q">Compliance updates the restricted list every Monday. The agent must never draft a note that recommends a restricted name. Where should the list live?</p>
+  <label><input type="radio" name="q0" value="a"> In the system prompt, pasted in full, updated by hand each Monday</label>
+  <label><input type="radio" name="q0" value="b"> In a record the loop reads into the context on calls that mention a ticker, with a code check on the answer</label>
+  <label><input type="radio" name="q0" value="c"> In a few-shot example that shows the model declining a restricted name</label>
+  <div class="fb"></div>
+</div>
+```
+
+## 2.2.3 Tools in the context
+
+Tools are part of the context too. On every call the model reads a definition of each tool it may use: the name, a description of when to use it, and the arguments it accepts. That is how it knows `get_financials` exists at all. Chapter 1 wrote these definitions so the model could not misuse a tool. This section counts what they cost.
+
+**What the model reads about each tool.** The definitions are sent on every call, whether the question needs the tool or not:
+
+```{code-block} python
+:class: pyodide
+import json
+from tools import TOOL_SCHEMAS
+from context import estimate_tokens
+
+total = 0
+for schema in TOOL_SCHEMAS:
+    cost = estimate_tokens(json.dumps(schema))
+    total += cost
+    print(f"{schema['name']:<18} {cost:>3} tokens")
+print(f"{'all four tools':<18} {total:>3} tokens, read on every call")
+```
+
+Four tools are cheap. A firm with forty tools pays for all forty on every call, and the model has forty descriptions to choose between. When two descriptions overlap, the model can pick the wrong one. [Anthropic's guidance](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) puts it this way: if an analyst could not say for sure which tool fits a question, the model will not do better.
+
+**Give each call only the tools it needs.** A revenue question needs one tool. The same code that picks the handbook clause can pick the tools:
+
+```{code-block} python
+:class: pyodide
+import json
+from tools import TOOL_SCHEMAS
+from context import estimate_tokens
+
+q = "What was Deere's revenue growth last quarter?"
+needed = [s for s in TOOL_SCHEMAS if s["name"] == "get_financials"]
+
+print("Question:", q)
+print("All four tools on the desk:", sum(estimate_tokens(json.dumps(s)) for s in TOOL_SCHEMAS), "tokens")
+print("Only get_financials:       ", sum(estimate_tokens(json.dumps(s)) for s in needed), "tokens")
+print("The model can no longer call get_price or search_docs by mistake.")
+```
+
+**Tool results pile up.** The definitions are the fixed cost. The results are the growing one. Each lookup's result stays in the messages, so every call reads more than the one before. Drag the slider, then switch to a real filing extract:
+
+```{raw} html
+:file: widgets/ch02-tool-pileup.html
 ```
 
 The same count, measured on the fixtures:
@@ -119,34 +178,14 @@ for entry in log:
 print(f"call {len(log)} read {on_desk:>4} tokens, then wrote the memo")
 ```
 
-Deciding what to keep, what to summarise and what to drop is the part of context engineering that chapter 7 takes up, when the agents run for twenty steps.
+Deciding what to keep, what to summarise and what to drop is the part of context engineering that chapter 6 takes up, when the agents run for twenty steps.
 
-**Where does each thing live?** Sort what the firm needs the model to know:
-
-```{raw} html
-:file: widgets/ch03-where-it-lives.html
-```
-
-**Checkpoint.**
-
-```{raw} html
-<div class="quiz" data-answer="b"
-     data-ok="Correct. It is a fact that changes weekly and is only needed on some calls, so code should fetch it into the context when the question needs it. A prompt is written once; a client-facing rule that must hold every time also gets checked in code after the model answers."
-     data-no="Think about how often it changes and how often it is needed. A prompt is written once and read on every call.">
-  <p class="q">Compliance updates the restricted list every Monday. The agent must never draft a note that recommends a restricted name. Where should the list live?</p>
-  <label><input type="radio" name="q0" value="a"> In the system prompt, pasted in full, updated by hand each Monday</label>
-  <label><input type="radio" name="q0" value="b"> In a record the loop reads into the context on calls that mention a ticker, with a code check on the answer</label>
-  <label><input type="radio" name="q0" value="c"> In a few-shot example that shows the model declining a restricted name</label>
-  <div class="fb"></div>
-</div>
-```
-
-## 3.3 Run it against a real model
+## 2.2.4 Run it against a real model
 
 The mock uses whatever is on the desk because it was written to. A real model usually does, and it can also ignore a clause or misread a follow-up. The cells below send the same desks to the GPT deployment on Illinois Azure through this site's `/api/chat` proxy; your browser never sees a key.
 
 ```{raw} html
-<div class="wk-banner wk-pages-only">Model cells need the campus copy of this book: <a data-campus="/ch03-context-engineering.html#run-it-against-a-real-model" href="#">open it there</a> and sign in with your @illinois.edu account. Everything else on this page works here.</div>
+<div class="wk-banner wk-pages-only">Model cells need the campus copy of this book: <a data-campus="/ch02-context-engineering.html#run-it-against-a-real-model" href="#">open it there</a> and sign in with your @illinois.edu account. Everything else on this page works here.</div>
 ```
 
 First, the follow-up. Write the memo, then ask "And NVIDIA?" with and without the last exchange:
@@ -185,9 +224,9 @@ answer, log = agent(q, model=azure_model, system=system, history=history)
 
 Did it decline? Did it cite `data-licensing-1`, or just refuse? Then check the client card: was the first memo a table, even though nobody asked for one?
 
-## 3.4 Exercise
+## 2.2.5 Exercise
 
-Open the Colab notebook. It has the chapter 1 loop with `system` and `history` arguments, the prompt blocks from chapter 2, and `build_context`, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
+Open the Colab notebook. It has the chapter 1 loop with `system` and `history` arguments, the prompt blocks from section 2.1, and `build_context`, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
 
 1. `build_context` retrieves a handbook clause when the question mentions vendor data or policy. Add the trigger for expense questions, then ask *"Can I expense a $70 dinner on the Chicago trip?"* and check that the memo cites `expense-2`.
 2. Run the three-company comparison and print the token count on the desk at each call. Then change `build_context` so that after the memo is written, the history it returns is a one-sentence summary of the exchange instead of the full memo. How many tokens did the next follow-up save?

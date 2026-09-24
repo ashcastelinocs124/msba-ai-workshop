@@ -1,7 +1,7 @@
-# 2. Prompt Engineering
+# 2.1 Prompt Engineering
 
 ```{raw} html
-<p class="wk-lede">The chapter 1 agent writes a good memo when the question is the one you scripted. Now four clients reply to that memo in their own words, one wants a table, one asks for something the handbook forbids, and one asks a three-word follow-up. Write the standing instructions the model reads first, and find where they stop working. Chapter 3 picks up from there, in the same session.</p>
+<p class="wk-lede">The chapter 1 agent writes a good memo when the question is the one you scripted. Now four clients reply to that memo in their own words, one wants a table, one asks for something the handbook forbids, and one asks a three-word follow-up. Write the standing instructions the model reads first, and find where they stop working. Section 2.2 picks up from there, in the same session.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-prompt-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
@@ -12,7 +12,7 @@
 - Count what a prompt costs, and say which problems a prompt cannot fix.
 ```
 
-## 2.1 Where the chapter 1 agent breaks
+## 2.1.1 Where the chapter 1 agent breaks
 
 Chapter 1 ended with a memo Priya could send: Deere against Caterpillar, both figures, the gap, a source tag. It went out at 11:40. By two o'clock four replies are in her inbox, and she forwards them to you.
 
@@ -60,7 +60,7 @@ This chapter and the next are about putting it there. The first tool for that is
 </div>
 ```
 
-## 2.2 The prompt: standing instructions
+## 2.1.2 The prompt: standing instructions
 
 A **prompt** is text you put in front of the question. In practice it is the *system prompt*: a block the model reads first on every call, before any user message, that says who it is, what it is for, and how it should behave. Think of it as the one-page memo a new associate gets on Monday morning. Priya does not repeat it every time she hands over a task; it stands.
 
@@ -121,7 +121,7 @@ Two things changed and one did not. The memo now carries a header saying whose d
 </div>
 ```
 
-## 2.3 Six kinds of prompt, one memo
+## 2.1.3 Six kinds of prompt, one memo
 
 Prompts come in a few kinds, and each fixes a different gap from 2.1. The names vary between textbooks; the jobs do not.
 
@@ -317,7 +317,7 @@ print("\nWith it:")
 answer, log = agent(q, system=ROLE + "\n\n" + REASONING)
 ```
 
-Without a plan, the agent looked up Deere and Caterpillar and answered. It never looked up NVIDIA, which is the right answer. With the plan it listed three companies, made three lookups, and got it right. Be careful with this cell: the mock is *scripted* to stop short every time. A real model stops short only sometimes, which is harder to catch. Section 2.5 runs the same pair against one.
+Without a plan, the agent looked up Deere and Caterpillar and answered. It never looked up NVIDIA, which is the right answer. With the plan it listed three companies, made three lookups, and got it right. Be careful with this cell: the mock is *scripted* to stop short every time. A real model stops short only sometimes, which is harder to catch. Section 2.1.5 runs the same pair against one.
 
 **Checkpoint.**
 
@@ -335,9 +335,9 @@ Without a plan, the agent looked up Deere and Caterpillar and answered. It never
 
 Two rules of thumb from all of this. First, **a prompt block changes the shape of the answer, never its facts.** Every figure in every memo above came from `get_financials`; the blocks decided the header, the table, the refusal and the sign-off. Second, **add blocks one at a time and run the same question after each.** A prompt assembled all at once is a prompt whose parts you cannot tell apart when one of them misbehaves.
 
-## 2.4 Where prompts stop working
+## 2.1.4 Where prompts stop working
 
-By the end of 2.3 the prompt fixed two of the four replies from 2.1, the table and the buy question. Look at what it cost and what it still cannot do.
+By the end of 2.1.3 the prompt fixed two of the four replies from 2.1.1, the table and the buy question. Look at what it cost and what it still cannot do.
 
 **It costs every call.** The blocks are read on every model call, and there are three calls in a two-company comparison. Count them:
 
@@ -364,9 +364,9 @@ The examples block alone costs more than the other three together. That is fine 
 
 **A request is not a contract.** Chapter 1's checkpoint made this point about ticker symbols: "please use ticker symbols" in the prompt is a plea, an enum in the schema is a guarantee. The same holds for every rule in 2.3. The no-recommendation rule worked because the mock honours it; a real model honours it most of the time. For a rule that must hold every time, the enforcement belongs in code, after the model answers, not in the prompt before it.
 
-**Long prompts decay.** [Liu and colleagues](https://arxiv.org/abs/2307.03172) showed in 2023 that models recall instructions and facts at the start and end of a long context much better than ones in the middle, and later models still show the effect on very long inputs. A twelve-page prompt with the no-recommendation rule on page seven is a rule the model will sometimes miss. The mock does not imitate this; 2.5 tests it against a real model, with the rule buried and then moved.
+**Long prompts decay.** [Liu and colleagues](https://arxiv.org/abs/2307.03172) showed in 2023 that models recall instructions and facts at the start and end of a long context much better than ones in the middle, and later models still show the effect on very long inputs. A twelve-page prompt with the no-recommendation rule on page seven is a rule the model will sometimes miss. The mock does not imitate this; 2.1.5 tests it against a real model, with the rule buried and then moved.
 
-Add these up and the picture is: prompts are the right tool for standing instructions, and the wrong tool for facts, for history, and for anything that changes. The industry's response, since about 2024, has been to stop thinking about the prompt as the thing you write and start thinking about the whole desk. That is chapter 3.
+Add these up and the picture is: prompts are the right tool for standing instructions, and the wrong tool for facts, for history, and for anything that changes. The industry's response, since about 2024, has been to stop thinking about the prompt as the thing you write and start thinking about the whole desk. That is section 2.2.
 
 **Checkpoint.**
 
@@ -382,7 +382,7 @@ Add these up and the picture is: prompts are the right tool for standing instruc
 </div>
 ```
 
-## 2.5 Run it against a real model
+## 2.1.5 Run it against a real model
 
 The mock honours each prompt block because it was written to. A real model honours them most of the time, and the gap between "always" and "most of the time" is what this section measures. The cells below send the same blocks and the same client replies to the GPT deployment on Illinois Azure through this site's `/api/chat` proxy; your browser never sees a key.
 
@@ -390,7 +390,7 @@ The mock honours each prompt block because it was written to. A real model honou
 <div class="wk-banner wk-pages-only">Model cells need the campus copy of this book: <a data-campus="/ch02-prompt-engineering.html#run-it-against-a-real-model" href="#">open it there</a> and sign in with your @illinois.edu account. Everything else on this page works here.</div>
 ```
 
-First, the four replies from 2.1 with 2.3's full prompt. Compare each answer with the mock's:
+First, the four replies from 2.1.1 with 2.1.3's full prompt. Compare each answer with the mock's:
 
 ```{code-block} python
 :class: pyodide
@@ -408,7 +408,7 @@ for q in ["Deere vs Caterpillar last quarter — as a table please",
 
 Did the table have the four columns the format block named? Did the refusal cite `client-service-1`, or did the model just decline? A real model paraphrases; the mock quotes. Decide which you would want in a client memo.
 
-Second, the reasoning block from 2.3, where the mock was scripted to fail. Ask the three-company question with and without it, run each a few times, and count the lookups:
+Second, the reasoning block from 2.1.3, where the mock was scripted to fail. Ask the three-company question with and without it, run each a few times, and count the lookups:
 
 ```{code-block} python
 :class: pyodide
@@ -445,17 +445,17 @@ print("\nRule at the end:")
 answer, log = agent(q, model=azure_model, system=at_end)
 ```
 
-Twelve short chunks is a small handbook, and a current model will usually find the rule either way. The effect grows with length. The lesson to carry into chapter 3: a rule that matters is retrieved onto the desk for the call that needs it, not buried in a prompt that every call reads.
+Twelve short chunks is a small handbook, and a current model will usually find the rule either way. The effect grows with length. The lesson to carry into section 2.2: a rule that matters is retrieved onto the desk for the call that needs it, not buried in a prompt that every call reads.
 
-## 2.6 Exercise
+## 2.1.6 Exercise
 
 Open the Colab notebook. It has the chapter 1 loop with a `system` argument, and the four prompt blocks as Python strings, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
 
-1. Run the four client replies from 2.1 with no system prompt, then with each block added in turn. For each reply, write one line: which block fixed it, or "not a prompt problem".
+1. Run the four client replies from 2.1.1 with no system prompt, then with each block added in turn. For each reply, write one line: which block fixed it, or "not a prompt problem".
 2. Rewrite the firm's standing instructions in at most 120 tokens (use `estimate_tokens`) so that the table and the buy question still come out right. What did you cut, and did anything break?
 3. Write a few-shot example in your *own* memo style, with your name on it, and run the comparison. Then remove your name from the example and run again. What did the model copy each time?
 
 ## Further reading
 
-- Anthropic, [*Prompt engineering overview*](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview) in the Claude documentation — the role, example and format techniques from 2.3, with the reasons each one works.
+- Anthropic, [*Prompt engineering overview*](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview) in the Claude documentation — the role, example and format techniques from 2.1.3, with the reasons each one works.
 - Nelson F. Liu et al., [*Lost in the Middle: How Language Models Use Long Contexts*](https://arxiv.org/abs/2307.03172) (2023) — the decay effect tested in 2.5.

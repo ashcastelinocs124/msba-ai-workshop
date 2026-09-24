@@ -47,7 +47,7 @@
   const w = document.getElementById("w-da");
   // Token counts are estimate_tokens() on the real blocks in context.py (words × 1.3).
   const B = {
-    inst:   { k: "inst",   t: 116, name: "Role, rules, format (chapter 2)" },
+    inst:   { k: "inst",   t: 116, name: "Role, rules, format (section 2.1)" },
     client: { k: "client", t: 20,  name: "Client card · Meridian: prefers tables" },
     clause: { k: "clause", t: 29,  name: "Handbook clause · data-licensing-1" },
     rest:   { k: "clause", t: 240, name: "The other 11 handbook clauses" },
@@ -65,7 +65,7 @@
       q: "And the raw vendor numbers behind that?", qt: 10,
       desk: [["inst", "read on every call"], ["client", "the firm knows who is asking"], ["clause", "“raw” and “vendor” sound like policy, so the handbook was searched; this clause matched"], ["hist", "“that” refers to the memo"]],
       cab: [["rest", "only the best match is retrieved, not the whole handbook"], ["old", "build_context keeps only the last exchange"]],
-      out: "<b>Result:</b> the memo declines and cites <code>data-licensing-1</code>. The rules block in chapter 2 never mentioned vendor data; the clause came onto the desk for this one question.",
+      out: "<b>Result:</b> the memo declines and cites <code>data-licensing-1</code>. The rules block in section 2.1 never mentioned vendor data; the clause came onto the desk for this one question.",
     },
     deere: {
       q: "What was Deere's revenue growth last quarter?", qt: 10,

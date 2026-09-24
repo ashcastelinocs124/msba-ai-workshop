@@ -1,7 +1,7 @@
-# 8. When to Use ML, Agents, or Neither
+# 4. ML Foundations I
 
 ```{raw} html
-<p class="wk-lede">Recommend a fit-for-purpose architecture and defend the tradeoffs.</p>
+<p class="wk-lede">Translate a business question into a valid modeling problem.</p>
 ```
 
 ```{admonition} Coming soon

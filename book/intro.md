@@ -1,7 +1,7 @@
 # AI, ML, and Financial Markets Workshop Series
 
 ```{raw} html
-<p class="wk-lede">An interactive textbook for the Gies MSBA workshop series on AI, machine learning, and financial markets. Ten chapters in four parts. Every chapter has code you can run in the page, a visual explainer you can poke, a checkpoint quiz, and a Colab notebook for the real thing.</p>
+<p class="wk-lede">An interactive textbook for the Gies MSBA workshop series on AI, machine learning, and financial markets. Nine chapters in four parts. Every chapter has code you can run in the page, a visual explainer you can poke, a checkpoint quiz, and a Colab notebook for the real thing.</p>
 ```
 
 ## Start here: the seven-minute overview
@@ -36,10 +36,10 @@ Each chapter follows the same shape so you always know where to look:
 
 | Part | Chapters | The question it answers |
 |---|---|---|
-| I · Agents | 1–4 | What is an agent, how does it take actions, and how do I keep that honest? |
-| II · Machine learning | 5–6 | How do I turn a business question into a model I can trust? |
-| III · Systems and decisions | 7–8 | How do I run this in production, and when should I not? |
-| IV · Finance | 9–10 | What does all of this look like when the domain is markets? |
+| I · Agents | 1–3 | What is an agent, how does it take actions, and how do I keep that honest? |
+| II · Machine learning | 4–5 | How do I turn a business question into a model I can trust? |
+| III · Systems and decisions | 6–7 | How do I run this in production, and when should I not? |
+| IV · Finance | 8–9 | What does all of this look like when the domain is markets? |
 
 ## Before session 1
 

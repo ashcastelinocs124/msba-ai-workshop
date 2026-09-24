@@ -1,4 +1,4 @@
-"""Prompt blocks (chapter 2) and context engineering (chapter 3): code decides what the model reads on each call.
+"""Prompt blocks (section 2.1) and context engineering (section 2.2): code decides what the model reads on each call.
 
 A prompt is one block a person typed. The context is everything on the desk for one call:
 the standing instructions, a handbook clause retrieved because this question needs it, the
