@@ -21,9 +21,6 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: jupyter-book build book
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: book/_build/html
       - name: Package the campus copy (proxy + built site)
         run: |
           mkdir -p dist && cp -r app dist/app && cp -r book/_build/html dist/html
@@ -33,6 +30,17 @@ jobs:
         with:
           name: campus
           path: campus.zip
+      # The public copy has no sign-in, so pages locked on the campus copy (app/main.py LOCKED_PAGES)
+      # are replaced with the notice here. Runs after the campus copy is packaged with the real pages.
+      - name: Replace locked pages on the public copy
+        run: |
+          for stem in ch02-prompt-and-context ch02-prompt-engineering ch02-context-engineering; do
+            cp app/locked.html "book/_build/html/$stem.html"
+            rm -f "book/_build/html/_sources/$stem.md" "book/_build/html/_sources/$stem.ipynb"
+          done
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: book/_build/html
   deploy:
     needs: build
     runs-on: ubuntu-latest

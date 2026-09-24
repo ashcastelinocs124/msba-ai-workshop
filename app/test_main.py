@@ -60,3 +60,18 @@ def test_signins(tmp_path):
     assert page.status_code == 200 and "1 people, 1 person-days" in page.text and "Priya Natarajan" in page.text
     csv_ = c.get("/admin/signins?format=csv", headers=ADMIN).text
     assert csv_.startswith("day,user,name\n") and csv_.count("student@illinois.edu") == 1
+
+
+def test_locked_pages(tmp_path):
+    (tmp_path / "ch02-prompt-engineering.html").write_text("chapter two")
+    m.ADMIN_USERS, m.LOCKED_PAGES = {"admin@illinois.edu"}, {"ch02-prompt-engineering"}
+    app = m.FastAPI()
+    app.middleware("http")(m.lock_pages)
+    app.mount("/", m.StaticFiles(directory=tmp_path, html=True))
+    c = TestClient(app)
+    locked = c.get("/ch02-prompt-engineering.html", headers=H)
+    assert locked.status_code == 403 and "not open yet" in locked.text and "chapter two" not in locked.text
+    assert c.get("/_sources/ch02-prompt-engineering.md", headers=H).status_code == 403
+    assert c.get("/ch02-prompt-engineering.html", headers={"x-ms-client-principal-name": "Admin@illinois.edu"}).text == "chapter two"
+    m.LOCKED_PAGES = set()                                                 # LOCKED_PAGES="" opens it to everyone
+    assert c.get("/ch02-prompt-engineering.html", headers=H).text == "chapter two"

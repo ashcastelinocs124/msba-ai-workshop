@@ -226,7 +226,7 @@ Did it decline? Did it cite `data-licensing-1`, or just refuse? Then check the c
 
 ## 2.2.5 Exercise
 
-Open the Colab notebook. It has the chapter 1 loop with `system` and `history` arguments, the prompt blocks from section 2.1, and `build_context`, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
+Open the Colab notebook. It has the chapter 1 loop rewritten with [LangChain](https://python.langchain.com) (a `ChatPromptTemplate` lays out the desk), with `system` and `history` arguments, the prompt blocks from section 2.1, and `build_context`, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
 
 1. `build_context` retrieves a handbook clause when the question mentions vendor data or policy. Add the trigger for expense questions, then ask *"Can I expense a $70 dinner on the Chicago trip?"* and check that the memo cites `expense-2`.
 2. Run the three-company comparison and print the token count on the desk at each call. Then change `build_context` so that after the memo is written, the history it returns is a one-sentence summary of the exchange instead of the full memo. How many tokens did the next follow-up save?

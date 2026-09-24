@@ -449,7 +449,7 @@ Twelve short chunks is a small handbook, and a current model will usually find t
 
 ## 2.1.6 Exercise
 
-Open the Colab notebook. It has the chapter 1 loop with a `system` argument, and the four prompt blocks as Python strings, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
+Open the Colab notebook. It has the chapter 1 loop rewritten with [LangChain](https://python.langchain.com), with a `system` argument, the four prompt blocks as Python strings, and LangChain's few-shot template for comparison, all wired to `glm-5.3-flash` on Lumen (see [Setup](setup.md) for the key).
 
 1. Run the four client replies from 2.1.1 with no system prompt, then with each block added in turn. For each reply, write one line: which block fixed it, or "not a prompt problem".
 2. Rewrite the firm's standing instructions in at most 120 tokens (use `estimate_tokens`) so that the table and the buy question still come out right. What did you cut, and did anything break?

@@ -26,8 +26,22 @@ HTML_DIR = os.environ.get("HTML_DIR", os.path.join(os.path.dirname(__file__), ".
 SIGNIN_LOG = os.environ.get("SIGNIN_LOG", "/home/data/signins.csv")
 # Only these accounts may read the list; set ADMIN_USERS in App Service settings, never in the repo.
 ADMIN_USERS = {u.strip().lower() for u in os.environ.get("ADMIN_USERS", "").split(",") if u.strip()}
+# Pages only admins may open (matched by file stem, so the page and its _sources copy are both covered).
+# Set LOCKED_PAGES to an empty string in App Service settings to open them to everyone.
+LOCKED_PAGES = {p.strip() for p in os.environ.get(
+    "LOCKED_PAGES", "ch02-prompt-and-context,ch02-prompt-engineering,ch02-context-engineering").split(",") if p.strip()}
+LOCKED_HTML = open(os.path.join(os.path.dirname(__file__), "locked.html")).read()
 
 app = FastAPI()
+
+
+@app.middleware("http")
+async def lock_pages(request: Request, call_next):
+    stem = request.url.path.rsplit("/", 1)[-1].split(".", 1)[0]
+    user = (request.headers.get("x-ms-client-principal-name") or "").lower()
+    if stem in LOCKED_PAGES and user not in ADMIN_USERS:
+        return HTMLResponse(LOCKED_HTML, status_code=403)
+    return await call_next(request)
 _usage: dict[tuple[str, str], int] = {}  # ponytail: in-memory per-user daily counter; Table Storage if restarts matter
 _seen: set[tuple[str, str]] = set()  # (day, user) already written today; the reader dedupes anyway, this just saves writes
 
