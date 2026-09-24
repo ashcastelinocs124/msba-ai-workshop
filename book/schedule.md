@@ -6,6 +6,8 @@
 - **Credit.** You need to attend 3 sessions to get credit for the workshop.
 - **Why come to all 9.** Three sessions earn the credit, but the chapters build on each other. Attending all of them gives you a strong base in each part.
 - **The goal.** By the end you should be a strong quantitative analyst with working knowledge of agents, machine learning and finance.
+- **What you need.** The most important skill in this course is curiosity. You need no technical background coming in, only the willingness to learn and to ask a lot of questions.
+- **If this pathway is not for you.** If the course does not interest you, reach out to Prof. Ashish, who can recommend a project or assignment you can do for extra credit instead.
 - **Questions.** Email Ashleyn at [ashleyn4@illinois.edu](mailto:ashleyn4@illinois.edu).
 
 ## Schedule
