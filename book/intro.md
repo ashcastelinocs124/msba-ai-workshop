@@ -18,6 +18,8 @@ A walkthrough of what the series covers, how each chapter works, and what to do 
 </figure>
 ```
 
+**Note:** The schedule has changed since this video was recorded. See [Schedule and rules](schedule.md) for the current dates, times and rooms.
+
 ## The story
 
 Every chapter is set at **Champaign Capital Research**, a fictional independent equity research firm that is adopting agents and machine learning one careful step at a time. The firm, its people, its problems, and its plan for the year are on [the firm page](the-firm.md). Read it first; every chapter picks up a task from that plan.
