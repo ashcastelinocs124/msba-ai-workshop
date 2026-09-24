@@ -16,6 +16,8 @@ The session 1 recording. Watch it before or alongside the sections below; the ce
 </figure>
 ```
 
+**Note:** I was not able to record the first hour of this session, so the recording starts partway through. The slides cover the whole session.
+
 ```{admonition} Learning objectives
 :class: note
 - Say what an agent is and tell it apart from a single model call and from a workflow.
