@@ -92,3 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebar.classList.toggle("pst-sidebar-hidden");
   }, true);
 });
+
+// The home page's sidebar entry (home_page_in_toc) is labelled with the book's full title; call it Introduction.
+document.addEventListener("DOMContentLoaded", () => {
+  const link = document.querySelector(".bd-sidenav__home-link a");
+  if (!link) return;
+  link.textContent = "Introduction";
+  if (/\/(intro\.html)?$/.test(location.pathname)) {
+    link.closest("li").classList.add("current", "active");
+    link.setAttribute("aria-current", "page");
+  }
+});

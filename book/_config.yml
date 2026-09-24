@@ -36,6 +36,7 @@ sphinx:
     # so the footer and repository button must be set here to render.
     html_theme_options:
       show_navbar_depth: 2
+      home_page_in_toc: true
       logo:
         text: "AI · ML · Markets"
       repository_url: https://github.com/ashcastelinocs124/msba-ai-workshop
