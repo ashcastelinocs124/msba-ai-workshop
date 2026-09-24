@@ -76,6 +76,10 @@ Never paste a key into a cell. Never commit one to a repository.
 
 An **SDK** (software development kit) is a package of ready-made code for talking to a service. Without one, every model call means writing the web request by hand: the address, the headers, the JSON body, and parsing the reply. With the `openai` package it is one line, `client.chat.completions.create(...)`, and the reply comes back as a Python object.
 
+```{raw} html
+:file: widgets/setup-sdk-compare.html
+```
+
 The package is from OpenAI because OpenAI's API format became the common standard. Many other providers accept the same requests: open-model servers such as [vLLM](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html), cloud platforms such as Azure, and campus services. NCSA's Lumen is one of them. So the [`openai` package](https://github.com/openai/openai-python) is not tied to OpenAI's models. Point `base_url` at Lumen and the same code calls the models NCSA serves; point it somewhere else and nothing else changes. That is why this workshop uses it, and why LangChain's `ChatOpenAI` works with Lumen too.
 
 ## Open-source and closed-source models
