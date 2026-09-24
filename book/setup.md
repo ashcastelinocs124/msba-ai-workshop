@@ -82,6 +82,8 @@ An **SDK** (software development kit) is a package of ready-made code for talkin
 
 The package is from OpenAI because OpenAI's API format became the common standard. Many other providers accept the same requests: open-model servers such as [vLLM](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html), cloud platforms such as Azure, and campus services. NCSA's Lumen is one of them. So the [`openai` package](https://github.com/openai/openai-python) is not tied to OpenAI's models. Point `base_url` at Lumen and the same code calls the models NCSA serves; point it somewhere else and nothing else changes. That is why this workshop uses it, and why LangChain's `ChatOpenAI` works with Lumen too.
 
+OpenAI also publishes the [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/), a separate package built on top of `openai` for agents that call tools over many steps: the loop chapter 1 writes by hand. This workshop writes that loop itself so you can see every step, but the Agents SDK is worth knowing once you build agents for real.
+
 ## Open-source and closed-source models
 
 A model is two things: the code that runs it, and its **weights**, the billions of numbers learned in training. Who can get the weights is the difference.
