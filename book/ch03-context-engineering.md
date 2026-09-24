@@ -18,6 +18,13 @@ Chapter 2 ended on a list of what a prompt cannot do. It costs every call, it ca
 
 The **context** is everything the model reads on one call. In the loop from chapter 1 that is the messages list: the system prompt, any earlier turns, the tool results so far, and the question. **Context engineering** is deciding what goes in that list, in what order, at what cost, for every call, and having code do it rather than a person.
 
+```{figure} _static/media/ch03-context-parts.png
+:alt: Venn diagram titled Context Engineering. One large circle labelled Context holds seven overlapping circles: Instructions / System Prompt, Long-Term Memory, State / History (short-term memory), Retrieved Information (RAG), User Prompt, Available Tools, and Structured Output, which sits inside Available Tools.
+:width: 640px
+
+What goes into the context on one call. The pieces overlap: a retrieved clause can sit in the system prompt, and a remembered fact can come back as retrieved text.
+```
+
 [Anthropic's engineering team](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) put it as the shift from finding the right words to finding the right *configuration of context*, and [Andrej Karpathy](https://x.com/karpathy/status/1937902205765607626) called it the delicate art of filling the window with just the right information for the next step. The picture this book uses is the analyst's desk. There is a fixed amount of room on it. Before each call, something has to decide what is on the desk and what stays in the filing cabinet.
 
 ```{raw} html

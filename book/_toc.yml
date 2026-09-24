@@ -5,6 +5,7 @@ parts:
     chapters:
       - file: the-firm
       - file: setup
+      - file: schedule
   - caption: Part I · Agents
     chapters:
       - file: ch01-agent-loop
