@@ -1,74 +1,162 @@
-<figure class="wk-widget wk-sdk" aria-labelledby="w-sdk-cap">
+<figure class="wk-widget wk-sdk" id="w-sdk" aria-labelledby="w-sdk-cap">
   <style>
     .wk-sdk { margin: 1rem 0; }
-    .wk-sdk .cols { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .wk-sdk .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .wk-sdk .top .wk-title { margin: 0; }
+    .wk-sdk .seg { display: inline-flex; border: 1px solid var(--wk-navy); border-radius: 6px; overflow: hidden; }
+    .wk-sdk .seg button { border: 0; border-radius: 0; padding: 5px 14px; }
+    .wk-sdk .seg button[aria-pressed="true"] { background: var(--wk-navy); color: #fff; }
+    .wk-sdk .seg button:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: -2px; }
+    .wk-sdk .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .wk-sdk .col { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-    .wk-sdk .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
     .wk-sdk .name { font: 700 13px system-ui, sans-serif; color: var(--wk-navy); }
     .wk-sdk .name small { display: block; font-weight: 400; color: var(--wk-muted); }
-    .wk-sdk .count { font: 700 11px ui-monospace, Menlo, monospace; border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
-    .wk-sdk .before .count { background: #fdecec; color: #8a1c1c; }
-    .wk-sdk .after .count { background: #e7f5ec; color: #14532d; }
-    .wk-sdk pre { margin: 0; background: #fff; border: 1px solid var(--wk-line); border-radius: 6px; padding: 10px 12px; font: 12px/1.6 ui-monospace, Menlo, monospace; color: #1f2430; overflow-x: auto; white-space: pre; }
+    .wk-sdk .tag { align-self: flex-start; font: 700 11px ui-monospace, Menlo, monospace; border-radius: 4px; padding: 2px 7px; }
+    .wk-sdk .before .tag { background: #fdecec; color: #8a1c1c; }
+    .wk-sdk .after .tag { background: #e7f5ec; color: #14532d; }
+    .wk-sdk .n { display: inline-block; min-width: 1.4em; height: 1.4em; line-height: 1.4em; text-align: center; border-radius: 50%; background: var(--wk-orange); color: #fff; font: 700 10.5px system-ui, sans-serif; vertical-align: 1px; flex: none; }
+    .wk-sdk .after .n { background: var(--wk-navy); }
+
+    /* picture view */
+    .wk-sdk .flow { display: flex; flex-direction: column; align-items: stretch; }
+    .wk-sdk .end { align-self: center; border: 2px solid var(--wk-navy); border-radius: 999px; padding: 5px 16px; background: #fff; font: 700 13px system-ui, sans-serif; color: var(--wk-navy); text-align: center; }
+    .wk-sdk .end small { display: block; font-weight: 400; font-size: 11.5px; color: var(--wk-muted); }
+    .wk-sdk .arrow { align-self: center; width: 2px; height: 16px; background: #8a93a6; position: relative; margin: 4px 0 10px; }
+    .wk-sdk .arrow::after { content: ""; position: absolute; left: -5px; bottom: -6px; border: 6px solid transparent; border-top-color: #8a93a6; border-bottom: 0; }
+    .wk-sdk .steps { display: flex; flex-direction: column; gap: 6px; }
+    .wk-sdk .step { display: flex; gap: 8px; align-items: center; background: #fff; border: 1px solid #f4c9ad; border-left: 4px solid var(--wk-orange); border-radius: 6px; padding: 7px 10px; font-size: 13px; color: #1f2430; }
+    .wk-sdk .you { font: 700 11px ui-monospace, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; color: #8a1c1c; margin: 0 0 6px; }
+    .wk-sdk .box { border: 2px solid var(--wk-navy); border-radius: 10px; background: #fff; overflow: hidden; }
+    .wk-sdk .box .call { background: var(--wk-navy); color: #fff; padding: 8px 12px; font: 700 13px system-ui, sans-serif; }
+    .wk-sdk .box .call small { display: block; font-weight: 400; font-size: 11.5px; opacity: .9; }
+    .wk-sdk .box .steps { padding: 8px 10px; gap: 4px; }
+    .wk-sdk .done { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #4a5263; padding: 3px 0; }
+    .wk-sdk .done .ok { margin-left: auto; font: 700 11px system-ui, sans-serif; color: #14532d; white-space: nowrap; }
+
+    /* code view */
+    .wk-sdk pre { margin: 0; background: #fff; border: 1px solid var(--wk-line); border-radius: 6px; padding: 10px 12px; font: 11.5px/1.6 ui-monospace, Menlo, monospace; color: #1f2430; overflow-x: auto; white-space: pre; }
     .wk-sdk .before pre { border-top: 3px solid #c0392b; }
     .wk-sdk .after pre { border-top: 3px solid #1e8449; }
-    .wk-sdk .n { display: inline-block; min-width: 1.35em; height: 1.35em; line-height: 1.35em; text-align: center; border-radius: 50%; background: var(--wk-orange); color: #fff; font: 700 10.5px system-ui, sans-serif; margin-left: 4px; vertical-align: 1px; }
-    .wk-sdk .after .n { background: var(--wk-navy); }
+    .wk-sdk pre .n { margin-left: 4px; }
     .wk-sdk .hl { background: #fff3ea; border-radius: 2px; }
     .wk-sdk .after .hl { background: #eef2f9; }
-    .wk-sdk .c { color: #6b7385; }
     .wk-sdk ol { margin: 12px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 6px 14px; font-size: 13px; }
     .wk-sdk li { display: flex; gap: 8px; align-items: baseline; }
-    .wk-sdk li .n { flex: none; margin: 0; }
     .wk-sdk li b { color: var(--wk-navy); }
+
+    .wk-sdk [data-view][hidden] { display: none; }
     .wk-sdk figcaption { margin-top: 12px; font-size: 13px; border-left: 3px solid var(--wk-orange); padding: 6px 10px; background: #fff; color: #1f2430; text-align: left; }
+    @media (max-width: 640px) { .wk-sdk .cols { grid-template-columns: 1fr; } }
   </style>
-  <div class="wk-title">/// Before and after · the same Lumen call</div>
-  <div class="cols">
-    <div class="col before">
-      <div class="head">
-        <div class="name">Before: without an SDK<small>Write the web request yourself</small></div>
-        <span class="count">14 lines · 5 things to get right</span>
-      </div>
-<pre><code>import json, os, requests
 
-response = requests.post(
-    <span class="hl">"https://lumen.ncsa.illinois.edu/v1/chat/completions"</span>,<span class="n">1</span>
-    headers={<span class="hl">"Authorization": f"Bearer {os.environ['LUMEN_API_KEY']}"</span>,<span class="n">2</span>
-             "Content-Type": "application/json"},
-    data=<span class="hl">json.dumps({</span><span class="n">3</span>
-        "model": "glm-5.3-flash",
-        "messages": [{"role": "user",
-                      "content": "Deere's revenue growth last quarter?"}],
-    }),
-)
-<span class="hl">if response.status_code != 200:</span><span class="n">4</span>
-    raise RuntimeError(response.text)
-answer = <span class="hl">response.json()["choices"][0]["message"]["content"]</span><span class="n">5</span></code></pre>
-    </div>
-    <div class="col after">
-      <div class="head">
-        <div class="name">After: with the OpenAI SDK<small>Call a function; the package writes the request</small></div>
-        <span class="count">9 lines · the SDK handles the rest</span>
-      </div>
-<pre><code>import os
-from openai import OpenAI
-
-client = OpenAI(<span class="hl">base_url="https://lumen.ncsa.illinois.edu/v1"</span>,<span class="n">1</span>
-                <span class="hl">api_key=os.environ["LUMEN_API_KEY"]</span>)<span class="n">2</span>
-reply = <span class="hl">client.chat.completions.create(</span><span class="n">3</span><span class="n">4</span>
-    model="glm-5.3-flash",
-    messages=[{"role": "user", "content": "Deere's revenue growth last quarter?"}],
-)
-answer = <span class="hl">reply.choices[0].message.content</span><span class="n">5</span></code></pre>
+  <div class="top">
+    <div class="wk-title">/// Before and after · the same Lumen call</div>
+    <div class="seg" role="group" aria-label="Show as">
+      <button type="button" data-show="picture" aria-pressed="true">Picture</button>
+      <button type="button" data-show="code" aria-pressed="false">Code</button>
     </div>
   </div>
-  <ol aria-label="What each number means">
-    <li><span class="n">1</span><span><b>The address.</b> Before: the full web address, typed on every call. After: set once, as <code>base_url</code>.</span></li>
-    <li><span class="n">2</span><span><b>The key.</b> Before: formatted into a header by hand. After: passed once, as <code>api_key</code>.</span></li>
-    <li><span class="n">3</span><span><b>The request.</b> Before: built as JSON text yourself. After: ordinary Python arguments.</span></li>
-    <li><span class="n">4</span><span><b>Errors.</b> Before: you check the status code. After: the SDK raises a clear error, and retries some failures for you.</span></li>
-    <li><span class="n">5</span><span><b>The answer.</b> Before: dug out of nested JSON by key names. After: a Python object, so your editor can suggest the fields.</span></li>
-  </ol>
-  <figcaption id="w-sdk-cap">Both sides send the same request to Lumen and get the same answer back. The SDK writes the request for you. To use a different service, change <code>base_url</code> and the key; the rest of the code stays the same.</figcaption>
+
+  <div data-view="picture">
+    <div class="cols">
+      <div class="col before">
+        <div class="name">Before: without an SDK<small>You write the web request yourself</small></div>
+        <span class="tag">5 steps, all yours</span>
+        <div class="flow">
+          <div class="end">Your question<small>"Deere's revenue growth last quarter?"</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+          <p class="you">You write each step</p>
+          <div class="steps">
+            <div class="step"><span class="n">1</span>Type Lumen's full web address</div>
+            <div class="step"><span class="n">2</span>Put your key in a request header</div>
+            <div class="step"><span class="n">3</span>Write the request out as JSON text</div>
+            <div class="step"><span class="n">4</span>Check the reply for errors</div>
+            <div class="step"><span class="n">5</span>Dig the answer out of nested JSON</div>
+          </div>
+          <div class="arrow" aria-hidden="true" style="margin-top:10px"></div>
+          <div class="end">Lumen<small>glm-5.3-flash</small></div>
+        </div>
+      </div>
+      <div class="col after">
+        <div class="name">After: with the OpenAI SDK<small>You call one function; the package does the rest</small></div>
+        <span class="tag">1 call, 5 steps done for you</span>
+        <div class="flow">
+          <div class="end">Your question<small>"Deere's revenue growth last quarter?"</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div class="box">
+            <div class="call">One function call<small>The openai package writes the request</small></div>
+            <div class="steps">
+              <div class="done"><span class="n">1</span>Web address, set once<span class="ok">✓ done for you</span></div>
+              <div class="done"><span class="n">2</span>Key, set once<span class="ok">✓ done for you</span></div>
+              <div class="done"><span class="n">3</span>Request built from Python<span class="ok">✓ done for you</span></div>
+              <div class="done"><span class="n">4</span>Errors raised, some retried<span class="ok">✓ done for you</span></div>
+              <div class="done"><span class="n">5</span>Answer as a Python object<span class="ok">✓ done for you</span></div>
+            </div>
+          </div>
+          <div class="arrow" aria-hidden="true" style="margin-top:10px"></div>
+          <div class="end">Lumen<small>glm-5.3-flash</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div data-view="code" hidden>
+    <div class="cols">
+      <div class="col before">
+        <div class="name">Before: without an SDK<small>Write the web request yourself</small></div>
+        <span class="tag">5 things to get right</span>
+<pre><code>import os, requests
+LUMEN = "https://lumen.ncsa.illinois.edu/v1"
+KEY = os.environ["LUMEN_API_KEY"]
+
+r = requests.post(
+    <span class="hl">LUMEN + "/chat/completions"</span>,<span class="n">1</span>
+    headers={<span class="hl">"Authorization": f"Bearer {KEY}"</span>},<span class="n">2</span>
+    <span class="hl">json={</span>"model": "glm-5.3-flash",<span class="n">3</span>
+          "messages": [{"role": "user",
+              "content": "Deere's growth?"}]},
+)
+<span class="hl">if r.status_code != 200:</span><span class="n">4</span>
+    raise RuntimeError(r.text)
+answer = (<span class="hl">r.json()["choices"][0]</span><span class="n">5</span>
+          <span class="hl">["message"]["content"]</span>)</code></pre>
+      </div>
+      <div class="col after">
+        <div class="name">After: with the OpenAI SDK<small>Call a function; the package writes the request</small></div>
+        <span class="tag">1 function call</span>
+<pre><code>import os
+from openai import OpenAI
+LUMEN = "https://lumen.ncsa.illinois.edu/v1"
+KEY = os.environ["LUMEN_API_KEY"]
+
+client = OpenAI(<span class="hl">base_url=LUMEN</span>,<span class="n">1</span>
+                <span class="hl">api_key=KEY</span>)<span class="n">2</span>
+reply = <span class="hl">client.chat.completions.create(</span><span class="n">3</span><span class="n">4</span>
+    model="glm-5.3-flash",
+    messages=[{"role": "user",
+               "content": "Deere's growth?"}],
+)
+answer = <span class="hl">reply.choices[0].message.content</span><span class="n">5</span></code></pre>
+      </div>
+    </div>
+    <ol aria-label="What each number means">
+      <li><span class="n">1</span><span><b>The address.</b> Before: the full path to the chat endpoint. After: the base address, set once.</span></li>
+      <li><span class="n">2</span><span><b>The key.</b> Before: formatted into a header by hand. After: passed once, as <code>api_key</code>.</span></li>
+      <li><span class="n">3</span><span><b>The request.</b> Before: shaped as JSON yourself. After: ordinary Python arguments.</span></li>
+      <li><span class="n">4</span><span><b>Errors.</b> Before: you check the status code. After: the SDK raises a clear error, and retries some failures for you.</span></li>
+      <li><span class="n">5</span><span><b>The answer.</b> Before: dug out of nested JSON by key names. After: a Python object with named fields.</span></li>
+    </ol>
+  </div>
+
+  <figcaption id="w-sdk-cap">Both sides send the same request to Lumen and get the same answer back. The SDK writes the request for you. To use a different service, change the address and the key; the rest of the code stays the same.</figcaption>
+  <script>
+  (() => {
+    const w = document.getElementById("w-sdk");
+    const buttons = w.querySelectorAll("[data-show]");
+    buttons.forEach((b) => b.addEventListener("click", () => {
+      buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      w.querySelectorAll("[data-view]").forEach((v) => { v.hidden = v.dataset.view !== b.dataset.show; });
+    }));
+  })();
+  </script>
 </figure>
