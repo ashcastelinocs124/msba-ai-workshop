@@ -1,7 +1,7 @@
 # 2.2 Context Engineering
 
 ```{raw} html
-<p class="wk-lede">Section 2.1's prompt fixed two of the four client replies. The other two, the raw vendor numbers and "And NVIDIA?", were never prompt problems. Decide what the model reads on each call, and have code put it there. This section is taught in the same session as section 2.1.</p>
+<p class="wk-lede">Section 2.1's prompt fixed two of the four client replies. The other two, the raw vendor numbers and "And NVIDIA?", were never prompt problems. Decide what the model reads on each call, and have code put it there. This section is taught in the same session as section 2.1. The session 2 lecture recording and slides are on <a href="ch02-prompt-and-context.html#ch02-lecture">the chapter 2 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-context-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

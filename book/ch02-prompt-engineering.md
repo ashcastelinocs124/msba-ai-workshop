@@ -1,7 +1,7 @@
 # 2.1 Prompt Engineering
 
 ```{raw} html
-<p class="wk-lede">The chapter 1 agent writes a good memo when the question is the one you scripted. Now four clients reply to that memo in their own words, one wants a table, one asks for something the handbook forbids, and one asks a three-word follow-up. Write the standing instructions the model reads first, and find where they stop working. Section 2.2 picks up from there, in the same session.</p>
+<p class="wk-lede">The chapter 1 agent writes a good memo when the question is the one you scripted. Now four clients reply to that memo in their own words, one wants a table, one asks for something the handbook forbids, and one asks a three-word follow-up. Write the standing instructions the model reads first, and find where they stop working. Section 2.2 picks up from there, in the same session. The session 2 lecture recording and slides are on <a href="ch02-prompt-and-context.html#ch02-lecture">the chapter 2 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-prompt-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
