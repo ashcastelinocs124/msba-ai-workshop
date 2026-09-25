@@ -31,8 +31,7 @@ SIGNIN_LOG = os.environ.get("SIGNIN_LOG", "/home/data/signins.csv")
 ADMIN_USERS = {u.strip().lower() for u in os.environ.get("ADMIN_USERS", "").split(",") if u.strip()}
 # Pages only admins may open (matched by file stem, so the page and its _sources copy are both covered).
 # Set LOCKED_PAGES to an empty string in App Service settings to open them to everyone.
-LOCKED_PAGES = {p.strip() for p in os.environ.get(
-    "LOCKED_PAGES", "ch02-prompt-and-context,ch02-prompt-engineering,ch02-context-engineering").split(",") if p.strip()}
+LOCKED_PAGES = {p.strip() for p in os.environ.get("LOCKED_PAGES", "").split(",") if p.strip()}  # e.g. "ch03-memory-rag"
 LOCKED_HTML = open(os.path.join(os.path.dirname(__file__), "locked.html")).read()
 ADMIN_HTML = open(os.path.join(os.path.dirname(__file__), "admin.html")).read()
 # Usage events and Lecture checkpoints. Like the sign-in list, this never leaves the App Service disk.

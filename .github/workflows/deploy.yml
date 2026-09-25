@@ -34,7 +34,8 @@ jobs:
       # are replaced with the notice here. Runs after the campus copy is packaged with the real pages.
       - name: Replace locked pages on the public copy
         run: |
-          for stem in ch02-prompt-and-context ch02-prompt-engineering ch02-context-engineering; do
+          # Keep this list in step with LOCKED_PAGES' default in app/main.py. Empty: nothing locked.
+          for stem in ; do
             cp app/locked.html "book/_build/html/$stem.html"
             rm -f "book/_build/html/_sources/$stem.md" "book/_build/html/_sources/$stem.ipynb"
           done
