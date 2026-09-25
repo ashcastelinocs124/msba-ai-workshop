@@ -1,0 +1,84 @@
+<div class="wk-widget" id="w-avm" style="background:#fff">
+  <div class="wk-title">/// Who reads the instructions? · press Play</div>
+  <div class="lanes">
+    <div class="lane" data-l="api">
+      <div class="lh"><b>API</b> · written for a human developer</div>
+      <div class="steps"></div>
+    </div>
+    <div class="lane" data-l="mcp">
+      <div class="lh"><b>MCP</b> · written for an agent</div>
+      <div class="steps"></div>
+    </div>
+  </div>
+  <div class="twist" aria-live="polite"></div>
+  <div class="nav"><button type="button" class="primary play">▶ Play</button><button type="button" class="change">The vendor adds a new data field</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-avm .lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    #w-avm .lane { border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 10px; }
+    #w-avm .lane[data-l="mcp"] { background: #fff8f3; border-color: #ffd9c2; }
+    #w-avm .lh { font-size: 13px; color: var(--wk-muted); margin-bottom: 8px; }
+    #w-avm .lh b { font: 700 13px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-avm .steps { display: grid; gap: 6px; }
+    #w-avm .st { display: grid; grid-template-columns: 30px 1fr; gap: 8px; align-items: start; border: 2px solid var(--wk-line); border-radius: 10px; background: #fff; padding: 6px 8px; opacity: .35; transition: opacity .3s, border-color .3s; }
+    #w-avm .st.on { opacity: 1; border-color: var(--wk-orange); }
+    #w-avm .st.done { opacity: 1; }
+    #w-avm .st i { font-style: normal; font-size: 20px; line-height: 1.2; }
+    #w-avm .st b { display: block; font-size: 13px; color: var(--wk-navy); }
+    #w-avm .st span { display: block; font-size: 12px; color: var(--wk-muted); line-height: 1.35; }
+    #w-avm .st code { display: block; margin-top: 3px; font: 11px ui-monospace, Menlo, monospace; background: #f5f6f9; border-radius: 4px; padding: 3px 5px; white-space: pre-wrap; color: #1f2430; }
+    #w-avm .st.warn { border-color: #c92a2a; } #w-avm .st.good { border-color: #2f9e44; }
+    #w-avm .twist { margin-top: 10px; font-size: 13.5px; line-height: 1.5; min-height: 1.5em; }
+    #w-avm .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    @media (max-width: 640px) { #w-avm .lanes { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-avm");
+    const API = [
+      ["🧑‍💻", "A developer reads the docs", "A web page about endpoints, fields and keys, written for a person.", ""],
+      ["⌨️", "…and writes code for this one API", "Weeks before anyone asks a question.", 'fetch("/v2/financials?ticker=DE&period=Q2-2026")'],
+      ["📦", "The app calls it", "Only the calls the developer wired up. Nothing else.", '200 OK {"revenue": 13800000000, "yoy": 0.064}'],
+    ];
+    const MCP = [
+      ["🤖", "The agent asks what the server offers", "At the moment it needs data. No code written for this source.", "tools/list"],
+      ["📖", "The server describes itself, for a model", "What each tool does, when to use it, and its exact inputs.", 'get_financials: "Quarterly revenue and YoY growth for one ticker. Use only for revenue questions." inputs: ticker (DE, CAT, …), period'],
+      ["📦", "The agent picks a tool and calls it", "The same MCP server works for every MCP-aware app.", 'tools/call get_financials {"ticker": "DE", "period": "Q2-2026"}'],
+    ];
+    const $ = (s) => w.querySelector(s);
+    const card = (s) => `<div class="st"><i>${s[0]}</i><div><b>${s[1]}</b><span>${s[2]}</span>${s[3] ? `<code></code>` : ""}</div></div>`;
+    let timer = null;
+    function reset() {
+      clearTimeout(timer);
+      [["api", API], ["mcp", MCP]].forEach(([l, S]) => {
+        const box = w.querySelector(`[data-l="${l}"] .steps`);
+        box.innerHTML = S.map(card).join("");
+        box.querySelectorAll(".st").forEach((el, i) => { const c = el.querySelector("code"); if (c) c.textContent = S[i][3]; });
+      });
+      $(".twist").textContent = "Both lanes end with the same figure. The difference is who had to read the instructions, and when.";
+    }
+    function play() {
+      reset();
+      const a = [...w.querySelectorAll('[data-l="api"] .st')], m = [...w.querySelectorAll('[data-l="mcp"] .st')];
+      let k = 0;
+      const tick = () => {
+        [a, m].forEach((L) => L.forEach((el, i) => { el.classList.toggle("on", i === k); el.classList.toggle("done", i < k); }));
+        if (++k <= 3) timer = setTimeout(tick, 1100);
+        else [a, m].forEach((L) => L.forEach((el) => { el.classList.remove("on"); el.classList.add("done"); }));
+      };
+      tick();
+    }
+    function change() {
+      reset();
+      const a = [...w.querySelectorAll('[data-l="api"] .st')], m = [...w.querySelectorAll('[data-l="mcp"] .st')];
+      a.forEach((el) => el.classList.add("done")); m.forEach((el) => el.classList.add("done"));
+      a[1].classList.add("warn"); a[1].querySelector("span").textContent = "The app can't use the new field until a developer reads the change and updates the code.";
+      m[1].classList.add("good"); m[1].querySelector("span").textContent = "The vendor updates its MCP server once. The description now mentions the new field, and every agent reads it on its next tools/list.";
+      $(".twist").textContent = "The vendor adds earnings estimates. With an API, a developer at every firm that uses it has to read about the change and update code. With MCP, the vendor updates one server, it describes the new field, and every agent can use it the next time it asks.";
+    }
+    $(".play").addEventListener("click", play);
+    $(".change").addEventListener("click", change);
+    $(".reset").addEventListener("click", reset);
+    reset();
+  })();
+  </script>
+</div>

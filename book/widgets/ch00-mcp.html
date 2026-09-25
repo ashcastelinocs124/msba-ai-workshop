@@ -1,0 +1,121 @@
+<div class="wk-widget" id="w-mcp" style="background:#fff">
+  <div class="wk-title">/// Connecting AI apps to the firm's data</div>
+  <div class="seg" role="group" aria-label="Set-up">
+    <button type="button" data-m="none" class="on" aria-pressed="true">Without MCP</button>
+    <button type="button" data-m="mcp" aria-pressed="false">With MCP</button>
+  </div>
+  <div class="board">
+    <svg class="wires" aria-hidden="true"></svg>
+    <div class="col apps"></div>
+    <div class="col hub"><div class="plug">MCP<small>one standard</small></div></div>
+    <div class="col srcs"></div>
+  </div>
+  <div class="count" aria-live="polite"></div>
+  <div class="flow" hidden>
+    <div class="fh">One request through MCP · the firm's research agent asks for Deere's revenue</div>
+    <ol class="msgs"></ol>
+  </div>
+  <div class="nav"><button type="button" class="add">+ Add a source</button><button type="button" class="watch primary" hidden>▶ Watch a call</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-mcp .seg { display: inline-flex; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-mcp .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 16px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-mcp .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-mcp .board { position: relative; display: grid; grid-template-columns: 1fr 120px 1fr; gap: 24px; align-items: center; margin-top: 12px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 14px; min-height: 260px; }
+    #w-mcp .wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    #w-mcp .wires line { stroke: #c3c8d3; stroke-width: 1.6; }
+    #w-mcp .wires line.mcp { stroke: var(--wk-navy); stroke-width: 2.2; }
+    #w-mcp .wires line.hot { stroke: var(--wk-orange); stroke-width: 3.5; }
+    #w-mcp .col { display: grid; gap: 8px; position: relative; z-index: 1; }
+    #w-mcp .node { border: 2px solid var(--wk-line); border-radius: 10px; background: #fff; padding: 7px 10px; font: 700 12.5px system-ui, sans-serif; color: var(--wk-navy); display: flex; gap: 8px; align-items: center; transition: border-color .3s, background .3s; }
+    #w-mcp .node i { font-style: normal; font-size: 18px; }
+    #w-mcp .node small { display: block; font-weight: 400; color: var(--wk-muted); font-size: 11px; }
+    #w-mcp .node.hot { border-color: var(--wk-orange); background: #fff3ea; }
+    #w-mcp .node.new { animation: wknew .5s; }
+    @keyframes wknew { from { transform: scale(.8); opacity: 0; } }
+    #w-mcp .srcs .node .srv { font: 700 9.5px ui-monospace, Menlo, monospace; color: #fff; background: var(--wk-navy); border-radius: 999px; padding: 1px 6px; margin-left: auto; opacity: 0; transition: opacity .3s; }
+    #w-mcp.mcp .srcs .node .srv { opacity: 1; }
+    #w-mcp .plug { opacity: 0; transition: opacity .3s; border: 2px solid var(--wk-navy); border-radius: 12px; background: var(--wk-navy); color: #fff; text-align: center; padding: 16px 6px; font: 700 18px system-ui, sans-serif; }
+    #w-mcp .plug small { display: block; font: 600 10.5px ui-monospace, Menlo, monospace; opacity: .8; margin-top: 2px; }
+    #w-mcp.mcp .plug { opacity: 1; }
+    #w-mcp .plug.hot { background: var(--wk-orange); border-color: var(--wk-orange); }
+    #w-mcp .count { margin-top: 10px; font-size: 13.5px; line-height: 1.5; }
+    #w-mcp .count b { font-size: 26px; color: var(--wk-orange); margin-right: 6px; vertical-align: -3px; }
+    #w-mcp .flow { margin-top: 10px; border: 1px solid var(--wk-line); border-radius: 10px; padding: 10px 12px; }
+    #w-mcp .fh { font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); text-transform: uppercase; letter-spacing: .05em; }
+    #w-mcp .msgs { margin: 8px 0 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+    #w-mcp .msgs li { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: start; font-size: 13px; animation: wknew .4s; }
+    #w-mcp .msgs .who { font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-navy); padding-top: 3px; }
+    #w-mcp .msgs code { display: block; background: #f5f6f9; border-radius: 6px; padding: 5px 8px; font: 12px ui-monospace, Menlo, monospace; white-space: pre-wrap; color: #1f2430; }
+    #w-mcp .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    @media (max-width: 640px) { #w-mcp .board { grid-template-columns: 1fr; } #w-mcp .wires { display: none; } #w-mcp .hub { order: 2; } #w-mcp .srcs { order: 3; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-mcp");
+    const APPS = [["🤖", "The firm's research agent", "chapters 1–3"], ["💬", "Claude", "desktop app"], ["💬", "ChatGPT", "desktop app"]];
+    const SRCS = [["📈", "Market-data vendor", "prices, financials"], ["🏛️", "SEC EDGAR", "company filings"], ["📇", "Client CRM", "who asked what"], ["📘", "Policy handbook", "the firm's rules"]];
+    const EXTRA = [["🎙️", "Earnings-call transcripts", "what management said"], ["📰", "News feed", "today's headlines"], ["🗂️", "Research archive", "past notes"]];
+    const MSGS = [
+      ["agent → MCP server", "What tools do you offer?   (tools/list)"],
+      ["market-data server", 'get_financials(ticker, period) · get_price(ticker)\neach with a description and an input schema'],
+      ["agent → MCP server", 'Call get_financials {"ticker": "DE", "period": "Q2-2026"}   (tools/call)'],
+      ["market-data server", '{"revenue": 13800000000, "yoy": 0.064}'],
+      ["agent", "Deere grew revenue 6.4% to $13.8B. [source: market-data vendor, Q2-2026]"],
+    ];
+    const $ = (s) => w.querySelector(s);
+    let mode = "none", srcs = SRCS.slice(), added = 0, timer = null;
+    const node = (e, cls = "") => `<div class="node ${cls}"><i>${e[0]}</i><span>${e[1]}<small>${e[2]}</small></span>${cls.includes("src") ? '<span class="srv">MCP server</span>' : ""}</div>`;
+
+    function wires(hot) {
+      const svg = $(".wires"), box = $(".board").getBoundingClientRect();
+      const pt = (el, side) => { const r = el.getBoundingClientRect(); return [side === "r" ? r.right - box.left : r.left - box.left, r.top - box.top + r.height / 2]; };
+      const apps = [...w.querySelectorAll(".apps .node")], ss = [...w.querySelectorAll(".srcs .node")], plug = $(".plug");
+      let out = "";
+      const line = ([x1, y1], [x2, y2], cls) => { out += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}"/>`; };
+      if (mode === "none") apps.forEach((a) => ss.forEach((s) => line(pt(a, "r"), pt(s, "l"), "")));
+      else {
+        apps.forEach((a, i) => line(pt(a, "r"), pt(plug, "l"), "mcp" + (hot && i === 0 ? " hot" : "")));
+        ss.forEach((s, i) => line(pt(plug, "r"), pt(s, "l"), "mcp" + (hot && i === 0 ? " hot" : "")));
+      }
+      svg.innerHTML = out;
+    }
+    function draw(fresh) {
+      w.classList.toggle("mcp", mode === "mcp");
+      $(".apps").innerHTML = APPS.map((a) => node(a)).join("");
+      $(".srcs").innerHTML = srcs.map((s, i) => node(s, "src" + (fresh && i === srcs.length - 1 ? " new" : ""))).join("");
+      const a = APPS.length, s = srcs.length;
+      $(".count").innerHTML = mode === "none"
+        ? `<b>${a * s}</b> custom connections to build and maintain · ${a} apps × ${s} sources. Every new source means ${a} more.`
+        : `<b>${a + s}</b> connections · each app speaks MCP once (${a}), each source is wrapped once as an MCP server (${s}). Every new source means 1 more.`;
+      $(".watch").hidden = mode !== "mcp";
+      $(".add").disabled = added >= EXTRA.length;
+      requestAnimationFrame(() => wires(false));
+    }
+    function watch() {
+      clearTimeout(timer);
+      const list = $(".msgs"); list.innerHTML = ""; $(".flow").hidden = false;
+      w.querySelectorAll(".node, .plug").forEach((n) => n.classList.remove("hot"));
+      w.querySelector(".apps .node").classList.add("hot"); w.querySelector(".srcs .node").classList.add("hot"); $(".plug").classList.add("hot");
+      wires(true);
+      let k = 0;
+      const next = () => {
+        if (k >= MSGS.length) return;
+        const [who, text] = MSGS[k++];
+        list.insertAdjacentHTML("beforeend", `<li><span class="who">${who}</span><code></code></li>`);
+        list.lastElementChild.querySelector("code").textContent = text;
+        timer = setTimeout(next, 900);
+      };
+      next();
+    }
+    w.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      w.querySelectorAll(".seg button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
+      mode = b.dataset.m; $(".flow").hidden = true; w.querySelectorAll(".hot").forEach((n) => n.classList.remove("hot")); draw(false);
+    }));
+    $(".add").addEventListener("click", () => { if (added < EXTRA.length) { srcs.push(EXTRA[added++]); draw(true); } });
+    $(".watch").addEventListener("click", watch);
+    $(".reset").addEventListener("click", () => { srcs = SRCS.slice(); added = 0; $(".flow").hidden = true; clearTimeout(timer); draw(false); });
+    window.addEventListener("resize", () => wires(false));
+    draw(false);
+  })();
+  </script>
+</div>

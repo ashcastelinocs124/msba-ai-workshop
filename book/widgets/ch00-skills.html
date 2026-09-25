@@ -1,0 +1,87 @@
+<div class="wk-widget" id="w-skills" style="background:#fff">
+  <div class="wk-title">/// The agent's skill shelf · pick a request</div>
+  <div class="reqs" role="group" aria-label="Request">
+    <button type="button" data-r="0">"Draft a note comparing Deere and Caterpillar"</button>
+    <button type="button" data-r="1">"Can Tom sell 80 shares of DE today?"</button>
+    <button type="button" data-r="2">"Reply to Meridian's email about NVIDIA"</button>
+  </div>
+  <div class="main">
+    <div class="shelf"></div>
+    <div class="side">
+      <div class="meter"><span>On the agent's desk</span><div class="g"><i class="base"></i><i class="full"></i></div><em></em></div>
+      <label class="upfront"><input type="checkbox"> Load every skill in full, up front</label>
+      <div class="file" hidden><div class="fh"></div><pre></pre></div>
+    </div>
+  </div>
+  <div class="cap" aria-live="polite">Only each skill's name and one-line description are on the desk. Pick a request.</div>
+  <style>
+    #w-skills .reqs { display: flex; flex-wrap: wrap; gap: 6px; }
+    #w-skills .reqs button { font: 600 12px system-ui, sans-serif; border-radius: 999px; }
+    #w-skills .reqs button.on { background: var(--wk-orange); border-color: var(--wk-orange); color: #fff; }
+    #w-skills .main { display: grid; grid-template-columns: 1fr 260px; gap: 14px; margin-top: 12px; }
+    #w-skills .shelf { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-content: start; }
+    #w-skills .sk { border: 2px solid var(--wk-line); border-left: 6px solid var(--wk-navy); border-radius: 8px; background: #fafbfc; padding: 7px 10px; transition: border-color .3s, background .3s, opacity .3s; }
+    #w-skills .sk b { display: block; font: 700 12px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-skills .sk span { display: block; font-size: 12px; color: var(--wk-muted); line-height: 1.35; margin-top: 2px; }
+    #w-skills .sk.open { border-color: var(--wk-orange); background: #fff3ea; }
+    #w-skills .sk.dim { opacity: .45; }
+    #w-skills .sk.all { border-left-color: #c92a2a; }
+    #w-skills .meter span { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); }
+    #w-skills .g { display: flex; height: 14px; background: #f0f2f6; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    #w-skills .g i { display: block; height: 100%; transition: width .5s; }
+    #w-skills .g .base { background: var(--wk-navy); } #w-skills .g .full { background: var(--wk-orange); }
+    #w-skills .meter em { font: 12px ui-monospace, Menlo, monospace; font-style: normal; color: var(--wk-muted); }
+    #w-skills .upfront { display: block; margin-top: 8px; font-size: 12.5px; }
+    #w-skills .file { margin-top: 10px; border: 1px solid var(--wk-line); border-radius: 8px; overflow: hidden; }
+    #w-skills .fh { background: #f5f6f9; padding: 5px 8px; font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-skills .file pre { margin: 0; padding: 8px; font: 11.5px/1.45 ui-monospace, Menlo, monospace; white-space: pre-wrap; background: #fff; border: 0; max-height: 220px; overflow: auto; }
+    #w-skills .cap { margin-top: 10px; font-size: 13.5px; line-height: 1.5; }
+    @media (max-width: 640px) { #w-skills .main { grid-template-columns: 1fr; } #w-skills .shelf { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-skills");
+    const DESC = 40, FULL = 1500, BUDGET = 9500;   // tokens: one name+description; one full skill; scale of the bar
+    const SK = [
+      ["write-research-note", "House style for a client note: header, figures with sources, sign-off for Priya.",
+       "## Steps\n1. Header: MEMO · <companies> · <period>.\n2. One sentence per company: revenue, YoY growth, [source].\n3. The comparison: how many times as fast, from what base.\n4. No recommendation; point to published notes.\n5. Sign off: drafted for Priya Natarajan, Industrials."],
+      ["earnings-comparison", "Compare revenue growth for two or more companies using the market-data tools.",
+       "## Steps\n1. List every company and period the question needs.\n2. Call get_financials once per company (MCP: market-data server).\n3. Compute the ratio of growth rates in code, not in your head.\n4. If a company is not covered, say so; never estimate."],
+      ["trade-preclearance", "Check a staff trade request against the restricted list, blackout and holding rules.",
+       "## Steps\n1. Fetch the request (get_trade_request).\n2. Restricted list? -> decline [restricted-list-1].\n3. Firm research within 14 days? -> hold [personal-trading-2].\n4. Held under 30 days? -> decline [personal-trading-3].\n5. Otherwise recommend approval. Elena decides."],
+      ["client-email-reply", "Reply to a client email in the firm's voice, with the client's preferred format.",
+       "## Steps\n1. Load the client's card (preferences, coverage).\n2. Answer only what was asked; tables if they prefer tables.\n3. Raw vendor data may not be shared [data-licensing-1].\n4. Draft only: Priya reads and sends."],
+      ["expense-policy", "Answer questions about what the firm reimburses, citing the handbook.", "## Steps\n1. search_docs for the expense clause.\n2. Quote the limit and cite it."],
+      ["filing-summary", "Summarise a 10-K or 10-Q section in five bullet points with page references.", "## Steps\n1. Fetch the filing section (MCP: SEC EDGAR server).\n2. Five bullets, each with a page reference."],
+    ];
+    const PICK = [
+      { load: [1, 0], cap: "The request matches two descriptions, so the agent loads those two skills in full: how to compare earnings, and how the firm writes a note. The other four stay as one line each." },
+      { load: [2], cap: "One skill matches: trade pre-clearance. Its full steps, with the handbook clauses to cite, go on the desk. Elena still makes the call." },
+      { load: [3, 0], cap: "Replying to a client pulls in the email skill and the note style. The data-licensing rule arrives with the skill, only on calls that need it." },
+    ];
+    const $ = (s) => w.querySelector(s);
+    let cur = -1;
+    $(".shelf").innerHTML = SK.map((s) => `<div class="sk"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("");
+    function draw() {
+      const all = $(".upfront input").checked, load = cur >= 0 ? PICK[cur].load : [];
+      const cards = [...w.querySelectorAll(".sk")];
+      cards.forEach((c, i) => { c.classList.toggle("open", load.includes(i)); c.classList.toggle("dim", cur >= 0 && !load.includes(i) && !all); c.classList.toggle("all", all); });
+      const base = all ? 0 : SK.length * DESC, full = all ? SK.length * FULL : load.length * FULL;
+      $(".g .base").style.width = (base / BUDGET * 100) + "%"; $(".g .full").style.width = (full / BUDGET * 100) + "%";
+      $(".meter em").textContent = `${(base + full).toLocaleString()} tokens · ${all ? "every skill in full, on every call" : `${SK.length} descriptions (${base}) + ${load.length} skill${load.length === 1 ? "" : "s"} in full (${full.toLocaleString()})`}`;
+      if (cur >= 0) {
+        const s = SK[load[0]];
+        $(".file").hidden = false;
+        $(".fh").textContent = `skills/${s[0]}/SKILL.md`;
+        $(".file pre").textContent = `---\nname: ${s[0]}\ndescription: ${s[1]}\n---\n${s[2]}`;
+        $(".cap").textContent = all ? "With every skill loaded up front, the agent reads all six on every call, relevant or not: more tokens, and more instructions competing for its attention (section 2.2)." : PICK[cur].cap;
+      }
+    }
+    w.querySelectorAll(".reqs button").forEach((b) => b.addEventListener("click", () => {
+      cur = +b.dataset.r; w.querySelectorAll(".reqs button").forEach((x) => x.classList.toggle("on", x === b)); draw();
+    }));
+    $(".upfront input").addEventListener("change", draw);
+    draw();
+  })();
+  </script>
+</div>

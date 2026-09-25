@@ -6,13 +6,14 @@ parts:
       - file: the-firm
       - file: setup
       - file: schedule
-  - caption: Part 0 · Foundations
+  - caption: Part 0 · Foundations for AI
     chapters:
       - file: ch00-how-llms-work
       - file: ch00-transformers
       - file: ch00-training
       - file: ch00-open-closed
       - file: ch00-apis
+      - file: ch00-skills-mcp
   - caption: Part I · Agents
     chapters:
       - file: ch01-agent-loop
