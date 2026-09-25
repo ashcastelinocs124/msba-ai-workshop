@@ -4,6 +4,10 @@
 <p class="wk-lede">Every chapter after this one hands a question to a large language model. Before you build on one, see what it actually does: it splits text into tokens, predicts the next one, and repeats. That one idea explains why it writes fluently, why it can state a wrong figure with confidence, and why chapters 1 and 2 give it tools and context. This chapter is pre-reading, with no session of its own.</p>
 ```
 
+```{raw} html
+:file: widgets/goal-map.html
+```
+
 ```{admonition} Learning objectives
 :class: note
 - Say what a token is, and why a model's costs and limits are counted in tokens rather than words.

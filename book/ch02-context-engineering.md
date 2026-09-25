@@ -5,6 +5,10 @@
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-context-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
+```{raw} html
+:file: widgets/goal-map.html
+```
+
 ```{admonition} Learning objectives
 :class: note
 - Say what the context is on one call, and how context engineering differs from writing a prompt.

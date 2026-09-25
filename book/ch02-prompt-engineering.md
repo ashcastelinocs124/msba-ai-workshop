@@ -5,6 +5,10 @@
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch02-prompt-engineering.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
+```{raw} html
+:file: widgets/goal-map.html
+```
+
 ```{admonition} Learning objectives
 :class: note
 - Name the four things the chapter 1 agent does not know, and say which of them a prompt can fix.

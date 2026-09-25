@@ -24,6 +24,20 @@ Three things eat the firm's time, and none of them is the hard part of the job.
 
 Each of these is a lookup followed by a short judgment. The firm's plan for the year is to hand the lookups to software and keep the judgments with people.
 
+## The goal
+
+By the end of the year, Champaign Capital Research wants its investment research workflow to run largely on its own, from pulling the data to a draft note ready for sign-off. Three pieces make that possible:
+
+- **An agent** that gathers figures and handbook clauses, cites where each came from, and drafts the memo or note.
+- **Machine learning** on the firm's own data: which clients may not renew, which names deserve coverage, how a forecast compares with the consensus.
+- **A person in the loop** who approves every published number, every trade clearance and every recommendation before it leaves the firm. Software proposes; people decide.
+
+Each chapter adds one piece, and every chapter opens with this map showing where it sits. Click a chapter to see what it automates and what stays with a person.
+
+```{raw} html
+:file: widgets/goal-map.html
+```
+
 ## How a note gets made
 
 ```{raw} html

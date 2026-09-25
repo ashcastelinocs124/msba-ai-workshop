@@ -22,7 +22,7 @@ A walkthrough of what the series covers, how each chapter works, and what to do 
 
 ## The story
 
-Every chapter is set at **Champaign Capital Research**, a fictional independent equity research firm that is adopting agents and machine learning one careful step at a time. The firm, its people, its problems, and its plan for the year are on [the firm page](the-firm.md). Read it first; every chapter picks up a task from that plan.
+Every chapter is set at **Champaign Capital Research**, a fictional independent equity research firm that is adopting agents and machine learning one careful step at a time. The firm, its people, its problems, and its plan for the year are on [the firm page](the-firm.md). The firm's goal is to automate its investment research workflow with an agent and machine learning, with a person approving every result before it leaves the firm. Every chapter moves it one step closer; read the firm page first.
 
 ## How this book works
 

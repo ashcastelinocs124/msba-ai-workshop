@@ -5,6 +5,10 @@
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch01-agent-loop.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
+```{raw} html
+:file: widgets/goal-map.html
+```
+
 ## Watch the lecture
 
 The session 1 recording. Watch it before or alongside the sections below; the cells on this page are the ones it walks through.

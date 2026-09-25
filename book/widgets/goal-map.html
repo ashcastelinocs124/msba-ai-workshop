@@ -1,0 +1,79 @@
+<div class="wk-widget wk-goal" style="background:#fff">
+  <div class="wk-title">/// Toward the goal</div>
+  <div class="gm-wrap"><svg class="gm" viewBox="0 0 745 300" role="img" aria-label="Chapters 0 to 9 as steps toward the firm's goal: an agent lane and a machine-learning lane merge, then lead to an automated research workflow a person signs off"></svg></div>
+  <div class="gm-detail" aria-live="polite"></div>
+  <style>
+    .wk-goal .gm-wrap{overflow-x:auto}
+    .wk-goal .gm{display:block;width:100%;min-width:560px;height:auto;font-family:system-ui,sans-serif}
+    .wk-goal .gm .n{cursor:pointer}
+    .wk-goal .gm .n rect{fill:#fafbfc;stroke:#e6e8ee;stroke-width:2}
+    .wk-goal .gm .n text{fill:#13294b;font-size:13px;font-weight:600}
+    .wk-goal .gm .n text.k{fill:#5a6478;font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em}
+    .wk-goal .gm .n.done rect{fill:#13294b;stroke:#13294b}.wk-goal .gm .n.done text{fill:#fff}
+    .wk-goal .gm .n.here rect{fill:#fff3ea;stroke:#ff5f05}.wk-goal .gm .n.here text.k{fill:#ff5f05}
+    .wk-goal .gm .n.sel rect{stroke-width:3}
+    .wk-goal .gm .n:focus-visible rect{stroke:#ff5f05;stroke-dasharray:4 3}
+    .wk-goal .gm .goal rect{fill:#ff5f05;stroke:#ff5f05}.wk-goal .gm .goal text{fill:#fff}
+    .wk-goal .gm path{fill:none;stroke:#c3c8d3;stroke-width:2;marker-end:url(#gm-arrow)}
+    .wk-goal .gm .lane{fill:#5a6478;font:700 10px ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase}
+    .wk-goal .gm-detail{margin-top:10px;border:1px solid #e6e8ee;border-left:4px solid #ff5f05;border-radius:8px;padding:10px 14px;font-size:13.5px;line-height:1.5;background:#fafbfc}
+    .wk-goal .gm-detail p{margin:3px 0}
+  </style>
+  <script>
+  (() => {
+    const w = document.currentScript.parentElement, svg = w.querySelector("svg"), d = w.querySelector(".gm-detail");
+    // [x, y, short label, what it automates, what stays with a person]
+    const N = {
+      0: [0, 70, "How LLMs work", "Nothing yet. First, know what the model inside every agent can and cannot do: it predicts text, it has not read the firm's files, and it can state a wrong figure fluently.", "Checking every figure a model states."],
+      1: [150, 18, "The agent loop", "The lookup. An agent pulls the figures a client asked for, drafts the comparison, and logs every step it took.", "The analyst checks each number against the log before the memo goes out."],
+      2: [300, 18, "Prompt + context", "The draft. The agent writes in the firm's house style, follows the handbook's rules, and reads the right client card and earlier turns on each call.", "The analyst edits and signs the memo."],
+      3: [450, 18, "Retrieval", "The citations. The agent finds the right filing passage or handbook clause and cites it, and triages trade pre-clearance requests.", "Elena approves or rejects every trade clearance."],
+      4: [225, 130, "First model", "The first prediction. A question such as \"which clients are likely not to renew?\" becomes a model trained on the firm's own data.", "Choosing the question, and deciding what the model's score may influence."],
+      5: [375, 130, "Trust the model", "The check. Compare models, read what drives them, and watch for drift so a stale model is caught before it misleads anyone.", "Deciding when a model is retrained or retired."],
+      6: [610, 70, "Production", "The harness. The agents and models run every day with budgets, traces, evaluation sets, injection guards, and an approval queue.", "Approval gates are built into the system, and Elena can read every log."],
+      7: [610, 240, "Choose the tool", "The routing. Each request goes to an agent, a model, a SQL query, or a person, by a written rule.", "The call on what is automated at all."],
+      8: [455, 240, "Markets", "The domain. The same tools are pointed at market data and at the AI investment value chain clients keep asking about.", "The investment view."],
+      9: [300, 240, "Research workflow", "The whole workflow, end to end: data is gathered, the agent drafts, a model tests the signal, and a note reaches the analyst ready to sign.", "The analyst decides and signs. Software gathers, extracts and tests."],
+    };
+    const E = [[0,1],[0,4],[1,2],[2,3],[4,5],[3,6],[5,6],[6,7],[7,8],[8,9]];
+    const W = 130, H = 46, ns = "http://www.w3.org/2000/svg";
+    const el = (t, a, p = svg) => { const e = document.createElementNS(ns, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+    const defs = el("defs", {}), mk = el("marker", {id: "gm-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto"}, defs);
+    el("path", {d: "M0,0 L10,5 L0,10 z", style: "fill:#c3c8d3;stroke:none"}, mk);
+    const link = ([x1, y1], [x2, y2]) => {
+      if (x1 === x2) return el("path", {d: `M${x1 + W / 2},${y1 + H} L${x2 + W / 2},${y2 - 2}`});
+      const back = x2 < x1, sx = back ? x1 : x1 + W, ex = back ? x2 + W + 2 : x2 - 2, sy = y1 + H / 2, ey = y2 + H / 2, mx = (sx + ex) / 2;
+      el("path", {d: `M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}`});
+    };
+    for (const [a, b] of E) link(N[a], N[b]);
+    el("path", {d: `M300,263 L272,263`});  // chapter 9 → the goal box
+    el("text", {x: 150, y: 10, class: "lane"}).textContent = "Agent";
+    el("text", {x: 225, y: 192, class: "lane"}).textContent = "Machine learning";
+    el("text", {x: 610, y: 62, class: "lane"}).textContent = "Together";
+    el("text", {x: 300, y: 232, class: "lane"}).textContent = "Into production, onto markets";
+    const g = el("g", {class: "goal"});
+    el("rect", {x: 100, y: 234, width: 170, height: 58, rx: 10}, g);
+    el("text", {x: 185, y: 258, "text-anchor": "middle", style: "font-size:13.5px;font-weight:700"}, g).textContent = "Goal";
+    el("text", {x: 185, y: 277, "text-anchor": "middle", style: "font-size:12px"}, g).textContent = "a person signs off";
+    // Which chapter is this page? None (the firm page) → nothing highlighted.
+    const m = location.pathname.match(/ch0(\d)-/), here = m ? +m[1] : -1;
+    const nodes = {};
+    for (const k in N) {
+      const [x, y, label] = N[k], i = +k;
+      const n = el("g", {class: "n" + (i < here ? " done" : "") + (i === here ? " here" : ""), tabindex: 0, role: "button", "aria-label": `Chapter ${i}: ${label}`});
+      el("rect", {x, y, width: W, height: H, rx: 8}, n);
+      el("text", {x: x + 10, y: y + 17, class: "k"}, n).textContent = i === here ? `CH ${i} · YOU ARE HERE` : `CH ${i}`;
+      el("text", {x: x + 10, y: y + 34}, n).textContent = label;
+      n.addEventListener("click", () => show(i));
+      n.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(i); } });
+      nodes[i] = n;
+    }
+    const show = (i) => {
+      for (const k in nodes) nodes[k].classList.toggle("sel", +k === i);
+      d.innerHTML = `<p><b>Chapter ${i} automates:</b> ${N[i][3]}</p><p><b>What stays with a person:</b> ${N[i][4]}</p>`;
+    };
+    if (here >= 0) show(here);
+    else d.innerHTML = "<p>Click a chapter to see which piece of the workflow it automates, and what stays with a person.</p>";
+  })();
+  </script>
+</div>
