@@ -11,16 +11,18 @@
 
 ## Watch the lecture
 
-The session 1 recording. Watch it before or alongside the sections below; the cells on this page are the ones it walks through.
+The session 1 recording, in two parts. Watch them in order, before or alongside the sections below; the cells on this page are the ones the lecture walks through.
 
 ```{raw} html
 <figure class="wk-intro-video">
-  <iframe src="https://www.youtube.com/embed/TuWWd335S1c" title="Session 1 · Introduction to AI Agents" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  <figcaption>Session 1 · Introduction to AI Agents · 47 min · <a href="https://youtu.be/TuWWd335S1c">Open on YouTube</a> · <a href="_static/media/ch01-lecture.mp4">Download the recording</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/workshop-lecture/msba-ch01-intro-to-ai-agents.pdf">Slides (PDF)</a></figcaption>
+  <iframe src="https://www.youtube.com/embed/70fGo-DmbZE" title="Session 1 · Introduction to AI Agents · Part 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Part 1 · Introduction to AI Agents · 19 min · <a href="https://youtu.be/70fGo-DmbZE">Open on YouTube</a></figcaption>
+</figure>
+<figure class="wk-intro-video">
+  <iframe src="https://www.youtube.com/embed/TuWWd335S1c" title="Session 1 · Introduction to AI Agents · Part 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Part 2 · Introduction to AI Agents · 47 min · <a href="https://youtu.be/TuWWd335S1c">Open on YouTube</a> · <a href="_static/media/ch01-lecture.mp4">Download the recording</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/workshop-lecture/msba-ch01-intro-to-ai-agents.pdf">Slides (PDF)</a></figcaption>
 </figure>
 ```
-
-**Note:** I was not able to record the first hour of this session, so the recording starts partway through. The slides cover the whole session.
 
 ```{admonition} Learning objectives
 :class: note
