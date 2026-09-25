@@ -12,7 +12,7 @@
 :class: note
 - Say what a token is, and why a model's costs and limits are counted in tokens rather than words.
 - Explain how a model writes by predicting the next token, and what the temperature setting changes.
-- Describe at a high level how a model is trained, and why that leaves it without the firm's data or today's numbers.
+- Describe the three stages of training (pre-training, mid-training and post-training, including reinforcement learning), and why they leave a model without the firm's data or today's numbers.
 - Tell an open-weight model from a closed one, and choose between them for a task at the firm.
 ```
 
@@ -107,12 +107,22 @@ At 0 all three runs agree. At 1.5 they wander, and some wander into sentences th
 
 ## 0.4 How a model learns
 
-The toy model learned by counting which word follows which. A real LLM learns the same kind of pattern with a neural network, in two main stages.
+The toy model learned by counting which word follows which. A real LLM learns the same kind of pattern with a neural network, in three stages. Each one starts from the model the stage before produced.
 
 | Stage | What it reads | What it learns |
 |---|---|---|
-| **Pretraining** | Trillions of tokens of public text: web pages, books, code, filings | To predict the next token in any kind of text. After this it can continue a document, but it does not yet act like an assistant. |
-| **Instruction tuning** | Many examples of requests and good answers, and people's ratings of which answer is better | To follow instructions, answer questions and decline some requests. This turns a text continuer into a chat assistant. |
+| **Pre-training** | Trillions of tokens of public text: web pages, books, code, filings | To predict the next token in any kind of text. Almost all of its knowledge comes from here. After this it can continue a document, but it does not yet act like an assistant. |
+| **Mid-training** | A smaller, carefully chosen set: high-quality writing, maths, code, long documents, sometimes a specialist field | To be better at what its makers care most about, and to read much longer inputs. It is still next-token prediction, only on better text. |
+| **Post-training** | Examples of requests with good answers, then scores for the answers it writes itself | To act like an assistant: follow instructions, answer in a useful shape, reason step by step, call tools, and decline some requests. |
+
+Post-training has two parts. First the model studies thousands of example conversations written by people, and learns to answer the way they do. Then comes **reinforcement learning**: the model writes several answers to the same request, each answer is scored, and the weights are nudged so that high-scoring answers become more likely. It learns from its own attempts, the way an analyst improves from a reviewer's marks rather than from reading more.
+
+The score comes from one of two places:
+
+- **People's preferences.** Reviewers compare two answers and pick the better one, and a second model learns to predict their choice. This is often called RLHF, reinforcement learning from human feedback. It is what makes a model polite, clear and helpful.
+- **A check that can be run.** For a maths problem the final number is right or wrong; for code the tests pass or fail. Rewarding correct results over many attempts is how "reasoning" models learned to work through a problem step by step before answering.
+
+Reinforcement learning teaches the model what gets rewarded, not what is true. Reviewers tend to prefer answers that are confident and agreeable, so a model can learn to sound sure of itself even when it is not (section 0.6).
 
 Training adjusts the model's **weights**, the billions of numbers that decide which token comes next, until its predictions match the text it reads. Training a large model takes months on thousands of GPUs. Using it afterwards takes a fraction of a second per token.
 
@@ -255,5 +265,6 @@ These use the cells on this page; there is no Colab notebook for this chapter.
 
 - 3Blue1Brown, [*Transformers, the tech behind LLMs*](https://www.youtube.com/watch?v=wjZofJX0v4M) (video) — how a model turns text into tokens and predicts the next one, drawn step by step.
 - Andrej Karpathy, [*Intro to Large Language Models*](https://www.youtube.com/watch?v=zjkBMFhNj_g) (1-hour talk) — pretraining, fine-tuning, and what models can and cannot do.
+- Hugging Face, [*Illustrating Reinforcement Learning from Human Feedback*](https://huggingface.co/blog/rlhf) — how post-training turns people's preferences into a score the model learns from.
 - Jay Alammar, [*The Illustrated Transformer*](https://jalammar.github.io/illustrated-transformer/) — the architecture inside the model, in pictures.
 - Hugging Face, [*LLM Course*](https://huggingface.co/learn/llm-course/chapter1/1) — free, hands-on, and the place most open models are published.
