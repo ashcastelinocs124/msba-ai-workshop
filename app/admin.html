@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workshop admin</title>
+<style>
+  :root { --navy: #13294b; --orange: #ff5f05; --line: #e6e8ee; --muted: #5a6478; --ok: #136c3a; --okbg: #e8f7ee; --no: #9c2323; --nobg: #fdeeee; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: #1f2430; font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 60px; }
+  h1 { color: var(--navy); letter-spacing: -0.02em; margin: 0 0 4px; }
+  h3 { color: var(--navy); font-size: 14px; margin: 0 0 10px; }
+  a { color: var(--navy); }
+  .muted, .hint { color: var(--muted); } .hint { font-size: 12.5px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 12px 0 16px; overflow-x: auto; }
+  .tabs button { border: 0; background: none; padding: 8px 14px; font: 600 14px system-ui, sans-serif; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+  .tabs button[aria-selected="true"] { color: var(--navy); border-bottom-color: var(--orange); }
+  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--orange); outline-offset: 1px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 10px; }
+  .kpi { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fafbfc; }
+  .kpi b { display: block; font-size: 26px; color: var(--orange); line-height: 1.15; }
+  .kpi span { font-size: 12.5px; color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 16px; margin-top: 16px; }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  td, th { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 120px; border-bottom: 1px solid var(--line); margin-top: 22px; }
+  .bars div { flex: 1; background: var(--navy); border-radius: 3px 3px 0 0; position: relative; min-height: 2px; }
+  .bars div.s { background: var(--orange); }
+  .bars div i { position: absolute; top: -17px; left: 0; right: 0; text-align: center; font: 11px ui-monospace, Menlo, monospace; font-style: normal; color: var(--muted); }
+  .blbl { display: flex; gap: 4px; font: 10.5px ui-monospace, Menlo, monospace; color: var(--muted); padding-top: 4px; }
+  .blbl span { flex: 1; text-align: center; overflow: hidden; white-space: nowrap; }
+  .btn { font: 600 13px system-ui, sans-serif; border: 1px solid var(--navy); color: var(--navy); background: #fff; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+  .btn.primary { background: var(--navy); color: #fff; } .btn.orange { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .btn.small { padding: 2px 9px; font-size: 12px; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .st { font: 700 10px ui-monospace, Menlo, monospace; border-radius: 999px; padding: 2px 8px; letter-spacing: 0.08em; white-space: nowrap; }
+  .st.closed { background: #eef0f4; color: var(--muted); } .st.open { background: #fff3ea; color: var(--orange); } .st.done { background: var(--okbg); color: var(--ok); }
+  tr.sel td { background: #fff8f3; }
+  .hbar { display: grid; grid-template-columns: minmax(0, 1fr) 140px 46px; gap: 8px; align-items: center; font-size: 13px; margin: 5px 0; }
+  .hbar .b { background: #f0f2f6; border-radius: 4px; height: 14px; overflow: hidden; }
+  .hbar .b i { display: block; height: 100%; background: #2f9e44; }
+  .hbar .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .choices { margin: 2px 0 8px 14px; font-size: 12.5px; color: var(--muted); }
+  label.f { display: block; font-size: 12.5px; color: var(--muted); margin: 10px 0 3px; }
+  input[type=text], select, textarea { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; width: 100%; }
+  .qb { border: 1px dashed #c3c8d3; border-radius: 8px; padding: 10px 12px; margin: 10px 0; background: #fafbfc; }
+  .qb .top { display: flex; gap: 8px; align-items: center; }
+  .qb .top select { width: auto; } .qb .top .x { margin-left: auto; }
+  .opt { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+  .opt input[type=text] { flex: 1; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .msg { margin-top: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13.5px; }
+  .msg.ok { background: var(--okbg); color: var(--ok); } .msg.no { background: var(--nobg); color: var(--no); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Workshop admin</h1>
+  <p class="muted" id="sub">Loading…</p>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-t="usage">Usage</button>
+    <button role="tab" aria-selected="false" data-t="cps">Lecture checkpoints</button>
+    <button role="tab" aria-selected="false" data-t="stud">Students</button>
+  </div>
+
+  <section id="t-usage">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <span class="muted" id="range"></span>
+      <select id="days" style="width:auto" aria-label="Date range"><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="0">Since launch</option></select>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="card"><h3>Students active per day <span class="hint">(orange = Friday, a session day)</span></h3><div id="daily"></div></div>
+      <div class="card"><h3>By chapter</h3><div class="scroll"><table id="chapters"></table></div></div>
+    </div>
+  </section>
+
+  <section id="t-cps" hidden>
+    <div class="grid2" style="margin-top:0">
+      <div class="card">
+        <h3>Lecture checkpoints</h3>
+        <div class="scroll"><table id="cplist"></table></div>
+        <p class="hint">Students' pages check every 10 seconds, so Open and Close reach the room within a few seconds.</p>
+        <div id="results"></div>
+      </div>
+      <div class="card">
+        <h3 id="bTitle">New Lecture checkpoint</h3>
+        <label class="f" for="bName">Title</label><input type="text" id="bName" maxlength="200" placeholder="e.g. Retrieval">
+        <label class="f" for="bSpot">Spot in the textbook <span>(markers found in the built chapters)</span></label><select id="bSpot"></select>
+        <div id="bQs"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="bAdd">+ Add question</button>
+          <button class="btn primary" id="bSave">Save (stays closed)</button>
+          <button class="btn" id="bCancel" hidden>Cancel edit</button>
+        </div>
+        <div id="bMsg"></div>
+        <p class="hint">Questions lock once the first student answers, so results always match what was asked. Correct answers are shown to students only after you open and then close the checkpoint.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="t-stud" hidden>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <span class="hint">All activity since launch, newest first. Admin accounts are not counted.</span>
+      <button class="btn small" id="studCsv">Download CSV</button>
+    </div>
+    <div class="scroll"><table id="students"></table></div>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const num = (n) => Number(n || 0).toLocaleString();
+  const when = (ts) => {
+    if (!ts) return "—";
+    const d = new Date(ts), today = new Date();
+    const same = d.toDateString() === today.toDateString();
+    return same ? "today " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : d.toLocaleDateString([], { month: "short", day: "numeric" });
+  };
+  const who = (a) => a.name ? `${esc(a.name)} <span class="hint">${esc(a.user)}</span>` : esc(a.user);
+  const csv = (rows, file) => {
+    const text = rows.map((r) => r.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
+    a.download = file; a.click();
+  };
+  const post = async (url, body) => {
+    const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || `Request failed (${r.status})`);
+    return r.json();
+  };
+
+  let data = null, selected = null, editing = null, tab = "usage";
+
+  // ---- tabs ----
+  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
+    tab = b.dataset.t;
+    history.replaceState(null, "", { usage: "#usage", cps: "#checkpoints", stud: "#students" }[tab]);
+    document.querySelectorAll(".tabs button").forEach((x) => x.setAttribute("aria-selected", x === b));
+    ["usage", "cps", "stud"].forEach((t) => { $("t-" + t).hidden = t !== tab; });
+  }));
+
+  // ---- usage ----
+  function drawUsage() {
+    const d = data;
+    $("sub").textContent = `${num(d.total_students)} students have used the campus copy.`;
+    $("range").textContent = d.days ? `Since ${new Date(d.since + "T00:00:00").toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}` : "Since launch";
+    const last = d.last_checkpoint;
+    $("kpis").innerHTML = [
+      [num(d.active), `students active (of ${num(d.total_students)})`],
+      [num(d.cell_runs), "Python cells run"],
+      [num(d.model_calls), `real-model calls · ${num(d.tokens)} tokens`],
+      last ? [d.total_students ? Math.round(100 * last.answered / d.total_students) + "%" : "—", `answered the last Lecture checkpoint (${esc(last.title)})`] : ["—", "no Lecture checkpoint opened yet"],
+    ].map(([b, s]) => `<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("");
+    const days = d.daily.slice(-31), max = Math.max(1, ...days.map((x) => x.users));
+    $("daily").innerHTML = days.length ? `<div class="bars">${days.map((x) => {
+        const dt = new Date(x.day + "T12:00:00Z");
+        return `<div class="${dt.getUTCDay() === 5 ? "s" : ""}" style="height:${Math.round(100 * x.users / max)}%" title="${esc(x.day)}: ${x.users}"><i>${x.users}</i></div>`;
+      }).join("")}</div><div class="blbl">${days.map((x) => `<span>${new Date(x.day + "T12:00:00Z").toLocaleDateString([], { month: "short", day: "numeric", timeZone: "UTC" })}</span>`).join("")}</div>`
+      : `<p class="hint">No activity in this range yet.</p>`;
+    $("chapters").innerHTML = `<tr><th>Page</th><th class="n">Readers</th><th class="n">Views</th><th class="n">Cell runs</th></tr>` +
+      (d.chapters.map((c) => `<tr><td>${esc(c.title)}</td><td class="n">${num(c.readers)}</td><td class="n">${num(c.views)}</td><td class="n">${num(c.cell_runs)}</td></tr>`).join("")
+       || `<tr><td colspan="4" class="hint">No page views in this range yet.</td></tr>`);
+  }
+  $("days").addEventListener("change", load);
+
+  // ---- students ----
+  function drawStudents() {
+    const opened = data.checkpoints_opened;
+    $("students").innerHTML = `<tr><th>Student</th><th>Last seen</th><th class="n">Days active</th><th class="n">Pages</th><th class="n">Cell runs</th><th class="n">Model tokens</th><th class="n">Checkpoints</th></tr>` +
+      (data.students.map((s) => `<tr><td>${who(s)}</td><td>${when(s.last_seen)}</td><td class="n">${s.days}</td><td class="n">${num(s.pages)}</td><td class="n">${num(s.cell_runs)}</td><td class="n">${num(s.tokens)}</td>
+        <td class="n">${s.checkpoints} / ${opened}${s.score != null ? " · " + s.score + "%" : ""}</td></tr>`).join("")
+       || `<tr><td colspan="7" class="hint">No students yet.</td></tr>`);
+  }
+  $("studCsv").addEventListener("click", () => csv([["user", "name", "last_seen", "days_active", "pages", "cell_runs", "model_tokens", "checkpoints_answered", "checkpoint_score_pct"],
+    ...data.students.map((s) => [s.user, s.name, s.last_seen, s.days, s.pages, s.cell_runs, s.tokens, s.checkpoints, s.score ?? ""])], "students.csv"));
+
+  // ---- checkpoints list + results ----
+  function drawCheckpoints() {
+    const cps = data.checkpoints;
+    if (selected == null && cps.length) selected = cps[0].id;
+    $("cplist").innerHTML = `<tr><th>Checkpoint</th><th>Spot</th><th class="n">Answered</th><th></th></tr>` +
+      (cps.map((c) => {
+        const st = c.status === "open" ? `<span class="st open">OPEN</span>` : `<span class="st ${c.opened_at ? "done" : "closed"}">CLOSED</span>`;
+        const act = c.status === "open" ? "Close" : c.opened_at ? "Reopen" : "Open";
+        return `<tr data-id="${c.id}" class="${c.id === selected ? "sel" : ""}"><td><a href="#" data-pick="${c.id}">${esc(c.title)}</a></td><td class="hint">${esc(c.label)}</td>
+          <td class="n">${c.answered} / ${data.total_students}</td><td style="white-space:nowrap">${st}
+          <button class="btn small ${c.status === "open" ? "" : "orange"}" data-toggle="${c.id}" data-to="${c.status === "open" ? "closed" : "open"}">${act}</button>
+          ${c.answers.length ? "" : `<button class="btn small" data-edit="${c.id}">Edit</button>`}</td></tr>`;
+      }).join("") || `<tr><td colspan="4" class="hint">None yet. Build one on the right.</td></tr>`);
+    drawResults();
+  }
+
+  function drawResults() {
+    const c = data.checkpoints.find((x) => x.id === selected);
+    if (!c) { $("results").innerHTML = ""; return; }
+    const perQ = c.questions.map((q, i) => {
+      const as = c.answers.filter((a) => a.q === i);
+      if (q.kind === "short") return `<div class="hbar"><span>Q${i + 1} · ${esc(q.prompt)}</span><span class="hint">short answer</span><span class="v">${as.length}</span></div>`;
+      const pct = as.length ? Math.round(100 * as.filter((a) => a.correct).length / as.length) : 0;
+      const counts = q.choices.map((ch, j) => `${j === q.correct ? "✓ " : ""}${esc(ch)}: ${as.filter((a) => a.value === String(j)).length}`).join(" · ");
+      return `<div class="hbar"><span>Q${i + 1} · ${esc(q.prompt)}</span><span class="b"><i style="width:${pct}%"></i></span><span class="v">${as.length ? pct + "%" : "—"}</span></div><div class="choices">${counts}</div>`;
+    }).join("");
+    const rows = c.answers.map((a) => {
+      const q = c.questions[a.q];
+      const shown = q.kind === "mc" ? q.choices[+a.value] : a.value;
+      const mark = a.correct == null ? "" : a.correct ? "✓" : "✗";
+      return `<tr><td>${who(a)}</td><td class="n">Q${a.q + 1}</td><td>${esc(shown)}</td><td>${mark}</td></tr>`;
+    }).join("");
+    $("results").innerHTML = `<h3 style="margin-top:16px">Results · ${esc(c.title)}</h3>${perQ}
+      <p class="hint">${c.answered} students answered. <a href="#" id="allToggle">See every answer</a> · <a href="#" id="ansCsv">Download CSV</a></p>
+      <div class="scroll" id="allAns" hidden><table><tr><th>Student</th><th class="n">Q</th><th>Answer</th><th></th></tr>${rows || `<tr><td colspan="4" class="hint">No answers yet.</td></tr>`}</table></div>`;
+    $("allToggle").onclick = (e) => { e.preventDefault(); $("allAns").hidden = !$("allAns").hidden; };
+    $("ansCsv").onclick = (e) => {
+      e.preventDefault();
+      csv([["user", "name", "question", "prompt", "answer", "correct", "time"], ...c.answers.map((a) => {
+        const q = c.questions[a.q];
+        return [a.user, a.name, a.q + 1, q.prompt, q.kind === "mc" ? q.choices[+a.value] : a.value, a.correct ?? "", a.ts];
+      })], `checkpoint-${c.spot}.csv`);
+    };
+  }
+
+  $("cplist").addEventListener("click", async (e) => {
+    const t = e.target;
+    if (t.dataset.pick) { e.preventDefault(); selected = +t.dataset.pick; drawCheckpoints(); }
+    if (t.dataset.toggle) {
+      t.disabled = true;
+      try { await post(`/admin/api/checkpoints/${t.dataset.toggle}/status`, { status: t.dataset.to }); selected = +t.dataset.toggle; await load(); }
+      catch (err) { alert(err.message); t.disabled = false; }
+    }
+    if (t.dataset.edit) startEdit(data.checkpoints.find((c) => c.id === +t.dataset.edit));
+  });
+
+  // ---- builder ----
+  function qBlock(q = { kind: "mc", prompt: "", choices: ["", "", ""], correct: null }) {
+    const d = document.createElement("div");
+    d.className = "qb";
+    const name = "c" + Math.random().toString(36).slice(2);
+    d.innerHTML = `<div class="top"><b style="font-size:13px" class="qn"></b>
+        <select aria-label="Question type"><option value="mc">Multiple choice</option><option value="short">Short answer</option></select>
+        <button class="btn small x" type="button">Remove</button></div>
+      <input type="text" class="prompt" style="margin-top:6px" placeholder="Question text" maxlength="1000">
+      <div class="opts"></div><div class="mcOnly"><button class="btn small addOpt" type="button">+ Choice</button> <span class="hint">● marks the correct choice</span></div>`;
+    const sel = d.querySelector("select"), opts = d.querySelector(".opts");
+    const addOpt = (text = "", checked = false) => {
+      const o = document.createElement("div");
+      o.className = "opt";
+      o.innerHTML = `<input type="radio" name="${name}" aria-label="Correct choice"${checked ? " checked" : ""}><input type="text" placeholder="Choice" maxlength="300">`;
+      o.querySelector("input[type=text]").value = text;
+      opts.append(o);
+    };
+    const sync = () => { const mc = sel.value === "mc"; opts.hidden = !mc; d.querySelector(".mcOnly").hidden = !mc; };
+    sel.value = q.kind; d.querySelector(".prompt").value = q.prompt;
+    (q.choices.length ? q.choices : ["", "", ""]).forEach((c, j) => addOpt(c, j === q.correct));
+    sel.addEventListener("change", sync);
+    d.querySelector(".addOpt").addEventListener("click", () => addOpt());
+    d.querySelector(".x").addEventListener("click", () => { d.remove(); renumber(); });
+    sync();
+    $("bQs").append(d);
+    renumber();
+  }
+  const renumber = () => $("bQs").querySelectorAll(".qn").forEach((b, i) => { b.textContent = "Q" + (i + 1); });
+  const readQs = () => [...$("bQs").querySelectorAll(".qb")].map((d) => {
+    const kind = d.querySelector("select").value, opts = [...d.querySelectorAll(".opt")].filter((o) => o.querySelector("input[type=text]").value.trim());
+    return { kind, prompt: d.querySelector(".prompt").value,
+      choices: kind === "mc" ? opts.map((o) => o.querySelector("input[type=text]").value) : [],
+      correct: kind === "mc" ? opts.findIndex((o) => o.querySelector("input[type=radio]").checked) : null };
+  });
+  function resetBuilder() {
+    editing = null;
+    $("bTitle").textContent = "New Lecture checkpoint";
+    $("bName").value = ""; $("bQs").innerHTML = ""; $("bCancel").hidden = true;
+    qBlock();
+  }
+  function startEdit(c) {
+    editing = c.id;
+    $("bTitle").textContent = `Edit · ${c.title}`;
+    $("bName").value = c.title; $("bSpot").value = c.spot; $("bQs").innerHTML = ""; $("bCancel").hidden = false;
+    c.questions.forEach((q) => qBlock(q));
+  }
+  function drawSpots() {
+    const taken = new Set(data.checkpoints.map((c) => c.spot)), cur = $("bSpot").value;
+    $("bSpot").innerHTML = data.spots.map((s) => `<option value="${esc(s.spot)}">${esc(s.label)}${taken.has(s.spot) ? " (has a checkpoint)" : ""}</option>`).join("")
+      || `<option value="">No markers in the book yet</option>`;
+    if (cur) $("bSpot").value = cur;
+  }
+  $("bAdd").addEventListener("click", () => qBlock());
+  $("bCancel").addEventListener("click", resetBuilder);
+  $("bSave").addEventListener("click", async () => {
+    $("bSave").disabled = true;
+    try {
+      await post("/admin/api/checkpoints", { id: editing, title: $("bName").value, spot: $("bSpot").value, questions: readQs() });
+      $("bMsg").innerHTML = `<div class="msg ok">Saved. It stays closed until you press Open.</div>`;
+      resetBuilder(); await load();
+    } catch (err) { $("bMsg").innerHTML = `<div class="msg no">${esc(err.message)}</div>`; }
+    $("bSave").disabled = false;
+  });
+
+  // ---- load; refresh while a checkpoint is open so answers come in live ----
+  async function load() {
+    const r = await fetch(`/admin/api/data?days=${$("days").value}`);
+    if (!r.ok) { $("sub").textContent = r.status === 403 ? "This page is for workshop admins." : `Could not load (${r.status}).`; return; }
+    data = await r.json();
+    drawUsage(); drawStudents(); drawCheckpoints(); drawSpots();
+  }
+  setInterval(() => { if (data && !document.hidden && data.checkpoints.some((c) => c.status === "open")) load(); }, 10000);
+  resetBuilder();
+  load();
+  // #checkpoints or #students in the URL opens that tab (bookmark /admin#checkpoints for lecture days)
+  const deep = { "#checkpoints": "cps", "#students": "stud" }[location.hash];
+  if (deep) document.querySelector(`.tabs button[data-t="${deep}"]`).click();
+})();
+</script>
+</body>
+</html>

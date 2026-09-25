@@ -9,7 +9,10 @@ import html
 import io
 import json
 import os
-from datetime import date
+import re
+import sqlite3
+from datetime import date, datetime, timedelta, timezone
+from functools import lru_cache
 
 import httpx
 from fastapi import FastAPI, HTTPException, Request
@@ -31,6 +34,21 @@ ADMIN_USERS = {u.strip().lower() for u in os.environ.get("ADMIN_USERS", "").spli
 LOCKED_PAGES = {p.strip() for p in os.environ.get(
     "LOCKED_PAGES", "ch02-prompt-and-context,ch02-prompt-engineering,ch02-context-engineering").split(",") if p.strip()}
 LOCKED_HTML = open(os.path.join(os.path.dirname(__file__), "locked.html")).read()
+ADMIN_HTML = open(os.path.join(os.path.dirname(__file__), "admin.html")).read()
+# Usage events and Lecture checkpoints. Like the sign-in list, this never leaves the App Service disk.
+APP_DB = os.environ.get("APP_DB", "/home/data/app.db")
+EVENT_KINDS = {"page_view", "cell_run"}  # what the browser may send; signin and model_call are written here
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, ts TEXT NOT NULL, user TEXT NOT NULL,
+    kind TEXT NOT NULL, page TEXT, tokens INTEGER);
+CREATE INDEX IF NOT EXISTS events_user_ts ON events(user, ts);
+CREATE TABLE IF NOT EXISTS lecture_checkpoints (id INTEGER PRIMARY KEY, spot TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'closed', questions TEXT NOT NULL,
+    opened_at TEXT, closed_at TEXT);
+CREATE TABLE IF NOT EXISTS answers (checkpoint_id INTEGER NOT NULL REFERENCES lecture_checkpoints(id),
+    user TEXT NOT NULL, q INTEGER NOT NULL, value TEXT NOT NULL, correct INTEGER, ts TEXT NOT NULL,
+    PRIMARY KEY (checkpoint_id, user, q));
+"""
 
 app = FastAPI()
 
@@ -42,7 +60,6 @@ async def lock_pages(request: Request, call_next):
     if stem in LOCKED_PAGES and user not in ADMIN_USERS:
         return HTMLResponse(LOCKED_HTML, status_code=403)
     return await call_next(request)
-_usage: dict[tuple[str, str], int] = {}  # ponytail: in-memory per-user daily counter; Table Storage if restarts matter
 _seen: set[tuple[str, str]] = set()  # (day, user) already written today; the reader dedupes anyway, this just saves writes
 
 
@@ -68,8 +85,49 @@ def _display_name(request: Request) -> str | None:
     return next((c.get("val") for c in claims if c.get("typ") in name_types), None)
 
 
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _today() -> date:
+    return datetime.now(timezone.utc).date()  # event timestamps are UTC, so "today" is too
+
+
+_schema_ready: set[str] = set()
+
+
+def _q(sql: str, args: tuple = ()) -> list[sqlite3.Row]:
+    """Run one statement in its own connection and commit.
+    ponytail: one SQLite file on the /home disk, fine while the web app runs on one instance;
+    scaling out to several instances needs Postgres or Table Storage instead."""
+    os.makedirs(os.path.dirname(APP_DB) or ".", exist_ok=True)
+    con = sqlite3.connect(APP_DB, timeout=10)
+    con.row_factory = sqlite3.Row
+    try:
+        if APP_DB not in _schema_ready:
+            con.executescript(SCHEMA)
+            _schema_ready.add(APP_DB)
+        with con:
+            return con.execute(sql, args).fetchall()
+    finally:
+        con.close()
+
+
+def _log(user: str, kind: str, page: str | None = None, tokens: int | None = None) -> None:
+    """Append one usage event. A logging failure never breaks the page or the model call."""
+    try:
+        _q("INSERT INTO events (ts, user, kind, page, tokens) VALUES (?, ?, ?, ?, ?)", (_now(), user, kind, page, tokens))
+    except sqlite3.Error:
+        pass
+
+
 def _used(user: str) -> int:
-    return _usage.get((user, date.today().isoformat()), 0)
+    """Tokens this user spent today (UTC day), read from the event log so the cap survives restarts."""
+    try:
+        return _q("SELECT COALESCE(SUM(tokens), 0) FROM events WHERE user = ? AND kind = 'model_call' AND ts >= ?",
+                  (user, _today().isoformat()))[0][0]
+    except sqlite3.Error:
+        return 0
 
 
 def _record_signin(user: str, name: str | None) -> None:
@@ -79,6 +137,7 @@ def _record_signin(user: str, name: str | None) -> None:
     if key in _seen:
         return
     _seen.add(key)
+    _log(user, "signin")
     try:
         os.makedirs(os.path.dirname(SIGNIN_LOG), exist_ok=True)
         with open(SIGNIN_LOG, "a", newline="") as f:
@@ -144,9 +203,218 @@ async def chat(request: Request):
     if r.status_code != 200:
         raise HTTPException(502, f"model call failed: {r.text[:300]}")
     data = r.json()
-    key = (user, date.today().isoformat())
-    _usage[key] = _usage.get(key, 0) + int((data.get("usage") or {}).get("total_tokens", 0))
+    _log(user, "model_call", tokens=int((data.get("usage") or {}).get("total_tokens", 0)))
     return data
+
+
+@app.post("/api/events")
+async def events(request: Request):
+    """A page view or a cell run, sent by site.js / pyodide-cell.js on the campus copy."""
+    user = _user(request)
+    body = await request.json()
+    kind, page = body.get("kind"), body.get("page")
+    if kind not in EVENT_KINDS or not isinstance(page, str) or not re.fullmatch(r"[\w.-]{1,80}", page):
+        raise HTTPException(400, "bad event")
+    _log(user, kind, page)
+    return {"ok": True}
+
+
+# ---- Lecture checkpoints: the instructor opens them in class, students answer in the chapter ----
+
+def _checkpoint(spot: str) -> sqlite3.Row | None:
+    rows = _q("SELECT * FROM lecture_checkpoints WHERE spot = ?", (spot,))
+    return rows[0] if rows else None
+
+
+def _student_view(cp: sqlite3.Row | None, spot: str, user: str) -> dict:
+    """What a student's page shows. Correct answers only after the checkpoint has been opened and closed again,
+    so a checkpoint that is closed *before* class never gives its answers away."""
+    if cp is None:
+        return {"spot": spot, "status": "none"}
+    revealed = cp["status"] == "closed" and cp["opened_at"] is not None
+    mine = {r["q"]: r["value"] for r in _q("SELECT q, value FROM answers WHERE checkpoint_id = ? AND user = ?", (cp["id"], user))}
+    questions = [{"prompt": q["prompt"], "kind": q["kind"], "choices": q.get("choices", []),
+                  **({"correct": q.get("correct")} if revealed else {})} for q in json.loads(cp["questions"])]
+    return {"spot": spot, "title": cp["title"], "status": cp["status"], "revealed": revealed,
+            "questions": questions, "mine": mine}
+
+
+@app.get("/api/checkpoints/{spot}")
+def checkpoint_get(spot: str, request: Request):
+    return _student_view(_checkpoint(spot), spot, _user(request))
+
+
+@app.post("/api/checkpoints/{spot}")
+async def checkpoint_answer(spot: str, request: Request):
+    """Save a student's answers. Resubmitting overwrites, so each student counts once per question."""
+    user = _user(request)
+    cp = _checkpoint(spot)
+    if cp is None or cp["status"] != "open":
+        raise HTTPException(409, "this checkpoint is closed")
+    questions = json.loads(cp["questions"])
+    answers = (await request.json()).get("answers")
+    if not isinstance(answers, dict) or not answers:
+        raise HTTPException(400, "answers required")
+    rows = []
+    for k, v in answers.items():
+        i = int(k) if str(k).isdigit() else -1
+        if not 0 <= i < len(questions):
+            raise HTTPException(400, f"no question {k}")
+        q = questions[i]
+        if q["kind"] == "mc":
+            if not isinstance(v, int) or not 0 <= v < len(q["choices"]):
+                raise HTTPException(400, f"question {i + 1}: pick one of the choices")
+            rows.append((i, str(v), int(v == q["correct"])))
+        else:
+            if not isinstance(v, str) or not v.strip():
+                raise HTTPException(400, f"question {i + 1}: write an answer")
+            rows.append((i, v.strip()[:1000], None))
+    for i, value, correct in rows:
+        _q("""INSERT INTO answers (checkpoint_id, user, q, value, correct, ts) VALUES (?, ?, ?, ?, ?, ?)
+              ON CONFLICT (checkpoint_id, user, q) DO UPDATE SET value = excluded.value, correct = excluded.correct, ts = excluded.ts""",
+           (cp["id"], user, i, value, correct, _now()))
+    return _student_view(_checkpoint(spot), spot, user)
+
+
+# ---- Admin: usage dashboard and the checkpoint builder (ADMIN_USERS only) ----
+
+def _admin(request: Request) -> str:
+    user = _user(request)
+    if user not in ADMIN_USERS:
+        raise HTTPException(403, "admins only")
+    return user
+
+
+@lru_cache(maxsize=4)
+def _scan(html_dir: str) -> tuple[dict, list]:
+    """Page titles and Lecture checkpoint markers, read once from the built book (it doesn't change while running)."""
+    titles, spots = {}, []
+    if os.path.isdir(html_dir):
+        for name in sorted(os.listdir(html_dir)):
+            if not name.endswith(".html"):
+                continue
+            text = open(os.path.join(html_dir, name), encoding="utf-8", errors="ignore").read()
+            stem = name[:-5]
+            t = re.search(r"<title>(.*?)</title>", text, re.S)
+            titles[stem] = html.unescape(t.group(1)).split(" — ")[0].strip() if t else stem
+            for spot, label in re.findall(r'data-spot="([\w-]+)"\s+data-label="([^"]*)"', text):
+                spots.append({"spot": spot, "label": html.unescape(label), "page": stem})
+    return titles, spots
+
+
+@app.get("/admin")
+def admin_page(request: Request):
+    _admin(request)
+    return HTMLResponse(ADMIN_HTML)
+
+
+@app.get("/admin/api/data")
+def admin_data(request: Request, days: int = 7):
+    """Everything the dashboard draws, in one call. Admin accounts are left out of every student number."""
+    _admin(request)
+    titles, spots = _scan(os.path.abspath(HTML_DIR))
+    since = (_today() - timedelta(days=max(days, 1) - 1)).isoformat() if days > 0 else ""
+    admins = tuple(sorted(ADMIN_USERS)) or ("",)
+    notadmin = f"user NOT IN ({','.join('?' * len(admins))})"
+    names = {u: n for _, u, n in _signins() if n}
+
+    def ev(sql: str, args: tuple = ()) -> list[sqlite3.Row]:
+        return _q(sql.replace("{NOTADMIN}", notadmin), (*admins, *args))
+
+    total = ev("SELECT COUNT(DISTINCT user) FROM events WHERE {NOTADMIN}")[0][0]
+    k = ev("""SELECT COUNT(DISTINCT user), SUM(kind = 'cell_run'), SUM(kind = 'model_call'), COALESCE(SUM(tokens), 0)
+              FROM events WHERE {NOTADMIN} AND ts >= ?""", (since,))[0]
+    daily = [dict(r) for r in ev("""SELECT substr(ts, 1, 10) AS day, COUNT(DISTINCT user) AS users FROM events
+                                    WHERE {NOTADMIN} AND ts >= ? GROUP BY day ORDER BY day""", (since,))]
+    chapters = [{**dict(r), "title": titles.get(r["page"], r["page"])} for r in ev(
+        """SELECT page, COUNT(DISTINCT CASE WHEN kind = 'page_view' THEN user END) AS readers,
+                  SUM(kind = 'page_view') AS views, SUM(kind = 'cell_run') AS cell_runs
+           FROM events WHERE {NOTADMIN} AND page IS NOT NULL AND ts >= ? GROUP BY page""", (since,))]
+    chapters.sort(key=lambda c: (not c["title"][:1].isdigit(), c["title"]))  # numbered chapters in reading order, then the rest
+
+    cps = []
+    for cp in _q("SELECT * FROM lecture_checkpoints ORDER BY COALESCE(opened_at, '') DESC, id DESC"):
+        qs = json.loads(cp["questions"])
+        ans = [dict(r) for r in _q("SELECT user, q, value, correct, ts FROM answers WHERE checkpoint_id = ? ORDER BY ts",
+                                   (cp["id"],)) if r["user"] not in ADMIN_USERS]
+        for a in ans:
+            a["name"] = names.get(a["user"], "")
+        label = next((s["label"] for s in spots if s["spot"] == cp["spot"]), cp["spot"] + " (marker not found in the book)")
+        cps.append({**{c: cp[c] for c in ("id", "spot", "title", "status", "opened_at", "closed_at")},
+                    "label": label, "questions": qs, "answers": ans, "answered": len({a["user"] for a in ans})})
+    last = next((c for c in cps if c["opened_at"]), None)
+
+    opened = [c for c in cps if c["opened_at"]]
+    students = []
+    for r in ev("""SELECT user, MAX(ts) AS last_seen, COUNT(DISTINCT substr(ts, 1, 10)) AS days,
+                          SUM(kind = 'page_view') AS pages, SUM(kind = 'cell_run') AS cell_runs, COALESCE(SUM(tokens), 0) AS tokens
+                   FROM events WHERE {NOTADMIN} GROUP BY user ORDER BY last_seen DESC"""):
+        mine = [a for c in opened for a in c["answers"] if a["user"] == r["user"]]
+        scored = [a["correct"] for a in mine if a["correct"] is not None]
+        students.append({**dict(r), "name": names.get(r["user"], ""),
+                         "checkpoints": len({c["id"] for c in opened if any(a["user"] == r["user"] for a in c["answers"])}),
+                         "score": round(100 * sum(scored) / len(scored)) if scored else None})
+    return {"days": days, "since": since, "total_students": total, "active": k[0], "cell_runs": k[1] or 0,
+            "model_calls": k[2] or 0, "tokens": k[3], "daily": daily, "chapters": chapters,
+            "last_checkpoint": {"title": last["title"], "answered": last["answered"]} if last else None,
+            "checkpoints": cps, "checkpoints_opened": len(opened), "students": students, "spots": spots}
+
+
+def _clean_questions(raw) -> list[dict]:
+    if not isinstance(raw, list) or not 1 <= len(raw) <= 20:
+        raise HTTPException(400, "add between 1 and 20 questions")
+    out = []
+    for n, q in enumerate(raw, 1):
+        prompt = str((q or {}).get("prompt", "")).strip()
+        if not prompt or len(prompt) > 1000:
+            raise HTTPException(400, f"question {n}: write the question")
+        if q.get("kind") == "short":
+            out.append({"prompt": prompt, "kind": "short", "choices": [], "correct": None})
+            continue
+        choices = [str(c).strip() for c in q.get("choices") or [] if str(c).strip()]
+        if not 2 <= len(choices) <= 8:
+            raise HTTPException(400, f"question {n}: give 2 to 8 choices")
+        correct = q.get("correct")
+        if not isinstance(correct, int) or not 0 <= correct < len(choices):
+            raise HTTPException(400, f"question {n}: mark the correct choice")
+        out.append({"prompt": prompt, "kind": "mc", "choices": choices, "correct": correct})
+    return out
+
+
+@app.post("/admin/api/checkpoints")
+async def admin_save(request: Request):
+    """Create a checkpoint, or edit one nobody has answered yet (so results always match what was asked)."""
+    _admin(request)
+    body = await request.json()
+    title, spot = str(body.get("title", "")).strip(), str(body.get("spot", ""))
+    if not title or len(title) > 200:
+        raise HTTPException(400, "give the checkpoint a title")
+    if spot not in {s["spot"] for s in _scan(os.path.abspath(HTML_DIR))[1]}:
+        raise HTTPException(400, "pick a spot from the book")
+    questions = json.dumps(_clean_questions(body.get("questions")))
+    try:
+        if body.get("id"):
+            if _q("SELECT 1 FROM answers WHERE checkpoint_id = ? LIMIT 1", (body["id"],)):
+                raise HTTPException(409, "students have already answered; its questions are locked")
+            _q("UPDATE lecture_checkpoints SET title = ?, spot = ?, questions = ? WHERE id = ?", (title, spot, questions, body["id"]))
+        else:
+            _q("INSERT INTO lecture_checkpoints (spot, title, questions) VALUES (?, ?, ?)", (spot, title, questions))
+    except sqlite3.IntegrityError:
+        raise HTTPException(409, "that spot already has a checkpoint")
+    return {"ok": True}
+
+
+@app.post("/admin/api/checkpoints/{cp_id}/status")
+async def admin_status(cp_id: int, request: Request):
+    _admin(request)
+    status = (await request.json()).get("status")
+    if status not in ("open", "closed"):
+        raise HTTPException(400, "status is open or closed")
+    col = "opened_at" if status == "open" else "closed_at"
+    if not _q("SELECT 1 FROM lecture_checkpoints WHERE id = ?", (cp_id,)):
+        raise HTTPException(404, "no such checkpoint")
+    _q(f"UPDATE lecture_checkpoints SET status = ?, {col} = ? WHERE id = ?", (status, _now(), cp_id))
+    return {"ok": True}
 
 
 if os.path.isdir(HTML_DIR):

@@ -26,9 +26,9 @@ def fake_transport(status=200, usage=900):
     return httpx.MockTransport(handler)
 
 
-def test_proxy(monkeypatch):
+def test_proxy(monkeypatch, tmp_path):
     m.ENDPOINT, m.API_KEY, m.DAILY_CAP = "https://x.cognitiveservices.azure.com", "k", 1000
-    m._usage.clear()
+    m.APP_DB, m.SIGNIN_LOG = str(tmp_path / "app.db"), str(tmp_path / "signins.csv")   # fresh token log
     real = httpx.AsyncClient
     monkeypatch.setattr(m.httpx, "AsyncClient", lambda **kw: real(transport=fake_transport(), **kw))
     c = TestClient(m.app)
@@ -44,7 +44,7 @@ def test_proxy(monkeypatch):
 
 
 def test_signins(tmp_path):
-    m.SIGNIN_LOG = str(tmp_path / "data" / "signins.csv")
+    m.SIGNIN_LOG, m.APP_DB = str(tmp_path / "data" / "signins.csv"), str(tmp_path / "app.db")
     m.ADMIN_USERS = {"admin@illinois.edu"}
     m._seen.clear()
     c = TestClient(m.app)
@@ -75,3 +75,71 @@ def test_locked_pages(tmp_path):
     assert c.get("/ch02-prompt-engineering.html", headers={"x-ms-client-principal-name": "Admin@illinois.edu"}).text == "chapter two"
     m.LOCKED_PAGES = set()                                                 # LOCKED_PAGES="" opens it to everyone
     assert c.get("/ch02-prompt-engineering.html", headers=H).text == "chapter two"
+
+
+ADMIN = {"x-ms-client-principal-name": "admin@illinois.edu"}
+H2 = {"x-ms-client-principal-name": "other@illinois.edu"}
+Q = [{"prompt": "Request #7104?", "kind": "mc", "choices": ["Approve", "Decline", "Hold"], "correct": 2},
+     {"prompt": "No clause found: what then?", "kind": "short"}]
+
+
+def _checkpoint_app(tmp_path):
+    book = tmp_path / "html"
+    book.mkdir()
+    (book / "ch03-memory-rag.html").write_text(
+        '<title>3. Memory Retrieval and RAG — AI · ML · Markets</title>'
+        '<div class="wk-lcp" data-spot="ch03-retrieval" data-label="Chapter 3 · after the preview"></div>')
+    m.HTML_DIR, m.APP_DB, m.SIGNIN_LOG = str(book), str(tmp_path / "app.db"), str(tmp_path / "signins.csv")
+    m.ADMIN_USERS = {"admin@illinois.edu"}
+    m._seen.clear()
+    return TestClient(m.app)
+
+
+def test_events(tmp_path):
+    c = _checkpoint_app(tmp_path)
+    assert c.post("/api/events", json={"kind": "page_view", "page": "ch01-agent-loop"}).status_code == 401
+    assert c.post("/api/events", json={"kind": "page_view", "page": "ch01-agent-loop"}, headers=H).status_code == 200
+    assert c.post("/api/events", json={"kind": "cell_run", "page": "ch01-agent-loop"}, headers=H).status_code == 200
+    assert c.post("/api/events", json={"kind": "model_call", "page": "x"}, headers=H).status_code == 400   # server-only kind
+    assert c.post("/api/events", json={"kind": "page_view", "page": "<script>"}, headers=H).status_code == 400
+    c.get("/api/whoami", headers=H)
+    c.get("/api/whoami", headers=ADMIN)                                    # admins are left out of the numbers
+    assert c.get("/admin/api/data", headers=H).status_code == 403
+    d = c.get("/admin/api/data", headers=ADMIN).json()
+    assert d["total_students"] == 1 and d["active"] == 1 and d["cell_runs"] == 1
+    assert d["chapters"] == [{"page": "ch01-agent-loop", "readers": 1, "views": 1, "cell_runs": 1, "title": "ch01-agent-loop"}]
+    assert d["students"][0]["user"] == "student@illinois.edu" and d["students"][0]["days"] == 1
+    assert d["spots"] == [{"spot": "ch03-retrieval", "label": "Chapter 3 · after the preview", "page": "ch03-memory-rag"}]
+
+
+def test_lecture_checkpoint(tmp_path):
+    c = _checkpoint_app(tmp_path)
+    url = "/api/checkpoints/ch03-retrieval"
+    assert c.get(url, headers=H).json() == {"spot": "ch03-retrieval", "status": "none"}
+    assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "ch03-retrieval", "questions": Q}, headers=H).status_code == 403
+    assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "nowhere", "questions": Q}, headers=ADMIN).status_code == 400
+    bad = [{**Q[0], "correct": 7}]
+    assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "ch03-retrieval", "questions": bad}, headers=ADMIN).status_code == 400
+    assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "ch03-retrieval", "questions": Q}, headers=ADMIN).status_code == 200
+    cp = c.get("/admin/api/data", headers=ADMIN).json()["checkpoints"][0]
+
+    view = c.get(url, headers=H).json()                                     # closed before class: no answers leaked
+    assert view["status"] == "closed" and not view["revealed"] and "correct" not in view["questions"][0]
+    assert c.post(url, json={"answers": {"0": 2}}, headers=H).status_code == 409
+
+    assert c.post(f"/admin/api/checkpoints/{cp['id']}/status", json={"status": "open"}, headers=ADMIN).status_code == 200
+    assert c.post(url, json={"answers": {"0": 9}}, headers=H).status_code == 400
+    assert c.post(url, json={"answers": {"5": 1}}, headers=H).status_code == 400
+    assert c.post(url, json={"answers": {"0": 0, "1": "Guess"}}, headers=H).json()["mine"] == {"0": "0", "1": "Guess"}
+    assert c.post(url, json={"answers": {"0": 2, "1": "Send it to compliance"}}, headers=H).status_code == 200  # overwrite
+    c.post(url, json={"answers": {"0": 1}}, headers=H2)
+    edit = {"id": cp["id"], "title": "Changed", "spot": "ch03-retrieval", "questions": Q}
+    assert c.post("/admin/api/checkpoints", json=edit, headers=ADMIN).status_code == 409   # locked once answered
+
+    c.post(f"/admin/api/checkpoints/{cp['id']}/status", json={"status": "closed"}, headers=ADMIN)
+    assert c.post(url, json={"answers": {"0": 0}}, headers=H).status_code == 409
+    view = c.get(url, headers=H).json()
+    assert view["revealed"] and view["questions"][0]["correct"] == 2 and view["mine"] == {"0": "2", "1": "Send it to compliance"}
+    cp = c.get("/admin/api/data", headers=ADMIN).json()["checkpoints"][0]
+    assert cp["answered"] == 2 and len(cp["answers"]) == 3
+    assert sorted(a["correct"] for a in cp["answers"] if a["q"] == 0) == [0, 1]

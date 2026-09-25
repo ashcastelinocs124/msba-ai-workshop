@@ -38,3 +38,7 @@ print(answer)
 ```
 
 Every recommendation ends with a `[source: …]` tag naming the handbook chunk it relied on. This chapter is about making that tag reliable: how the chunks are built, how the search finds the right one, and what to do when it does not.
+
+```{raw} html
+<div class="wk-lcp" data-spot="ch03-retrieval" data-label="Chapter 3 · after the pre-clearance preview"></div>
+```

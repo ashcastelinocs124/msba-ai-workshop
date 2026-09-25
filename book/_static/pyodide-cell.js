@@ -338,6 +338,7 @@
     const btn = cell.querySelector(".wk-run"), ta = cell.querySelector("textarea"), out = cell.querySelector(".wk-out");
     const status = (m) => { out.className = "wk-out show"; out.textContent = m; };
     btn.disabled = true; btn.textContent = "Running…";
+    window.wkTrack?.("cell_run");
     cell._player.reset();
     showView(cell, "text");
     try {

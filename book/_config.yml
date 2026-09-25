@@ -32,6 +32,7 @@ sphinx:
       - pyodide-cell.js
       - quiz.js
       - site.js
+      - lecture-checkpoint.js
     # html_theme_options here replaces the options derived from the html: block above,
     # so the footer and repository button must be set here to render.
     html_theme_options:

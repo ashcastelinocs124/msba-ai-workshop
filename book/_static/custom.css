@@ -165,3 +165,31 @@ h1, h2 { color: var(--wk-navy); letter-spacing: -0.02em; }
 @media (min-width: 1200px) {
   .bd-sidebar-secondary { top: 3rem; } /* stick below the pinned controls instead of under them */
 }
+
+/* Lecture checkpoint (lecture-checkpoint.js): questions the instructor opens during a session */
+.wk-lcp { border: 1px solid var(--wk-line); border-left: 4px solid var(--wk-navy); border-radius: 10px; padding: 14px 16px; margin: 1.2rem 0; background: #fafbfc; }
+.wk-lcp:empty::before { content: "Lecture checkpoint"; font: 700 11px ui-monospace, Menlo, monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wk-muted); }
+.wk-lcp.open { border-left-color: var(--wk-orange); background: #fff; }
+.wk-lcp p { margin: 8px 0 0; }
+.wk-lcp-t { font: 700 11px ui-monospace, Menlo, monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wk-navy); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.wk-lcp.open .wk-lcp-t { color: var(--wk-orange); }
+.wk-lcp-st { font: 700 10px ui-monospace, Menlo, monospace; border-radius: 999px; padding: 2px 8px; letter-spacing: 0.08em; }
+.wk-lcp-st.closed { background: #eef0f4; color: var(--wk-muted); }
+.wk-lcp-st.open { background: #fff3ea; color: #b54200; }
+.wk-lcp-st.done { background: #e8f7ee; color: #136c3a; }
+.wk-lcp-q { border: 0; padding: 0; margin: 14px 0; }
+.wk-lcp-q legend { font-size: 1rem; line-height: 1.5; font-weight: 600; margin-bottom: 6px; padding: 0; float: none; width: auto; }
+.wk-lcp-q label { display: block; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.wk-lcp-q label:hover { background: #f5f6f9; }
+.wk-lcp-q textarea { width: 100%; min-height: 64px; border: 1px solid var(--wk-line); border-radius: 6px; padding: 8px; font: inherit; }
+.wk-lcp-q textarea:focus, .wk-lcp-btn:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 1px; }
+.wk-lcp-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.wk-lcp-btn { font: 700 13px system-ui, sans-serif; background: var(--wk-navy); color: #fff; border: 0; border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.wk-lcp-btn:disabled { opacity: 0.6; cursor: wait; }
+.wk-lcp-hint { font-size: 0.85rem; color: var(--wk-muted); }
+.wk-lcp-fb:not(:empty) { margin-top: 10px; padding: 8px 10px; border-radius: 6px; font-size: 0.92rem; }
+.wk-lcp-fb.ok { background: #e8f7ee; color: #136c3a; }
+.wk-lcp-fb.no { background: #fdeeee; color: #9c2323; }
+.wk-lcp-r { margin-top: 8px; padding: 8px 10px; border-radius: 6px; font-size: 0.95rem; background: #f5f6f9; }
+.wk-lcp-r.ok { background: #e8f7ee; color: #136c3a; }
+.wk-lcp-r.no { background: #fdeeee; color: #9c2323; }

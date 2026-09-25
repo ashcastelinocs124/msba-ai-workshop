@@ -1,5 +1,13 @@
 // Which copy of the book is this? The campus (Azure) copy answers /api/whoami; GitHub Pages does not.
 window.WK_CAMPUS_URL = "https://dl-msba-workshop.azurewebsites.net";
+
+// Usage events for the instructor's /admin dashboard: a page view on load, a cell run from pyodide-cell.js.
+// Campus copy only (WK_SIGNED_IN is set once /api/whoami answers); fire-and-forget, never blocks the page.
+window.wkTrack = (kind) => {
+  if (!window.WK_SIGNED_IN) return;
+  const page = location.pathname.split("/").pop().replace(/\.html$/, "") || "index";
+  fetch("/api/events", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind, page }), keepalive: true }).catch(() => {});
+};
 window.WK_REPO = "https://github.com/ashcastelinocs124/msba-ai-workshop";
 
 // Report button: a Bug / Feature-request dialog that opens a prefilled new-issue page on the
@@ -68,6 +76,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const r = await fetch("/api/whoami", { headers: { accept: "application/json" } });
     if (r.ok) who = await r.json();
   } catch (e) { /* offline or no proxy */ }
+  if (who) {
+    window.WK_SIGNED_IN = true;
+    window.wkTrack("page_view");
+  }
   if (who && slot) {
     const pill = document.createElement("span");
     pill.className = "wk-who";
