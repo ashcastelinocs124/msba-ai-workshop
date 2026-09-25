@@ -28,15 +28,16 @@
   function revealedView(s) {
     const scored = s.questions.map((q, i) => q.kind === "mc" && s.mine[i] != null ? +(s.mine[i] === String(q.correct)) : null).filter((x) => x != null);
     const badge = Object.keys(s.mine).length ? `CLOSED · ${scored.reduce((a, b) => a + b, 0)} OF ${scored.length} CORRECT` : "CLOSED";
+    const why = (q) => q.explain ? `<div class="wk-lcp-why">${esc(q.explain)}</div>` : "";
     const rows = s.questions.map((q, i) => {
       const mine = s.mine[i];
       if (q.kind === "short") {
-        return `<div class="wk-lcp-r"><b>${i + 1}. ${esc(q.prompt)}</b><br>${mine ? `Your answer: “${esc(mine)}” (short answer, not scored)` : "You did not answer."}</div>`;
+        return `<div class="wk-lcp-r"><b>${i + 1}. ${esc(q.prompt)}</b><br>${mine ? `Your answer: “${esc(mine)}” (short answer, not scored)` : "You did not answer."}${why(q)}</div>`;
       }
       const right = q.choices[q.correct];
-      if (mine == null) return `<div class="wk-lcp-r"><b>${i + 1}. ${esc(q.prompt)}</b><br>Answer: ${esc(right)}. You did not answer.</div>`;
+      if (mine == null) return `<div class="wk-lcp-r"><b>${i + 1}. ${esc(q.prompt)}</b><br>Answer: ${esc(right)}. You did not answer.${why(q)}</div>`;
       const ok = mine === String(q.correct);
-      return `<div class="wk-lcp-r ${ok ? "ok" : "no"}"><b>${i + 1}. ${esc(q.prompt)}</b><br>${ok ? `✓ ${esc(right)}` : `✗ You chose: ${esc(q.choices[+mine])}. Answer: ${esc(right)}.`}</div>`;
+      return `<div class="wk-lcp-r ${ok ? "ok" : "no"}"><b>${i + 1}. ${esc(q.prompt)}</b><br>${ok ? `✓ ${esc(right)}` : `✗ You chose: ${esc(q.choices[+mine])}. Answer: ${esc(right)}.`}${why(q)}</div>`;
     }).join("");
     return head(s.title, badge, "done") + rows;
   }

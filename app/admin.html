@@ -93,6 +93,11 @@
         <h3 id="bTitle">New Lecture checkpoint</h3>
         <label class="f" for="bName">Title</label><input type="text" id="bName" maxlength="200" placeholder="e.g. Retrieval">
         <label class="f" for="bSpot">Spot in the textbook <span>(markers found in the built chapters)</span></label><select id="bSpot"></select>
+        <details id="bPaste" style="margin-top:10px">
+          <summary class="hint" style="cursor:pointer">Paste questions instead of typing them</summary>
+          <textarea id="bPasteText" rows="8" style="margin-top:6px" placeholder="1. Slide 17: Which of these…&#10;&#10;A. …&#10;B. …&#10;C. …&#10;&#10;Answer: C. Why C is right."></textarea>
+          <div class="row" style="margin-top:6px"><button class="btn small" id="bPasteGo" type="button">Fill the questions below</button><span class="hint" id="bPasteMsg"></span></div>
+        </details>
         <div id="bQs"></div>
         <div class="row" style="margin-top:8px">
           <button class="btn" id="bAdd">+ Add question</button>
@@ -247,7 +252,8 @@
         <select aria-label="Question type"><option value="mc">Multiple choice</option><option value="short">Short answer</option></select>
         <button class="btn small x" type="button">Remove</button></div>
       <input type="text" class="prompt" style="margin-top:6px" placeholder="Question text" maxlength="1000">
-      <div class="opts"></div><div class="mcOnly"><button class="btn small addOpt" type="button">+ Choice</button> <span class="hint">● marks the correct choice</span></div>`;
+      <div class="opts"></div><div class="mcOnly"><button class="btn small addOpt" type="button">+ Choice</button> <span class="hint">● marks the correct choice</span></div>
+      <input type="text" class="explain" style="margin-top:6px" placeholder="Explanation (optional, shown to students after you close it)" maxlength="1000">`;
     const sel = d.querySelector("select"), opts = d.querySelector(".opts");
     const addOpt = (text = "", checked = false) => {
       const o = document.createElement("div");
@@ -257,7 +263,7 @@
       opts.append(o);
     };
     const sync = () => { const mc = sel.value === "mc"; opts.hidden = !mc; d.querySelector(".mcOnly").hidden = !mc; };
-    sel.value = q.kind; d.querySelector(".prompt").value = q.prompt;
+    sel.value = q.kind; d.querySelector(".prompt").value = q.prompt; d.querySelector(".explain").value = q.explain || "";
     (q.choices.length ? q.choices : ["", "", ""]).forEach((c, j) => addOpt(c, j === q.correct));
     sel.addEventListener("change", sync);
     d.querySelector(".addOpt").addEventListener("click", () => addOpt());
@@ -269,7 +275,7 @@
   const renumber = () => $("bQs").querySelectorAll(".qn").forEach((b, i) => { b.textContent = "Q" + (i + 1); });
   const readQs = () => [...$("bQs").querySelectorAll(".qb")].map((d) => {
     const kind = d.querySelector("select").value, opts = [...d.querySelectorAll(".opt")].filter((o) => o.querySelector("input[type=text]").value.trim());
-    return { kind, prompt: d.querySelector(".prompt").value,
+    return { kind, prompt: d.querySelector(".prompt").value, explain: d.querySelector(".explain").value,
       choices: kind === "mc" ? opts.map((o) => o.querySelector("input[type=text]").value) : [],
       correct: kind === "mc" ? opts.findIndex((o) => o.querySelector("input[type=radio]").checked) : null };
   });
@@ -292,6 +298,37 @@
     if (cur) $("bSpot").value = cur;
   }
   $("bAdd").addEventListener("click", () => qBlock());
+
+  // "1. Slide 17: question" / "A. choice" lines / "Answer: C. explanation" → questions. A block with no
+  // lettered choices becomes a short-answer question. Anything unparsed is reported, never silently dropped.
+  function parsePasted(text) {
+    const blocks = text.replace(/\r/g, "").split(/^\s*(?=\d+[.)]\s)/m).map((b) => b.trim()).filter(Boolean);
+    return blocks.map((b, n) => {
+      const lines = b.split("\n").map((l) => l.trim()).filter(Boolean);
+      const prompt = lines[0].replace(/^\d+[.)]\s*/, "");
+      const choices = [], rest = [];
+      let letter = null, explain = "";
+      for (const l of lines.slice(1)) {
+        const c = l.match(/^([A-H])[.)]\s+(.*)$/), a = l.match(/^Answer:\s*([A-H])\b[.)]?\s*(.*)$/i);
+        if (a) { letter = a[1].toUpperCase(); explain = a[2]; }
+        else if (c) choices.push(c[2]);
+        else if (letter) explain += (explain ? " " : "") + l;
+        else rest.push(l);
+      }
+      if (!choices.length) return { kind: "short", prompt: [prompt, ...rest].join(" "), choices: [], correct: null, explain };
+      const correct = letter ? letter.charCodeAt(0) - 65 : -1;
+      if (correct < 0 || correct >= choices.length) throw new Error(`Question ${n + 1}: no "Answer: X." line matching its choices.`);
+      return { kind: "mc", prompt: [prompt, ...rest].join(" "), choices, correct, explain };
+    });
+  }
+  $("bPasteGo").addEventListener("click", () => {
+    try {
+      const qs = parsePasted($("bPasteText").value);
+      if (!qs.length) throw new Error("Nothing to read. Each question starts with a number, like \"1. \".");
+      $("bQs").innerHTML = ""; qs.forEach((q) => qBlock(q));
+      $("bPasteMsg").textContent = `Filled ${qs.length} question${qs.length > 1 ? "s" : ""}. Check them, pick the spot and title, then Save.`;
+    } catch (err) { $("bPasteMsg").textContent = err.message; }
+  });
   $("bCancel").addEventListener("click", resetBuilder);
   $("bSave").addEventListener("click", async () => {
     $("bSave").disabled = true;

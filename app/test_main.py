@@ -79,7 +79,8 @@ def test_locked_pages(tmp_path):
 
 ADMIN = {"x-ms-client-principal-name": "admin@illinois.edu"}
 H2 = {"x-ms-client-principal-name": "other@illinois.edu"}
-Q = [{"prompt": "Request #7104?", "kind": "mc", "choices": ["Approve", "Decline", "Hold"], "correct": 2},
+Q = [{"prompt": "Request #7104?", "kind": "mc", "choices": ["Approve", "Decline", "Hold"], "correct": 2,
+      "explain": "Deere was published on 6 days ago; the blackout is 14."},
      {"prompt": "No clause found: what then?", "kind": "short"}]
 
 
@@ -125,6 +126,7 @@ def test_lecture_checkpoint(tmp_path):
 
     view = c.get(url, headers=H).json()                                     # closed before class: no answers leaked
     assert view["status"] == "closed" and not view["revealed"] and "correct" not in view["questions"][0]
+    assert "explain" not in view["questions"][0]                           # nor the explanation
     assert c.post(url, json={"answers": {"0": 2}}, headers=H).status_code == 409
 
     assert c.post(f"/admin/api/checkpoints/{cp['id']}/status", json={"status": "open"}, headers=ADMIN).status_code == 200
@@ -140,6 +142,7 @@ def test_lecture_checkpoint(tmp_path):
     assert c.post(url, json={"answers": {"0": 0}}, headers=H).status_code == 409
     view = c.get(url, headers=H).json()
     assert view["revealed"] and view["questions"][0]["correct"] == 2 and view["mine"] == {"0": "2", "1": "Send it to compliance"}
+    assert view["questions"][0]["explain"].startswith("Deere was published") and view["questions"][1]["explain"] == ""
     cp = c.get("/admin/api/data", headers=ADMIN).json()["checkpoints"][0]
     assert cp["answered"] == 2 and len(cp["answers"]) == 3
     assert sorted(a["correct"] for a in cp["answers"] if a["q"] == 0) == [0, 1]

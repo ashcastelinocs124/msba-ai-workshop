@@ -234,7 +234,8 @@ def _student_view(cp: sqlite3.Row | None, spot: str, user: str) -> dict:
     revealed = cp["status"] == "closed" and cp["opened_at"] is not None
     mine = {r["q"]: r["value"] for r in _q("SELECT q, value FROM answers WHERE checkpoint_id = ? AND user = ?", (cp["id"], user))}
     questions = [{"prompt": q["prompt"], "kind": q["kind"], "choices": q.get("choices", []),
-                  **({"correct": q.get("correct")} if revealed else {})} for q in json.loads(cp["questions"])]
+                  **({"correct": q.get("correct"), "explain": q.get("explain", "")} if revealed else {})}
+                 for q in json.loads(cp["questions"])]
     return {"spot": spot, "title": cp["title"], "status": cp["status"], "revealed": revealed,
             "questions": questions, "mine": mine}
 
@@ -368,8 +369,9 @@ def _clean_questions(raw) -> list[dict]:
         prompt = str((q or {}).get("prompt", "")).strip()
         if not prompt or len(prompt) > 1000:
             raise HTTPException(400, f"question {n}: write the question")
+        explain = str(q.get("explain") or "").strip()[:1000]  # optional; students see it after the checkpoint closes
         if q.get("kind") == "short":
-            out.append({"prompt": prompt, "kind": "short", "choices": [], "correct": None})
+            out.append({"prompt": prompt, "kind": "short", "choices": [], "correct": None, "explain": explain})
             continue
         choices = [str(c).strip() for c in q.get("choices") or [] if str(c).strip()]
         if not 2 <= len(choices) <= 8:
@@ -377,7 +379,7 @@ def _clean_questions(raw) -> list[dict]:
         correct = q.get("correct")
         if not isinstance(correct, int) or not 0 <= correct < len(choices):
             raise HTTPException(400, f"question {n}: mark the correct choice")
-        out.append({"prompt": prompt, "kind": "mc", "choices": choices, "correct": correct})
+        out.append({"prompt": prompt, "kind": "mc", "choices": choices, "correct": correct, "explain": explain})
     return out
 
 

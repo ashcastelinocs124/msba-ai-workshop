@@ -184,6 +184,10 @@ print(f"call {len(log)} read {on_desk:>4} tokens, then wrote the memo")
 
 Deciding what to keep, what to summarise and what to drop is the part of context engineering that chapter 6 takes up, when the agents run for twenty steps.
 
+```{raw} html
+<div class="wk-lcp" data-spot="ch02-context" data-label="2.2 Context Engineering · after §2.2.3 (slides 53–75)"></div>
+```
+
 ## 2.2.4 Run it against a real model
 
 The mock uses whatever is on the desk because it was written to. A real model usually does, and it can also ignore a clause or misread a follow-up. The cells below send the same desks to the GPT deployment on Illinois Azure through this site's `/api/chat` proxy; your browser never sees a key.

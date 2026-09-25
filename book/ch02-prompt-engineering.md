@@ -386,6 +386,10 @@ Add these up and the picture is: prompts are the right tool for standing instruc
 </div>
 ```
 
+```{raw} html
+<div class="wk-lcp" data-spot="ch02-prompt" data-label="2.1 Prompt Engineering · after §2.1.4 (slides 17–46)"></div>
+```
+
 ## 2.1.5 Run it against a real model
 
 The mock honours each prompt block because it was written to. A real model honours them most of the time, and the gap between "always" and "most of the time" is what this section measures. The cells below send the same blocks and the same client replies to the GPT deployment on Illinois Azure through this site's `/api/chat` proxy; your browser never sees a key.
