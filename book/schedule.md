@@ -24,4 +24,6 @@
 | 8 | Fri, Nov 13, 2026 | 1:30–3:30 pm | 3007 BIF | IV · Finance | [8. Financial Markets and AI as an Investment Theme](ch08-markets-and-ai.md) |
 | 9 | Fri, Dec 4, 2026 | 1:30–3:30 pm | 3007 BIF | IV · Finance | [9. AI for Financial and Investment Research](ch09-ai-investment-research.md) |
 
+Chapter 0, [How Large Language Models Work](ch00-how-llms-work.md), is pre-reading with no session of its own. Read it before your first session, or now if you have already started.
+
 No sessions on Oct 9, Nov 20, or Nov 27. Most sessions are in 3007 BIF; sessions 1 and 3 are not.

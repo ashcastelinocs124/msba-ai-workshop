@@ -84,45 +84,7 @@ The package is from OpenAI because OpenAI's API format became the common standar
 
 OpenAI also publishes the [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/), a separate package built on top of `openai` for agents that call tools over many steps: the loop chapter 1 writes by hand. This workshop writes that loop itself so you can see every step, but the Agents SDK is worth knowing once you build agents for real.
 
-## Open-source and closed-source models
-
-A model is two things: the code that runs it, and its **weights**, the billions of numbers learned in training. Who can get the weights is the difference.
-
-| | Closed-source | Open-source (open-weight) |
-|---|---|---|
-| Examples | OpenAI's GPT models, Anthropic's Claude, Google's Gemini | Meta's Llama, Alibaba's Qwen, Z.ai's GLM, Mistral |
-| How you use it | Only through the company's API, on its servers | Download the weights and run it on hardware you choose |
-| Your data | Sent to the provider on every call | Can stay on hardware your organization controls |
-| Cost | Pay per token | Pay for the hardware, or use hardware you already have |
-| Changing it | Prompting, and fine-tuning only where the provider allows it | Inspect it, fine-tune it, run it offline |
-| Trade-off | Usually the strongest models, with no servers to run | You run, secure and update it; the best open models tend to trail the best closed ones |
-
-"Open" has limits. Most open models publish their weights and code, but not their training data, and each comes with a license that says what you may do with it. Read the license before you build on one.
-
-For a firm like Champaign Capital, the data row often decides it: client data that may not leave the building can still go to a model the firm runs itself.
-
-### Running an open model on campus GPUs
-
-Open weights mean the campus can run a model itself. NCSA does this for Lumen, and you can do the same on NCSA's research GPUs, such as the [Delta cluster](https://docs.ncsa.illinois.edu/systems/delta/en/latest/) (access comes through an allocation, for example from [Illinois Computes](https://computes.illinois.edu/)). The steps, on a GPU node:
-
-```bash
-pip install vllm "huggingface_hub[cli]"
-hf download Qwen/Qwen3-8B                   # pull the weights and config from Hugging Face
-vllm serve Qwen/Qwen3-8B --port 8000        # serve it with an OpenAI-compatible API
-```
-
-[`hf download`](https://huggingface.co/docs/huggingface_hub/guides/cli) fetches the model files from [Hugging Face](https://huggingface.co/Qwen/Qwen3-8B), where most open models are published. vLLM loads them onto the GPU and answers requests in the OpenAI format. So the same client code works; only the address changes:
-
-```python
-from openai import OpenAI
-
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-reply = client.chat.completions.create(model="Qwen/Qwen3-8B",
-                                       messages=[{"role": "user", "content": "Say hello"}])
-print(reply.choices[0].message.content)
-```
-
-On a shared cluster you would usually run this as a batch job on an allocated GPU node rather than on the login node; the Delta documentation explains how. You do not need any of this for the workshop. Lumen already does it for you.
+What an open-source model is, how it differs from a closed one, and how to run one on NCSA's GPUs are in {ref}`chapter 0 <open-closed-models>`.
 
 ## Logistics
 

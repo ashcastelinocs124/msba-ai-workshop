@@ -1,9 +1,10 @@
 # AI, ML, and Financial Markets Workshop Series
 
-An interactive textbook for the Gies MSBA workshop series. Nine chapters in four parts:
+An interactive textbook for the Gies MSBA workshop series. Ten chapters in five parts:
 
 | Part | Chapters |
 |---|---|
+| 0 · Foundations | 0 How Large Language Models Work (tokens, next-token prediction, open vs closed models) |
 | I · Agents | 1 Introduction to AI Agents (what an agent is, the loop, tool design) · 2 Prompt and Context Engineering · 3 Memory Retrieval and RAG |
 | II · Machine learning | 4 ML Foundations I · 5 ML Foundations II |
 | III · Systems and decisions | 6 Agent Systems · 7 When to Use ML, Agents, or Neither |

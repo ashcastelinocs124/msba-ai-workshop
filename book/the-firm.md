@@ -1,7 +1,7 @@
 # The firm: Champaign Capital Research
 
 ```{raw} html
-<p class="wk-lede">Every chapter of this book is set at one company. Read this page first: the people, the product, and the plan are the same from chapter 1 to chapter 9.</p>
+<p class="wk-lede">Every chapter of this book is set at one company. Read this page first: the people, the product, and the plan are the same from chapter 0 to chapter 9.</p>
 ```
 
 ## The business

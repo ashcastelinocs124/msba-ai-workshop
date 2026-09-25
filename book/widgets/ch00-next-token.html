@@ -1,0 +1,133 @@
+<div class="wk-widget wk-nt" id="w-nt">
+  <style>
+    .wk-nt .starts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--wk-muted); margin-bottom: 10px; }
+    .wk-nt .starts button[aria-pressed="true"] { background: var(--wk-navy); color: #fff; }
+    .wk-nt .sent { background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 12px 14px; font: 600 17px/1.5 system-ui, sans-serif; color: #1f2430; min-height: 28px; }
+    .wk-nt .sent .w { display: inline-block; margin-right: 6px; }
+    .wk-nt .sent .w.new { background: #fff3ea; border-radius: 3px; }
+    .wk-nt .sent .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--wk-orange); vertical-align: -3px; animation: wk-nt-blink 1s steps(2) infinite; }
+    @keyframes wk-nt-blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .wk-nt .sent .caret { animation: none; } }
+    .wk-nt .h { font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin: 14px 0 6px; }
+    .wk-nt .bars { display: flex; flex-direction: column; gap: 5px; }
+    .wk-nt .bar { display: grid; grid-template-columns: 7.5em 1fr 3.2em; gap: 8px; align-items: center; width: 100%; text-align: left; border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 5px 8px; cursor: pointer; font: 600 13px system-ui, sans-serif; color: #1f2430; }
+    .wk-nt .bar:hover { border-color: var(--wk-navy); }
+    .wk-nt .bar:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-nt .track { height: 12px; background: #eef0f4; border-radius: 3px; overflow: hidden; }
+    .wk-nt .fill { height: 100%; background: var(--wk-navy); border-radius: 3px; transition: width .2s; }
+    .wk-nt .bar.top .fill { background: var(--wk-orange); }
+    .wk-nt .pct { font: 600 12px ui-monospace, Menlo, monospace; color: var(--wk-muted); text-align: right; }
+    .wk-nt .controls { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; margin-top: 12px; }
+    .wk-nt label.t { font-size: 13px; color: #1f2430; }
+    .wk-nt label.t b { font-family: ui-monospace, Menlo, monospace; }
+    .wk-nt .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .wk-nt .btns button:focus-visible, .wk-nt .starts button:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-nt .verdict { margin-top: 12px; font-size: 13px; border-left: 3px solid var(--wk-line); padding: 6px 10px; background: #fff; min-height: 1.5em; }
+    .wk-nt .verdict.ok { border-left-color: #1e8449; }
+    .wk-nt .verdict.bad { border-left-color: #c0392b; }
+    .wk-nt .note { font-size: 12px; color: var(--wk-muted); margin-top: 10px; }
+    @media (max-width: 560px) { .wk-nt .controls { grid-template-columns: 1fr; } .wk-nt .bar { grid-template-columns: 6em 1fr 3em; } }
+  </style>
+  <div class="wk-title">/// Interactive · predict the next word</div>
+  <div class="starts" role="group" aria-label="First word">
+    Start with:
+    <button type="button" data-start="Deere" aria-pressed="true">Deere</button>
+    <button type="button" data-start="NVIDIA" aria-pressed="false">NVIDIA</button>
+    <button type="button" data-start="Apple" aria-pressed="false">Apple</button>
+  </div>
+  <div class="sent" aria-live="polite" data-sent></div>
+  <div class="h" data-h>What the model thinks comes next</div>
+  <div class="bars" data-bars></div>
+  <div class="controls">
+    <label class="t">Temperature: <b data-tv>1.0</b>
+      <input type="range" min="0" max="2" step="0.1" value="1" data-t aria-describedby="w-nt-thelp">
+      <span id="w-nt-thelp" class="note" style="display:block;margin:2px 0 0">0 always takes the favourite. Higher gives the long shots a better chance.</span>
+    </label>
+    <div class="btns">
+      <button type="button" class="primary" data-act="top">Take the favourite</button>
+      <button type="button" data-act="roll">Roll the dice</button>
+      <button type="button" data-act="reset">Start over</button>
+    </div>
+  </div>
+  <div class="verdict" data-verdict aria-live="polite"></div>
+  <p class="note">A toy model: it has read thirteen sentences from the firm's memos and counts which word follows which. A real LLM does the same job over tokens, with a neural network trained on trillions of them. Click any bar to choose that word yourself.</p>
+  <script>
+  (() => {
+    const w = document.getElementById("w-nt");
+    // Copy of CORPUS in _static/py/llm_basics.py; keep the two in step.
+    const CORPUS = [
+      "Deere grew revenue faster than Caterpillar .",
+      "Deere grew revenue 6.4% to $13.8B .",
+      "Caterpillar grew revenue 3.1% to $16.9B .",
+      "NVIDIA grew revenue faster than Apple .",
+      "NVIDIA grew revenue 58.0% to $52.4B .",
+      "Apple grew revenue 5.0% to $96.1B .",
+      "Microsoft grew revenue 17.0% to $76.3B .",
+      "Microsoft grew revenue faster than Apple .",
+      "Deere grew revenue faster than Caterpillar from a smaller base .",
+      "NVIDIA is growing faster than Microsoft .",
+      "Deere is growing faster than Caterpillar .",
+      "Caterpillar is larger than Deere by revenue .",
+      "Apple is larger than NVIDIA .",
+    ];
+    // The firm's records (tools.py FINANCIALS): growth %, revenue $B.
+    const RECORDS = { Deere: [6.4, 13.8], Caterpillar: [3.1, 16.9], NVIDIA: [58.0, 52.4], Apple: [5.0, 96.1], Microsoft: [17.0, 76.3] };
+    const follows = {};
+    CORPUS.forEach((s) => { const ws = s.split(" "); ws.slice(1).forEach((b, i) => { const a = ws[i]; (follows[a] ||= {})[b] = (follows[a][b] || 0) + 1; }); });
+
+    const probs = (word, t) => {
+      const c = follows[word]; if (!c) return [];
+      const entries = Object.entries(c);
+      if (t <= 0) { const best = Math.max(...entries.map((e) => e[1])); const n = entries.filter((e) => e[1] === best).length;
+        return entries.map(([k, v]) => [k, v === best ? 1 / n : 0]).sort((a, b) => b[1] - a[1]); }
+      const wts = entries.map(([k, v]) => [k, Math.pow(v, 1 / t)]); const tot = wts.reduce((s, e) => s + e[1], 0);
+      return wts.map(([k, v]) => [k, v / tot]).sort((a, b) => b[1] - a[1]);
+    };
+    const check = (words) => {
+      const s = words.join(" "), rec = RECORDS[words[0]];
+      const g = s.match(/(\d+\.\d)%/), r = s.match(/\$(\d+\.\d)B/);
+      if (!rec || (!g && !r)) return ["", "No figures to check. Try a start and roll until it writes a number."];
+      const wrong = [];
+      if (g && Math.abs(+g[1] - rec[0]) > 0.05) wrong.push(`growth was ${rec[0].toFixed(1)}%, not ${g[1]}%`);
+      if (r && Math.abs(+r[1] - rec[1]) > 0.05) wrong.push(`revenue was $${rec[1].toFixed(1)}B, not $${r[1]}B`);
+      return wrong.length ? ["bad", `✗ Sounds right, but it is wrong: ${words[0]}'s ${wrong.join(" and ")}. The model picked each word because it often follows the last one, not because it is true.`]
+                          : ["ok", "✓ Matches the firm's records."];
+    };
+
+    const sentEl = w.querySelector("[data-sent]"), barsEl = w.querySelector("[data-bars]"), tEl = w.querySelector("[data-t]"),
+          tvEl = w.querySelector("[data-tv]"), vEl = w.querySelector("[data-verdict]"), hEl = w.querySelector("[data-h]");
+    let start = "Deere", words = [start];
+    const done = () => words[words.length - 1] === "." || words.length >= 14 || !follows[words[words.length - 1]];
+
+    const render = () => {
+      const t = +tEl.value; tvEl.textContent = t.toFixed(1);
+      sentEl.innerHTML = words.map((x, i) => `<span class="w${i === words.length - 1 && i ? " new" : ""}">${x}</span>`).join("") + (done() ? "" : '<span class="caret" aria-hidden="true"></span>');
+      barsEl.innerHTML = "";
+      w.querySelectorAll("[data-act=top],[data-act=roll]").forEach((b) => { b.disabled = done(); });
+      if (done()) { hEl.textContent = "Sentence finished"; const [cls, msg] = check(words); vEl.className = "verdict " + cls; vEl.textContent = msg; return; }
+      hEl.textContent = `What the model thinks comes after “${words[words.length - 1]}”`; vEl.className = "verdict"; vEl.textContent = "";
+      probs(words[words.length - 1], t).slice(0, 6).forEach(([word, p], i) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "bar" + (i === 0 ? " top" : "");
+        b.setAttribute("aria-label", `${word}, ${Math.round(p * 100)} percent. Choose it.`);
+        b.innerHTML = `<span>${word}</span><span class="track"><span class="fill" style="width:${(p * 100).toFixed(1)}%"></span></span><span class="pct">${Math.round(p * 100)}%</span>`;
+        b.addEventListener("click", () => { words.push(word); render(); });
+        barsEl.appendChild(b);
+      });
+    };
+    w.querySelectorAll("[data-start]").forEach((b) => b.addEventListener("click", () => {
+      w.querySelectorAll("[data-start]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      start = b.dataset.start; words = [start]; render();
+    }));
+    w.querySelector("[data-act=top]").addEventListener("click", () => { const p = probs(words[words.length - 1], 0); if (p.length) { words.push(p[0][0]); render(); } });
+    w.querySelector("[data-act=roll]").addEventListener("click", () => {
+      const p = probs(words[words.length - 1], +tEl.value); if (!p.length) return;
+      let r = Math.random(), pick = p[p.length - 1][0];
+      for (const [k, v] of p) { if ((r -= v) <= 0) { pick = k; break; } }
+      words.push(pick); render();
+    });
+    w.querySelector("[data-act=reset]").addEventListener("click", () => { words = [start]; render(); });
+    tEl.addEventListener("input", render);
+    render();
+  })();
+  </script>
+</div>

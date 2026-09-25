@@ -6,6 +6,9 @@ parts:
       - file: the-firm
       - file: setup
       - file: schedule
+  - caption: Part 0 · Foundations
+    chapters:
+      - file: ch00-how-llms-work
   - caption: Part I · Agents
     chapters:
       - file: ch01-agent-loop
