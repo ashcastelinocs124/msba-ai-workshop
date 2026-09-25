@@ -12,8 +12,9 @@
 ```{admonition} Learning objectives
 :class: note
 - Say what the context is on one call, and how context engineering differs from writing a prompt.
-- Assemble the context for one call from instructions, a client card, a retrieved policy clause, the last exchange and tool results.
-- Count what each piece costs, including the tool definitions and tool results, and decide what belongs in the prompt, in the context per call, and in a code check after the answer.
+- Assemble the context for one call from instructions, a client card, a retrieved policy clause and the last exchange.
+- Count what each piece costs, and decide what belongs in the prompt, in the context per call, and in a code check after the answer.
+- Hand an independent job to a sub-agent with a clean desk, and say what that saves and what it costs.
 ```
 
 ## 2.2.1 From prompts to context
@@ -119,70 +120,50 @@ A table, though nobody asked for one. That preference is held in the client's re
 </div>
 ```
 
-## 2.2.3 Tools in the context
+## 2.2.3 Sub-agents: a clean desk for each job
 
-Tools are part of the context too. On every call the model reads a definition of each tool it may use: the name, a description of when to use it, and the arguments it accepts. That is how it knows `get_financials` exists at all. Chapter 1 wrote these definitions so the model could not misuse a tool. This section counts what they cost.
+A four-company comparison means four lookups. When one agent makes them all, every result stays on its desk, and each later call reads everything before it. By the time it writes four sentences, most of what it reads is raw material it no longer needs.
 
-**What the model reads about each tool.** The definitions are sent on every call, whether the question needs the tool or not:
+A **sub-agent** is an agent that the lead agent sends off to do one job. It starts with a clean desk: only its task. It does the lookup, sends back one line, and its desk is thrown away. The lead never sees the working papers. Priya does the same when she asks Marcus for Deere's number: she gets one line back, not his spreadsheet.
 
-```{code-block} python
-:class: pyodide
-import json
-from tools import TOOL_SCHEMAS
-from context import estimate_tokens
-
-total = 0
-for schema in TOOL_SCHEMAS:
-    cost = estimate_tokens(json.dumps(schema))
-    total += cost
-    print(f"{schema['name']:<18} {cost:>3} tokens")
-print(f"{'all four tools':<18} {total:>3} tokens, read on every call")
-```
-
-Four tools are cheap. A firm with forty tools pays for all forty on every call, and the model has forty descriptions to choose between. When two descriptions overlap, the model can pick the wrong one. [Anthropic's guidance](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) puts it this way: if an analyst could not say for sure which tool fits a question, the model will not do better.
-
-**Give each call only the tools it needs.** A revenue question needs one tool. The same code that picks the handbook clause can pick the tools:
-
-```{code-block} python
-:class: pyodide
-import json
-from tools import TOOL_SCHEMAS
-from context import estimate_tokens
-
-q = "What was Deere's revenue growth last quarter?"
-needed = [s for s in TOOL_SCHEMAS if s["name"] == "get_financials"]
-
-print("Question:", q)
-print("All four tools on the desk:", sum(estimate_tokens(json.dumps(s)) for s in TOOL_SCHEMAS), "tokens")
-print("Only get_financials:       ", sum(estimate_tokens(json.dumps(s)) for s in needed), "tokens")
-print("The model can no longer call get_price or search_docs by mistake.")
-```
-
-**Tool results pile up.** The definitions are the fixed cost. The results are the growing one. Each lookup's result stays in the messages, so every call reads more than the one before. Drag the slider, then switch to a real filing extract:
+Step through both set-ups. Each lookup here returns a filing extract of about 1,800 tokens, the size of a real one:
 
 ```{raw} html
-:file: widgets/ch02-tool-pileup.html
+:file: widgets/ch02-subagents.html
 ```
 
-The same count, measured on the fixtures:
+The same pattern with the book's agent. `sub_agent` runs the chapter 1 loop with nothing on its desk but one company's question:
 
 ```{code-block} python
 :class: pyodide
 from agent import agent
 from context import ROLE, RULES, estimate_tokens
 
-q = "Compare revenue growth for Deere, Caterpillar and NVIDIA last quarter"
-answer, log = agent(q, system=ROLE + "\n\n" + RULES, verbose=False)
+COMPANIES = ["Deere", "Caterpillar", "NVIDIA", "Microsoft"]
 
-on_desk = estimate_tokens(ROLE + RULES) + estimate_tokens(q)
-for entry in log:
-    if entry["kind"] == "tool_call":
-        print(f"call {entry['step'] + 1} read {on_desk:>4} tokens, then looked up {entry['args']['ticker']}")
-        on_desk += estimate_tokens(str(entry["result"]))
-print(f"call {len(log)} read {on_desk:>4} tokens, then wrote the memo")
+def sub_agent(company):
+    """A fresh agent with a clean desk: one company in, one line back."""
+    answer, log = agent(f"What was {company}'s revenue growth last quarter?", verbose=False)
+    return answer
+
+notes = [sub_agent(c) for c in COMPANIES]
+for note in notes:
+    print("note from a sub-agent:", note)
+
+# What the lead reads when it writes the memo, against one agent that did every lookup itself.
+q = "Compare revenue growth for Deere, Caterpillar, NVIDIA and Microsoft last quarter"
+answer, log = agent(q, system=ROLE + "\n\n" + RULES, verbose=False)
+desk = estimate_tokens(ROLE + RULES + q)
+results = [estimate_tokens(str(e["result"])) for e in log if e["kind"] == "tool_call"]
+print()
+print(f"lead with sub-agents reads {desk + sum(estimate_tokens(n) for n in notes):>6} tokens")
+print(f"one agent reads            {desk + sum(results):>6} tokens   (the book's records are tiny)")
+print(f"one agent, real filings    {desk + 1800 * len(results):>6} tokens   (about 1,800 per lookup)")
 ```
 
-Deciding what to keep, what to summarise and what to drop is the part of context engineering that chapter 6 takes up, when the agents run for twenty steps.
+The book's records are a dozen tokens each, so on them the saving is small. Real lookups return pages, and that is where a sub-agent earns its keep.
+
+**What it costs.** More model calls: in the widget, nine instead of five. A sub-agent sees none of the lead's desk, not the client card, not the rules, not the earlier turns, unless code hands them over, so choosing what to pass down is context engineering again. And a one-line note can drop a detail the lead turns out to need. Sub-agents are worth it when the pieces are independent and each one reads a lot; chapter 6 runs many agents at once.
 
 ```{raw} html
 <div class="wk-lcp" data-spot="ch02-context" data-label="2.2 Context Engineering · after §2.2.3 (slides 53–75)"></div>

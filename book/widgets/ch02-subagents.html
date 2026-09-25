@@ -1,0 +1,124 @@
+<div class="wk-widget" id="w-sub" style="background:#fff">
+  <div class="wk-title">/// One agent vs a lead with sub-agents · step through the calls</div>
+  <div class="seg" role="group" aria-label="Set-up">
+    <button type="button" data-m="one" class="on" aria-pressed="true">One agent does everything</button>
+    <button type="button" data-m="sub" aria-pressed="false">Lead + 4 sub-agents</button>
+  </div>
+  <div class="q">Client: <b>Compare revenue growth for Deere, Caterpillar, NVIDIA and Microsoft last quarter.</b></div>
+  <div class="scene">
+    <div class="desk lead"><div class="dh">Lead agent's desk</div><div class="stack"></div><div class="tok"></div></div>
+    <div class="subs"></div>
+  </div>
+  <div class="cap" aria-live="polite"></div>
+  <div class="meters">
+    <div class="m"><span>Largest single call (lead)</span><b data-k="max">0</b></div>
+    <div class="m"><span>Tokens read, all calls</span><b data-k="total">0</b></div>
+    <div class="m"><span>Model calls</span><b data-k="calls">0</b></div>
+  </div>
+  <div class="nav"><button type="button" class="primary next">Next call</button><button type="button" class="all">Run all</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-sub .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-sub .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 14px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-sub .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-sub .q { margin: 10px 0; font-size: 13.5px; color: var(--wk-muted); }
+    #w-sub .q b { color: var(--wk-navy); }
+    #w-sub .scene { display: grid; grid-template-columns: 220px 1fr; gap: 14px; align-items: end; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 12px; min-height: 290px; }
+    #w-sub .desk { border: 2px solid var(--wk-line); border-radius: 10px; background: #fff; padding: 8px; display: flex; flex-direction: column; justify-content: flex-end; transition: border-color .3s; }
+    #w-sub .desk.on { border-color: var(--wk-orange); }
+    #w-sub .dh { font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--wk-navy); margin-bottom: 6px; }
+    #w-sub .stack { display: flex; flex-direction: column-reverse; gap: 2px; }
+    #w-sub .blk { border-radius: 4px; font: 600 10.5px system-ui, sans-serif; color: #fff; padding: 0 6px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; min-height: 14px; animation: wkin .35s; }
+    @keyframes wkin { from { opacity: 0; transform: translateY(-8px); } }
+    #w-sub .blk.base { background: var(--wk-navy); }
+    #w-sub .blk.raw { background: #c92a2a; }
+    #w-sub .blk.line { background: #2f9e44; }
+    #w-sub .blk.task { background: #4a6490; }
+    #w-sub .tok { margin-top: 6px; font: 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    #w-sub .subs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; }
+    #w-sub .subs .desk { min-height: 80px; }
+    #w-sub .subs .desk .dh { color: #4a6490; }
+    #w-sub.one .subs { opacity: .25; }
+    #w-sub .cap { margin-top: 10px; font-size: 13.5px; line-height: 1.5; min-height: 2.9em; }
+    #w-sub .meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px; }
+    #w-sub .m { border: 1px solid var(--wk-line); border-radius: 8px; padding: 8px 10px; background: #fafbfc; }
+    #w-sub .m span { display: block; font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--wk-muted); }
+    #w-sub .m b { font-size: 20px; color: var(--wk-orange); }
+    #w-sub .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    @media (max-width: 640px) { #w-sub .scene { grid-template-columns: 1fr; } #w-sub .subs { grid-template-columns: repeat(2, 1fr); } #w-sub .meters { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-sub");
+    const CO = ["Deere", "Caterpillar", "NVIDIA", "Microsoft"];
+    // Token sizes: the lead's standing desk (instructions, client card, question), one filing extract per company,
+    // a sub-agent's task, and the one-line answer each sub-agent sends back.
+    const BASE = 250, RAW = 1800, TASK = 60, LINE = 25, PX = 0.028;   // PX: pixels per token in the drawing
+    const $ = (s) => w.querySelector(s);
+    let mode = "one", i = 0, plan = [];
+    w.querySelector(".subs").innerHTML = CO.map((c) => `<div class="desk" data-c="${c}"><div class="dh">Sub-agent · ${c}</div><div class="stack"></div><div class="tok"></div></div>`).join("");
+    const blk = (cls, label, tokens) => `<div class="blk ${cls}" style="height:${Math.max(14, tokens * PX)}px" title="${label}: ${tokens} tokens">${label}</div>`;
+
+    function build() {
+      plan = [];
+      if (mode === "one") {
+        CO.forEach((c, k) => plan.push({ desk: "lead", reads: BASE + k * RAW, add: ["raw", `${c} filing extract`, RAW],
+          cap: `Call ${k + 1}: the agent reads ${(BASE + k * RAW).toLocaleString()} tokens, then looks up ${c}. The whole filing extract lands on its own desk and stays there.` }));
+        plan.push({ desk: "lead", reads: BASE + 4 * RAW, cap: `Call 5: to write four sentences, it reads ${(BASE + 4 * RAW).toLocaleString()} tokens, most of it raw filings it no longer needs.`, done: true });
+      } else {
+        CO.forEach((c) => {
+          plan.push({ desk: c, reads: TASK, add: ["raw", "filing extract", RAW], task: true,
+            cap: `The lead hands ${c} to a sub-agent with a clean desk: just the task (${TASK} tokens). It looks the company up; the filing lands on the sub-agent's desk, not the lead's.` });
+          plan.push({ desk: c, reads: TASK + RAW, back: c,
+            cap: `The ${c} sub-agent reads its filing once and sends one line back (${LINE} tokens). Its desk is then thrown away.` });
+        });
+        plan.push({ desk: "lead", reads: BASE + 4 * LINE, cap: `The lead writes the memo from four one-line notes: ${(BASE + 4 * LINE).toLocaleString()} tokens on its desk, instead of ${(BASE + 4 * RAW).toLocaleString()}.`, done: true });
+      }
+    }
+    function reset() {
+      i = 0; build();
+      w.classList.toggle("one", mode === "one");
+      $(".lead .stack").innerHTML = blk("base", "instructions · client · question", BASE);
+      w.querySelectorAll(".subs .desk").forEach((d) => { d.querySelector(".stack").innerHTML = ""; d.querySelector(".tok").textContent = ""; });
+      $(".lead .tok").textContent = `${BASE} tokens`;
+      ["max", "total", "calls"].forEach((k) => { $(`[data-k="${k}"]`).textContent = "0"; });
+      $(".cap").textContent = mode === "one" ? "One agent looks up all four companies itself. Press Next call." : "A lead agent sends each company to its own sub-agent. Press Next call.";
+      w.querySelectorAll(".desk").forEach((d) => d.classList.remove("on"));
+      $(".next").disabled = false;
+    }
+    let total = 0, calls = 0, max = 0, leadTok = BASE;
+    function step() {
+      if (i === 0) { total = 0; calls = 0; max = 0; leadTok = BASE; }
+      const s = plan[i]; if (!s) return;
+      w.querySelectorAll(".desk").forEach((d) => d.classList.remove("on"));
+      const desk = s.desk === "lead" ? $(".lead") : $(`.subs [data-c="${s.desk}"]`);
+      desk.classList.add("on");
+      total += s.reads; calls += 1;
+      if (s.desk === "lead") max = Math.max(max, s.reads);
+      if (s.task) { desk.querySelector(".stack").innerHTML = blk("task", "task", TASK); desk.querySelector(".tok").textContent = `${TASK} tokens`; }
+      if (s.add) {
+        desk.querySelector(".stack").insertAdjacentHTML("beforeend", blk(s.add[0], s.add[1], s.add[2]));
+        if (s.desk === "lead") { leadTok += s.add[2]; desk.querySelector(".tok").textContent = `${leadTok.toLocaleString()} tokens`; }
+        else desk.querySelector(".tok").textContent = `${(TASK + RAW).toLocaleString()} tokens`;
+      }
+      if (s.back) {
+        $(".lead .stack").insertAdjacentHTML("beforeend", blk("line", `${s.back}: one line`, LINE));
+        leadTok += LINE; $(".lead .tok").textContent = `${leadTok} tokens`;
+      }
+      $(".cap").textContent = s.cap;
+      $('[data-k="max"]').textContent = max.toLocaleString();
+      $('[data-k="total"]').textContent = total.toLocaleString();
+      $('[data-k="calls"]').textContent = calls;
+      i++;
+      if (i >= plan.length) $(".next").disabled = true;
+    }
+    w.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      w.querySelectorAll(".seg button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
+      mode = b.dataset.m; reset();
+    }));
+    $(".next").addEventListener("click", step);
+    $(".all").addEventListener("click", () => { reset(); while (i < plan.length) step(); });
+    $(".reset").addEventListener("click", reset);
+    reset();
+  })();
+  </script>
+</div>
