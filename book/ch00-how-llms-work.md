@@ -107,7 +107,16 @@ At 0 all three runs agree. At 1.5 they wander, and some wander into sentences th
 
 ## 0.4 How a model learns
 
-The toy model learned by counting which word follows which. A real LLM learns the same kind of pattern with a neural network, in three stages. Each one starts from the model the stage before produced.
+The toy model learned by counting which word follows which. A real LLM learns the same kind of pattern with a neural network. Training adjusts the model's **weights**, the billions of numbers that decide which token comes next, until its predictions match the text it reads. Training a large model takes months on thousands of GPUs. Using it afterwards takes a fraction of a second per token.
+
+Two consequences shape the rest of this book:
+
+- **It knows nothing after its training cutoff.** Last quarter's results may have come out after the model was trained. Chapter 1 gives it tools to look them up.
+- **It has never seen the firm's private data.** Client preferences, the policy handbook and last week's memos were not in its training text. Chapter 2 puts them in front of it on each call.
+
+### Pre-training, mid-training and post-training
+
+Training happens in three stages. Each one starts from the model the stage before produced.
 
 | Stage | What it reads | What it learns |
 |---|---|---|
@@ -123,13 +132,6 @@ The score comes from one of two places:
 - **A check that can be run.** For a maths problem the final number is right or wrong; for code the tests pass or fail. Rewarding correct results over many attempts is how "reasoning" models learned to work through a problem step by step before answering.
 
 Reinforcement learning teaches the model what gets rewarded, not what is true. Reviewers tend to prefer answers that are confident and agreeable, so a model can learn to sound sure of itself even when it is not (section 0.6).
-
-Training adjusts the model's **weights**, the billions of numbers that decide which token comes next, until its predictions match the text it reads. Training a large model takes months on thousands of GPUs. Using it afterwards takes a fraction of a second per token.
-
-Two consequences shape the rest of this book:
-
-- **It knows nothing after its training cutoff.** Last quarter's results may have come out after the model was trained. Chapter 1 gives it tools to look them up.
-- **It has never seen the firm's private data.** Client preferences, the policy handbook and last week's memos were not in its training text. Chapter 2 puts them in front of it on each call.
 
 ## 0.5 The context window
 
