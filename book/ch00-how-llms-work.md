@@ -12,8 +12,7 @@
 :class: note
 - Say what a token is, and why a model's costs and limits are counted in tokens rather than words.
 - Explain how a model writes by predicting the next token, and what the temperature setting changes.
-- Describe the three stages of training (pre-training, mid-training and post-training, including reinforcement learning), and why they leave a model without the firm's data or today's numbers.
-- Tell an open-weight model from a closed one, and choose between them for a task at the firm.
+- Describe at a high level how a model is trained, and why that leaves it without the firm's data or today's numbers.
 ```
 
 ## 0.1 What a large language model is
@@ -22,7 +21,7 @@ It is Monday at Champaign Capital Research. Priya has a client asking how Deere'
 
 An LLM is a program that has read a very large amount of text and learned one skill from it: given some text, predict what comes next. Everything else it seems to do (answer questions, write memos, summarise filings, call tools) is that one skill, repeated.
 
-"Large" refers to two things: the amount of text it learned from, trillions of words, and the size of the model, billions of adjustable numbers. "Language model" is the older, plainer name for any program that predicts the next word.
+"Large" refers to two things: the amount of text it learned from, trillions of words, and the size of the model, billions of adjustable numbers called **parameters** (section 0.4). "Language model" is the older, plainer name for any program that predicts the next word.
 
 ## 0.2 Tokens: what the model reads
 
@@ -109,29 +108,25 @@ At 0 all three runs agree. At 1.5 they wander, and some wander into sentences th
 
 The toy model learned by counting which word follows which. A real LLM learns the same kind of pattern with a neural network. Training adjusts the model's **weights**, the billions of numbers that decide which token comes next, until its predictions match the text it reads. Training a large model takes months on thousands of GPUs. Using it afterwards takes a fraction of a second per token.
 
+Those adjustable numbers are the model's **parameters**; "weights" is the usual name for nearly all of them, and the two words are often used interchangeably. A parameter is a single number, such as 0.0137, and on its own it means nothing. What the model knows is spread across all of them at once, the way a firm's judgement lives in all its people rather than in one desk.
+
+The parameter count is how models are sized, and it is the number in many model names:
+
+| Model | Parameters | What that means |
+|---|---|---|
+| The toy model in section 0.3 | 53 counts | Enough for thirteen sentences |
+| Qwen3-8B | 8 billion | Runs on one good GPU |
+| Llama 3.1 405B | 405 billion | Needs a rack of GPUs |
+| DeepSeek-V3 | 671 billion, 37 billion used per token | A mixture of experts ([page 0A](ch00-transformers.md)) |
+
+More parameters can hold more knowledge and handle harder tasks, but they cost more to train and to run: every parameter is used for every token (except in a mixture of experts), and each one takes memory. At the usual precision a parameter takes 2 bytes, so an 8-billion-parameter model needs about 16 GB of GPU memory just to load. The makers of closed models such as GPT, Claude and Gemini do not publish their counts.
+
 Two consequences shape the rest of this book:
 
 - **It knows nothing after its training cutoff.** Last quarter's results may have come out after the model was trained. Chapter 1 gives it tools to look them up.
 - **It has never seen the firm's private data.** Client preferences, the policy handbook and last week's memos were not in its training text. Chapter 2 puts them in front of it on each call.
 
-### Pre-training, mid-training and post-training
-
-Training happens in three stages. Each one starts from the model the stage before produced.
-
-| Stage | What it reads | What it learns |
-|---|---|---|
-| **Pre-training** | Trillions of tokens of public text: web pages, books, code, filings | To predict the next token in any kind of text. Almost all of its knowledge comes from here. After this it can continue a document, but it does not yet act like an assistant. |
-| **Mid-training** | A smaller, carefully chosen set: high-quality writing, maths, code, long documents, sometimes a specialist field | To be better at what its makers care most about, and to read much longer inputs. It is still next-token prediction, only on better text. |
-| **Post-training** | Examples of requests with good answers, then scores for the answers it writes itself | To act like an assistant: follow instructions, answer in a useful shape, reason step by step, call tools, and decline some requests. |
-
-Post-training has two parts. First the model studies thousands of example conversations written by people, and learns to answer the way they do. Then comes **reinforcement learning**: the model writes several answers to the same request, each answer is scored, and the weights are nudged so that high-scoring answers become more likely. It learns from its own attempts, the way an analyst improves from a reviewer's marks rather than from reading more.
-
-The score comes from one of two places:
-
-- **People's preferences.** Reviewers compare two answers and pick the better one, and a second model learns to predict their choice. This is often called RLHF, reinforcement learning from human feedback. It is what makes a model polite, clear and helpful.
-- **A check that can be run.** For a maths problem the final number is right or wrong; for code the tests pass or fail. Rewarding correct results over many attempts is how "reasoning" models learned to work through a problem step by step before answering.
-
-Reinforcement learning teaches the model what gets rewarded, not what is true. Reviewers tend to prefer answers that are confident and agreeable, so a model can learn to sound sure of itself even when it is not (section 0.6).
+What that network looks like inside is on [0A Transformers and Mixture of Experts](ch00-transformers.md); the three stages of training that turn it from a text predictor into an assistant are on [0B How a Model Is Trained](ch00-training.md); who can get a trained model's weights, and why that matters to the firm, is on [0C Open-Source and Closed-Source Models](ch00-open-closed.md).
 
 ## 0.5 The context window
 
@@ -171,62 +166,7 @@ Real models are far better than this toy, but the mechanism is the same, and it 
 </div>
 ```
 
-(open-closed-models)=
-## 0.7 Open-source and closed-source models
-
-Section 0.4 said training produces the model's **weights**, the billions of numbers that decide which token comes next. A model is two things: those weights, and the code that runs them. Who can get the weights is the difference.
-
-| | Closed-source | Open-source (open-weight) |
-|---|---|---|
-| Examples | OpenAI's GPT models, Anthropic's Claude, Google's Gemini | Meta's Llama, Alibaba's Qwen, Z.ai's GLM, Mistral |
-| How you use it | Only through the company's API, on its servers | Download the weights and run it on hardware you choose |
-| Your data | Sent to the provider on every call | Can stay on hardware your organization controls |
-| Cost | Pay per token | Pay for the hardware, or use hardware you already have |
-| Changing it | Prompting, and fine-tuning only where the provider allows it | Inspect it, fine-tune it, run it offline |
-| Trade-off | Usually the strongest models, with no servers to run | You run, secure and update it; the best open models tend to trail the best closed ones |
-
-"Open" has limits. Most open models publish their weights and code, but not their training data, and each comes with a license that says what you may do with it. Read the license before you build on one.
-
-For a firm like Champaign Capital, the data row often decides it: client data that may not leave the building can still go to a model the firm runs itself.
-
-### Running an open model on campus GPUs
-
-Open weights mean the campus can run a model itself. NCSA does this for Lumen, and you can do the same on NCSA's research GPUs, such as the [Delta cluster](https://docs.ncsa.illinois.edu/systems/delta/en/latest/) (access comes through an allocation, for example from [Illinois Computes](https://computes.illinois.edu/)). The steps, on a GPU node:
-
-```bash
-pip install vllm "huggingface_hub[cli]"
-hf download Qwen/Qwen3-8B                   # pull the weights and config from Hugging Face
-vllm serve Qwen/Qwen3-8B --port 8000        # serve it with an OpenAI-compatible API
-```
-
-[`hf download`](https://huggingface.co/docs/huggingface_hub/guides/cli) fetches the model files from [Hugging Face](https://huggingface.co/Qwen/Qwen3-8B), where most open models are published. vLLM loads them onto the GPU and answers requests in the OpenAI format. So the same client code works; only the address changes:
-
-```python
-from openai import OpenAI
-
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-reply = client.chat.completions.create(model="Qwen/Qwen3-8B",
-                                       messages=[{"role": "user", "content": "Say hello"}])
-print(reply.choices[0].message.content)
-```
-
-On a shared cluster you would usually run this as a batch job on an allocated GPU node rather than on the login node; the Delta documentation explains how. You do not need any of this for the workshop. Lumen already does it for you.
-
-**Checkpoint.**
-
-```{raw} html
-<div class="quiz" data-answer="b"
-     data-ok="Correct. Client holdings may not leave the firm, so the model has to run where the firm controls the data. Open weights make that possible."
-     data-no="Look at the Your data row of the table. Where does the text go when you call a closed model?">
-  <p class="q">Champaign Capital wants a model to summarise each client's private holdings file. The files may not leave the firm's systems. Which fits?</p>
-  <label><input type="radio" name="q2" value="a"> A closed model through its public API, because it is usually the strongest</label>
-  <label><input type="radio" name="q2" value="b"> An open-weight model the firm runs on its own servers, or on campus GPUs for a class project</label>
-  <label><input type="radio" name="q2" value="c"> Either one, because models do not keep what they read</label>
-  <div class="fb"></div>
-</div>
-```
-
-## 0.8 Run it against a real model
+## 0.7 Run it against a real model
 
 The toy model has read thirteen sentences. The cells below send questions to a GPT deployment on Illinois Azure through this site's `/api/chat` proxy; your browser never sees a key.
 
@@ -254,19 +194,16 @@ reply = azure_model([{"role": "user", "content": "What was Deere's revenue growt
 print(explain_reply(reply))
 ```
 
-## 0.9 Exercise
+## 0.8 Exercise
 
 These use the cells on this page; there is no Colab notebook for this chapter.
 
 1. In the tokens cell in 0.2, try a sentence from your own work or internship. Which words split into several tokens, and what do they have in common?
 2. In the widget, start from NVIDIA and build a sentence that is true, then one that is false, by clicking the bars. How many choices did each take?
 3. Change the fact-check cell in 0.6 to run 20 seeds at temperature 1.5, then at 0.5. How many false sentences did each produce?
-4. For each task, choose an open-weight or a closed model, with one reason: a memo that quotes a client's private holdings; a summary of public news about Deere; a first draft of a Python script for the data team.
 
 ## Further reading
 
 - 3Blue1Brown, [*Transformers, the tech behind LLMs*](https://www.youtube.com/watch?v=wjZofJX0v4M) (video) — how a model turns text into tokens and predicts the next one, drawn step by step.
 - Andrej Karpathy, [*Intro to Large Language Models*](https://www.youtube.com/watch?v=zjkBMFhNj_g) (1-hour talk) — pretraining, fine-tuning, and what models can and cannot do.
-- Hugging Face, [*Illustrating Reinforcement Learning from Human Feedback*](https://huggingface.co/blog/rlhf) — how post-training turns people's preferences into a score the model learns from.
 - Jay Alammar, [*The Illustrated Transformer*](https://jalammar.github.io/illustrated-transformer/) — the architecture inside the model, in pictures.
-- Hugging Face, [*LLM Course*](https://huggingface.co/learn/llm-course/chapter1/1) — free, hands-on, and the place most open models are published.

@@ -1,0 +1,124 @@
+<div class="wk-widget" id="w-tf" style="background:#fff">
+  <div class="wk-title">/// Inside a transformer · four steps</div>
+  <div class="steps" role="tablist" aria-label="Step">
+    <button type="button" data-s="1" role="tab"><b>1</b>Words → numbers</button>
+    <button type="button" data-s="2" role="tab"><b>2</b>Attention</button>
+    <button type="button" data-s="3" role="tab"><b>3</b>Layers</button>
+    <button type="button" data-s="4" role="tab"><b>4</b>Next word</button>
+  </div>
+  <div class="stage">
+    <svg class="arcs" aria-hidden="true"></svg>
+    <div class="toks"></div>
+    <div class="stack" aria-hidden="true"></div>
+    <div class="pred"></div>
+  </div>
+  <div class="cap" aria-live="polite"></div>
+  <div class="nav"><button type="button" class="prev">← Back</button><button type="button" class="next primary">Next step →</button></div>
+  <style>
+    #w-tf .steps { display: flex; gap: 6px; flex-wrap: wrap; }
+    #w-tf .steps button { flex: 1 1 120px; border: 2px solid var(--wk-line); border-radius: 999px; background: #fafbfc; color: var(--wk-navy); font: 700 12.5px system-ui, sans-serif; padding: 7px 10px; cursor: pointer; }
+    #w-tf .steps b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--wk-line); font-size: 11px; margin-right: 6px; }
+    #w-tf .steps button.on { border-color: var(--wk-orange); background: #fff3ea; }
+    #w-tf .steps button.on b, #w-tf .steps button.done b { background: var(--wk-orange); color: #fff; }
+    #w-tf .stage { position: relative; margin-top: 12px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 70px 12px 14px; min-height: 250px; }
+    #w-tf .arcs { position: absolute; left: 0; top: 0; width: 100%; height: 90px; pointer-events: none; overflow: visible; }
+    #w-tf .arcs path { fill: none; stroke: var(--wk-orange); stroke-linecap: round; transition: stroke-width .3s, opacity .3s; }
+    #w-tf .arcs text { font: 700 10px ui-monospace, Menlo, monospace; fill: #b54200; }
+    #w-tf .toks { display: flex; gap: 6px; justify-content: center; flex-wrap: nowrap; position: relative; z-index: 1; }
+    #w-tf .tok { display: flex; flex-direction: column; align-items: center; gap: 5px; border: 0; background: none; padding: 0; cursor: default; font: inherit; }
+    #w-tf.s2 .tok { cursor: pointer; }
+    #w-tf .word { font: 700 13px ui-monospace, Menlo, monospace; color: var(--wk-navy); background: #fff; border: 2px solid var(--wk-line); border-radius: 8px; padding: 4px 7px; white-space: pre; transition: border-color .2s, background .2s; }
+    #w-tf .tok.sel .word { border-color: var(--wk-orange); background: #fff3ea; }
+    #w-tf .tok.src .word { border-color: #ffb183; }
+    #w-tf .vec { display: grid; grid-template-rows: repeat(8, 7px); gap: 2px; width: 22px; opacity: 0; transform: translateY(-6px); transition: opacity .35s, transform .35s; }
+    #w-tf.s1 .vec, #w-tf.s2 .vec, #w-tf.s3 .vec, #w-tf.s4 .vec { opacity: 1; transform: none; }
+    #w-tf .vec i { border-radius: 2px; transition: background .5s; }
+    #w-tf .stack { display: none; margin: 14px auto 0; max-width: 520px; }
+    #w-tf.s3 .stack { display: grid; gap: 5px; }
+    #w-tf .layer { border: 2px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 5px 10px; font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); display: flex; justify-content: space-between; transition: border-color .3s, background .3s; }
+    #w-tf .layer.on { border-color: var(--wk-orange); background: #fff3ea; color: #b54200; }
+    #w-tf .pred { display: none; margin: 14px auto 0; max-width: 460px; }
+    #w-tf.s4 .pred { display: block; }
+    #w-tf .pr { display: grid; grid-template-columns: 80px 1fr 44px; gap: 8px; align-items: center; margin: 4px 0; font: 13px ui-monospace, Menlo, monospace; }
+    #w-tf .pr .b { height: 16px; background: #eef0f4; border-radius: 4px; overflow: hidden; }
+    #w-tf .pr .b i { display: block; height: 100%; width: 0; background: var(--wk-navy); transition: width .6s; }
+    #w-tf .pr:nth-child(2) .b i { background: var(--wk-orange); }
+    #w-tf .pr .v { text-align: right; color: var(--wk-muted); }
+    #w-tf .cap { margin-top: 10px; font-size: 13.5px; line-height: 1.5; min-height: 2.9em; color: #1f2430; }
+    #w-tf .nav { display: flex; justify-content: space-between; margin-top: 8px; }
+    @media (max-width: 640px) { #w-tf .toks { flex-wrap: wrap; } #w-tf .arcs { display: none; } #w-tf .stage { padding-top: 14px; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-tf");
+    const T = ["Deere", "'s", " revenue", " grew", ",", " but", " its", " margins"];
+    // Toy attention weights: for each token, how much it draws from each earlier token (row sums to 1).
+    const ATT = {
+      1: [1], 2: [0.7, 0.3], 3: [0.3, 0.05, 0.65], 4: [0.1, 0, 0.3, 0.6], 5: [0.15, 0, 0.2, 0.45, 0.2],
+      6: [0.58, 0.08, 0.14, 0.05, 0.02, 0.05, 0.08], 7: [0.2, 0.02, 0.18, 0.08, 0.02, 0.15, 0.3, 0.05],
+    };
+    const PRED = [["fell", 41], ["rose", 22], ["narrowed", 14], ["were", 9], ["held", 6]];
+    const CAP = {
+      1: "Each piece of text (a token) becomes a list of numbers, drawn here as a coloured strip. Real models use a few thousand numbers per token.",
+      2: "Click a word. The arcs show which earlier words it draws on, thicker for more. <b>its</b> draws most from <b>Deere</b>: that is how the model knows whose margins these are.",
+      3: "Attention happens again in every layer, each one adding to what the strips mean. Large models stack dozens of layers.",
+      4: "The strip at the last position becomes a probability for every token in the vocabulary. The model picks one, adds it, and starts again (chapter 0, section 0.3).",
+    };
+    const hue = (i, j) => [214, 22, 150, 260, 40, 190, 330, 100][(i * 3 + j * 5) % 8];
+    const toks = w.querySelector(".toks"), svg = w.querySelector(".arcs");
+    toks.innerHTML = T.map((t, i) => `<button type="button" class="tok" data-i="${i}" aria-label="${t.trim() || "comma"}"><span class="word">${t.replace(/ /g, "·")}</span><span class="vec">${Array.from({ length: 8 }, (_, j) => `<i style="background:hsl(${hue(i, j)} 55% ${55 + ((i + j) % 3) * 10}%)"></i>`).join("")}</span></button>`).join("");
+    w.querySelector(".stack").innerHTML = ["layer 60", "…", "layer 3", "layer 2", "layer 1"].map((l) => `<div class="layer"><span>${l}</span><span>attention → update</span></div>`).join("");
+    w.querySelector(".pred").innerHTML = `<div style="font:700 11px ui-monospace,Menlo,monospace;color:var(--wk-muted);margin-bottom:4px">NEXT WORD AFTER "…its margins"</div>` +
+      PRED.map(([t, p]) => `<div class="pr"><span>${t}</span><span class="b"><i data-p="${p}"></i></span><span class="v">${p}%</span></div>`).join("");
+
+    let step = 1, sel = 6, timer = null;
+    function arcs() {
+      svg.innerHTML = "";
+      if (step !== 2) { w.querySelectorAll(".tok").forEach((t) => t.classList.remove("sel", "src")); return; }
+      const box = w.querySelector(".stage").getBoundingClientRect();
+      const x = (i) => { const r = toks.children[i].getBoundingClientRect(); return r.left - box.left + r.width / 2; };
+      const y0 = 68, row = ATT[sel] || [];
+      w.querySelectorAll(".tok").forEach((t, i) => { t.classList.toggle("sel", i === sel); t.classList.toggle("src", i < sel && (row[i] || 0) >= 0.15); });
+      row.forEach((a, i) => {
+        if (a < 0.02) return;
+        const x1 = x(sel), x2 = x(i), h = Math.min(56, 16 + Math.abs(x1 - x2) * 0.2);  // stay inside the stage
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute("d", `M${x1},${y0} C${x1},${y0 - h} ${x2},${y0 - h} ${x2},${y0}`);
+        p.setAttribute("stroke-width", (1 + a * 12).toFixed(1)); p.setAttribute("opacity", (0.25 + a).toFixed(2));
+        svg.appendChild(p);
+        if (a >= 0.14) {
+          const tx = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          tx.setAttribute("x", (x1 + x2) / 2 - 10); tx.setAttribute("y", y0 - h * 0.78 - 4); tx.textContent = Math.round(a * 100) + "%";
+          svg.appendChild(tx);
+        }
+      });
+    }
+    function layers() {
+      clearInterval(timer);
+      const L = [...w.querySelectorAll(".layer")].reverse();
+      let k = 0;
+      timer = setInterval(() => {
+        L.forEach((l, i) => l.classList.toggle("on", i === k % L.length));
+        w.querySelectorAll(".vec i").forEach((c, j) => { c.style.background = `hsl(${(hue(j >> 3, j & 7) + k * 23) % 360} 55% ${55 + ((j + k) % 3) * 10}%)`; });
+        k++;
+      }, 550);
+    }
+    function set(s) {
+      step = s; clearInterval(timer);
+      w.className = "wk-widget s" + s;
+      w.querySelectorAll(".steps button").forEach((b) => { const n = +b.dataset.s; b.classList.toggle("on", n === s); b.classList.toggle("done", n < s); b.setAttribute("aria-selected", n === s); });
+      w.querySelector(".cap").innerHTML = CAP[s];
+      w.querySelector(".prev").disabled = s === 1; w.querySelector(".next").disabled = s === 4;
+      if (s === 3) layers();
+      w.querySelectorAll(".pr i").forEach((i) => { i.style.width = s === 4 ? i.dataset.p * 2 + "%" : 0; });
+      requestAnimationFrame(arcs);
+    }
+    w.querySelectorAll(".steps button").forEach((b) => b.addEventListener("click", () => set(+b.dataset.s)));
+    w.querySelector(".prev").addEventListener("click", () => set(Math.max(1, step - 1)));
+    w.querySelector(".next").addEventListener("click", () => set(Math.min(4, step + 1)));
+    toks.addEventListener("click", (e) => { const t = e.target.closest(".tok"); if (step === 2 && t && +t.dataset.i > 0) { sel = +t.dataset.i; arcs(); } });
+    window.addEventListener("resize", arcs);
+    set(1);
+  })();
+  </script>
+</div>

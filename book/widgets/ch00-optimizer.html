@@ -1,0 +1,125 @@
+<div class="wk-widget" id="w-opt" style="background:#fff">
+  <div class="wk-title">/// One training step · predict, compare, go back, adjust</div>
+  <div class="loop" aria-hidden="true">
+    <span data-p="1">① Predict</span><i>→</i><span data-p="2">② Compare</span><i>→</i><span data-p="3">③ Go back</span><i>→</i><span data-p="4">④ Optimizer adjusts</span><i class="ret">↺</i>
+  </div>
+  <div class="body">
+    <div class="net">
+      <div class="q">Deere's revenue <b>___</b> <span class="ans">right answer: <b>grew</b></span></div>
+      <div class="layers">
+        <div class="ly"><span>layer 1</span><div class="dials"></div></div>
+        <div class="ly"><span>layer 2</span><div class="dials"></div></div>
+        <div class="ly"><span>layer 3</span><div class="dials"></div></div>
+        <div class="pulse"></div>
+      </div>
+      <div class="bars"></div>
+    </div>
+    <div class="side">
+      <div class="err"><span>Error on this guess</span><div class="g"><i></i></div><em></em></div>
+      <svg class="curve" viewBox="0 0 220 110" role="img" aria-label="Error after each training step"><line x1="24" y1="96" x2="214" y2="96"/><line x1="24" y1="6" x2="24" y2="96"/><text x="0" y="12">high</text><text x="0" y="96">low</text><text x="120" y="108" text-anchor="middle">training steps</text><polyline points=""/></svg>
+      <label class="lr">Learning rate <b></b><input type="range" min="1" max="3" step="1" value="2" aria-label="Learning rate"></label>
+      <div class="note" aria-live="polite"></div>
+    </div>
+  </div>
+  <div class="nav"><button type="button" class="primary step">Train one step</button><button type="button" class="run">▶ Train 20 steps</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-opt .loop { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 700 12px system-ui, sans-serif; }
+    #w-opt .loop span { border: 2px solid var(--wk-line); border-radius: 999px; padding: 5px 11px; color: var(--wk-navy); background: #fafbfc; transition: border-color .2s, background .2s; }
+    #w-opt .loop span.on { border-color: var(--wk-orange); background: #fff3ea; }
+    #w-opt .loop i { font-style: normal; color: #aaa; }
+    #w-opt .loop .ret { font-size: 18px; color: var(--wk-orange); }
+    #w-opt .body { display: grid; grid-template-columns: 1fr 240px; gap: 14px; margin-top: 12px; }
+    #w-opt .net { border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 12px; }
+    #w-opt .q { font: 700 14px ui-monospace, Menlo, monospace; color: var(--wk-navy); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+    #w-opt .ans { font: 12px system-ui, sans-serif; color: #136c3a; background: #e8f7ee; border-radius: 999px; padding: 2px 9px; }
+    #w-opt .layers { position: relative; display: grid; gap: 6px; margin: 10px 0; }
+    #w-opt .ly { display: grid; grid-template-columns: 58px 1fr; align-items: center; gap: 8px; border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 5px 8px; }
+    #w-opt .ly > span { font: 700 10.5px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    #w-opt .dials { display: flex; gap: 8px; }
+    #w-opt .dial { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #c3c8d3; position: relative; background: #fff; transition: border-color .3s; }
+    #w-opt .dial::after { content: ""; position: absolute; left: 50%; top: 2px; width: 2px; height: 9px; margin-left: -1px; background: var(--wk-navy); border-radius: 2px; transform-origin: 50% 9px; transform: rotate(var(--a, 0deg)); transition: transform .5s; }
+    #w-opt .dial.hot { border-color: var(--wk-orange); }
+    #w-opt .pulse { position: absolute; left: 0; right: 0; height: 4px; border-radius: 4px; background: var(--wk-orange); opacity: 0; pointer-events: none; }
+    #w-opt .pulse.fwd { animation: wkfwd .7s ease-in-out; } #w-opt .pulse.back { animation: wkback .7s ease-in-out; }
+    @keyframes wkfwd { 0% { top: 0; opacity: .9; } 100% { top: 100%; opacity: 0; } }
+    @keyframes wkback { 0% { top: 100%; opacity: .9; } 100% { top: 0; opacity: 0; } }
+    #w-opt .br { display: grid; grid-template-columns: 58px 1fr 40px; gap: 8px; align-items: center; margin: 3px 0; font: 12.5px ui-monospace, Menlo, monospace; }
+    #w-opt .br .b { height: 14px; background: #eef0f4; border-radius: 4px; overflow: hidden; }
+    #w-opt .br .b i { display: block; height: 100%; background: var(--wk-navy); transition: width .5s; }
+    #w-opt .br.t .b i { background: #2f9e44; } #w-opt .br.t span:first-child { color: #136c3a; font-weight: 700; }
+    #w-opt .br .v { text-align: right; color: var(--wk-muted); }
+    #w-opt .side { display: grid; gap: 10px; align-content: start; }
+    #w-opt .err span, #w-opt .lr { font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--wk-muted); }
+    #w-opt .err .g { height: 12px; background: #f0f2f6; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    #w-opt .err .g i { display: block; height: 100%; background: #c92a2a; border-radius: 999px; transition: width .5s; }
+    #w-opt .err em { font: 12px ui-monospace, Menlo, monospace; font-style: normal; color: var(--wk-muted); }
+    #w-opt .curve { width: 100%; height: auto; background: #fafbfc; border: 1px solid var(--wk-line); border-radius: 8px; }
+    #w-opt .curve line { stroke: #c3c8d3; } #w-opt .curve text { font: 9px ui-monospace, Menlo, monospace; fill: var(--wk-muted); }
+    #w-opt .curve polyline { fill: none; stroke: #c92a2a; stroke-width: 2; stroke-linejoin: round; }
+    #w-opt .lr { display: grid; gap: 4px; } #w-opt .lr b { color: var(--wk-navy); text-transform: none; letter-spacing: 0; }
+    #w-opt .lr input { accent-color: var(--wk-orange); width: 100%; }
+    #w-opt .note { font-size: 12.5px; line-height: 1.45; min-height: 3em; }
+    #w-opt .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    @media (max-width: 640px) { #w-opt .body { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { #w-opt .pulse { display: none; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-opt");
+    const WORDS = ["grew", "fell", "was", "margins"], TARGET = 0;
+    const START = [0.2, 0.9, 0.6, 0.3];           // the untrained model's scores: it likes "fell" best
+    const LR = { 1: [0.4, "small"], 2: [1.2, "medium"], 3: [6, "very large"] };
+    let logits, hist, busy = false, dials;
+    const $ = (s) => w.querySelector(s);
+    const soft = (z) => { const e = z.map((v) => Math.exp(v)), s = e.reduce((a, b) => a + b, 0); return e.map((v) => v / s); };
+    w.querySelectorAll(".dials").forEach((d) => { d.innerHTML = Array.from({ length: 6 }, () => `<span class="dial"></span>`).join(""); });
+    dials = [...w.querySelectorAll(".dial")];
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const phase = (n) => w.querySelectorAll(".loop span").forEach((s) => s.classList.toggle("on", +s.dataset.p === n));
+    const pulse = (dir) => { const p = $(".pulse"); p.className = "pulse"; void p.offsetWidth; p.classList.add(dir); };
+
+    function draw() {
+      const p = soft(logits), loss = -Math.log(p[TARGET]);
+      $(".bars").innerHTML = WORDS.map((t, i) => `<div class="br${i === TARGET ? " t" : ""}"><span>${t}</span><span class="b"><i style="width:${(p[i] * 100).toFixed(0)}%"></i></span><span class="v">${(p[i] * 100).toFixed(0)}%</span></div>`).join("");
+      $(".err .g i").style.width = Math.min(100, loss / 1.8 * 100) + "%";
+      $(".err em").textContent = `the model gave "grew" ${(p[TARGET] * 100).toFixed(0)}%`;
+      const pts = hist.map((l, i) => `${24 + i * (190 / 20)},${96 - Math.min(1, l / 1.8) * 88}`).join(" ");
+      $(".curve polyline").setAttribute("points", pts);
+      return loss;
+    }
+    function note() {
+      const v = +$(".lr input").value, [, name] = LR[v];
+      $(".lr b").textContent = name;
+      $(".note").innerHTML = v === 3
+        ? "Huge steps: right after one or two, but real training sees billions of different sentences. Steps this big undo what earlier sentences taught, so training becomes unstable."
+        : v === 1 ? "Small steps: safe, but it takes many more of them to learn anything."
+        : "The <b>optimizer</b> is the rule that decides how far to turn each weight. The most common one is called Adam.";
+    }
+    async function step() {
+      if (busy || hist.length > 20) return;
+      busy = true;
+      phase(1); pulse("fwd"); await sleep(450);
+      phase(2); draw(); await sleep(450);
+      phase(3); pulse("back"); dials.forEach((d) => d.classList.add("hot")); await sleep(500);
+      phase(4);
+      const p = soft(logits), lr = LR[+$(".lr input").value][0];
+      logits = logits.map((z, i) => z - lr * (p[i] - (i === TARGET ? 1 : 0)));   // gradient descent on the error
+      dials.forEach((d, i) => { const a = parseFloat(d.style.getPropertyValue("--a") || 0) + (((i * 7) % 5) - 2) * lr * 6; d.style.setProperty("--a", a + "deg"); });
+      hist.push(-Math.log(soft(logits)[TARGET]));
+      draw(); await sleep(350);
+      dials.forEach((d) => d.classList.remove("hot")); phase(0);
+      busy = false;
+    }
+    function reset() {
+      logits = START.slice(); hist = [-Math.log(soft(logits)[TARGET])];
+      dials.forEach((d) => d.style.setProperty("--a", "0deg"));
+      phase(0); draw(); note();
+    }
+    $(".step").addEventListener("click", step);
+    $(".run").addEventListener("click", async () => { for (let i = 0; i < 20 && hist.length <= 20; i++) { await step(); } });
+    $(".reset").addEventListener("click", () => { if (!busy) reset(); });
+    $(".lr input").addEventListener("input", note);
+    reset();
+  })();
+  </script>
+</div>

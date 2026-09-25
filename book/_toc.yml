@@ -9,6 +9,9 @@ parts:
   - caption: Part 0 · Foundations
     chapters:
       - file: ch00-how-llms-work
+      - file: ch00-transformers
+      - file: ch00-training
+      - file: ch00-open-closed
       - file: ch00-apis
   - caption: Part I · Agents
     chapters:

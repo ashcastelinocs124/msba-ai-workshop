@@ -1,0 +1,84 @@
+<div class="wk-widget" id="w-moe" style="background:#fff">
+  <div class="wk-title">/// One layer · dense vs mixture of experts</div>
+  <div class="seg" role="group" aria-label="Kind of model">
+    <button type="button" data-m="dense" aria-pressed="false">Dense: every expert runs</button>
+    <button type="button" data-m="moe" class="on" aria-pressed="true">Mixture of experts: 2 of 16 run</button>
+  </div>
+  <div class="flow">
+    <div class="queue" aria-label="Tokens waiting"></div>
+    <div class="now"><span class="lbl">token</span><span class="cur">—</span></div>
+    <div class="router" title="Router"><span>router</span></div>
+    <div class="grid" aria-label="16 experts"></div>
+  </div>
+  <div class="meters">
+    <div class="m"><span>Weights stored</span><div class="g"><i data-m="stored"></i></div><em data-t="stored"></em></div>
+    <div class="m"><span>Weights used for this token</span><div class="g"><i data-m="used" class="o"></i></div><em data-t="used"></em></div>
+  </div>
+  <div class="real">Real model: <b>DeepSeek-V3</b> stores <b>671 billion</b> weights and uses about <b>37 billion</b> (5.5%) per token.</div>
+  <div class="nav"><button type="button" class="primary send">Send next token</button><button type="button" class="auto">▶ Play</button></div>
+  <style>
+    #w-moe .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-moe .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 14px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-moe .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-moe .flow { display: grid; grid-template-columns: 1fr 90px 70px 230px; gap: 12px; align-items: center; margin-top: 12px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 14px; }
+    #w-moe .queue { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+    #w-moe .queue span { font: 700 12px ui-monospace, Menlo, monospace; background: #fff; border: 1px solid var(--wk-line); border-radius: 6px; padding: 3px 7px; color: var(--wk-muted); }
+    #w-moe .now { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    #w-moe .lbl { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--wk-muted); }
+    #w-moe .cur { font: 700 14px ui-monospace, Menlo, monospace; color: var(--wk-navy); background: #fff3ea; border: 2px solid var(--wk-orange); border-radius: 8px; padding: 5px 9px; }
+    #w-moe .router { width: 56px; height: 56px; transform: rotate(45deg); border: 2px solid var(--wk-navy); border-radius: 10px; display: grid; place-items: center; background: #fff; margin: 0 auto; }
+    #w-moe .router span { transform: rotate(-45deg); font: 700 10px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-moe .router.hit { animation: wkr .4s; }
+    @keyframes wkr { 50% { background: #fff3ea; border-color: var(--wk-orange); } }
+    #w-moe .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    #w-moe .ex { aspect-ratio: 1; border-radius: 8px; background: #fff; border: 2px solid var(--wk-line); display: grid; place-items: center; font: 700 11px ui-monospace, Menlo, monospace; color: #c3c8d3; transition: background .25s, border-color .25s, color .25s; }
+    #w-moe .ex.on { background: var(--wk-orange); border-color: var(--wk-orange); color: #fff; }
+    #w-moe .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+    #w-moe .m span { font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--wk-muted); }
+    #w-moe .g { height: 12px; background: #f0f2f6; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    #w-moe .g i { display: block; height: 100%; width: 0; background: var(--wk-navy); border-radius: 999px; transition: width .5s; }
+    #w-moe .g i.o { background: var(--wk-orange); }
+    #w-moe .m em { font: 12px ui-monospace, Menlo, monospace; font-style: normal; color: var(--wk-muted); }
+    #w-moe .real { margin-top: 10px; font-size: 13px; color: #1f2430; }
+    #w-moe .nav { display: flex; gap: 8px; margin-top: 10px; }
+    @media (max-width: 640px) { #w-moe .flow { grid-template-columns: 1fr; } #w-moe .queue { justify-content: flex-start; } #w-moe .meters { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-moe");
+    const TOKENS = ["Deere", "'s", "revenue", "grew", "6.4%", "def", "total", "(", "NVIDIA", "sales", "=", "fell"];
+    // Toy router: a fixed pair of experts per token, so the same token always goes to the same place.
+    const route = (t) => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; const a = h % 16; let b = (h >>> 4) % 16; if (b === a) b = (a + 5) % 16; return [a, b]; };
+    const grid = w.querySelector(".grid");
+    grid.innerHTML = Array.from({ length: 16 }, (_, i) => `<div class="ex">E${i + 1}</div>`).join("");
+    let mode = "moe", n = 0, timer = null;
+    const $ = (s) => w.querySelector(s);
+    function queue() { $(".queue").innerHTML = TOKENS.slice(n % TOKENS.length + 1, n % TOKENS.length + 7).map((t) => `<span>${t}</span>`).join(""); }
+    function meters(active) {
+      $('[data-m="stored"]').style.width = "100%";
+      $('[data-t="stored"]').textContent = "16 of 16 experts";
+      $('[data-m="used"]').style.width = (active / 16 * 100) + "%";
+      $('[data-t="used"]').textContent = `${active} of 16 experts${mode === "moe" ? " · about 1/8 of the work" : " · all of the work"}`;
+    }
+    function send() {
+      const t = TOKENS[n % TOKENS.length];
+      $(".cur").textContent = t;
+      const r = $(".router"); r.classList.remove("hit"); void r.offsetWidth; r.classList.add("hit");
+      const on = mode === "dense" ? [...Array(16).keys()] : route(t);
+      grid.querySelectorAll(".ex").forEach((e, i) => e.classList.toggle("on", on.includes(i)));
+      meters(on.length);
+      n++; queue();
+    }
+    w.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      w.querySelectorAll(".seg button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
+      mode = b.dataset.m; n = Math.max(0, n - 1); send();
+    }));
+    $(".send").addEventListener("click", send);
+    $(".auto").addEventListener("click", () => {
+      if (timer) { clearInterval(timer); timer = null; $(".auto").textContent = "▶ Play"; return; }
+      send(); timer = setInterval(send, 900); $(".auto").textContent = "❚❚ Pause";
+    });
+    queue(); send();
+  })();
+  </script>
+</div>

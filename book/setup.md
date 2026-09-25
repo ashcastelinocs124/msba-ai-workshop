@@ -84,7 +84,7 @@ The package is from OpenAI because OpenAI's API format became the common standar
 
 OpenAI also publishes the [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/), a separate package built on top of `openai` for agents that call tools over many steps: the loop chapter 1 writes by hand. This workshop writes that loop itself so you can see every step, but the Agents SDK is worth knowing once you build agents for real.
 
-What an open-source model is, how it differs from a closed one, and how to run one on NCSA's GPUs are in {ref}`chapter 0 <open-closed-models>`.
+What an open-source model is, how it differs from a closed one, and how to run one on NCSA's GPUs are on {ref}`page 0C <open-closed-models>`.
 
 ## Logistics
 
