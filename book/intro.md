@@ -38,7 +38,7 @@ Each chapter follows the same shape so you always know where to look:
 
 | Part | Chapters | The question it answers |
 |---|---|---|
-| 0 · Foundations | 0 | How does a large language model work, and what is the difference between open and closed models? |
+| 0 · Foundations | 0, 0.5 | How does a large language model work, what is the difference between open and closed models, and what is an API? |
 | I · Agents | 1–3 | What is an agent, how does it take actions, and how do I keep that honest? |
 | II · Machine learning | 4–5 | How do I turn a business question into a model I can trust? |
 | III · Systems and decisions | 6–7 | How do I run this in production, and when should I not? |

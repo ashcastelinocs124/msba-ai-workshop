@@ -1,0 +1,98 @@
+<div class="wk-widget" id="w-api-call">
+  <div class="wk-title">/// One API call, step by step</div>
+  <div class="seg" role="tablist" aria-label="Kind of API">
+    <button type="button" class="on" data-m="data" aria-pressed="true">Classic API · market data</button>
+    <button type="button" data-m="ai" aria-pressed="false">AI API · Lumen</button>
+  </div>
+  <div class="lane">
+    <div class="box" data-part="req"><h4>① The request</h4><pre data-t="req"></pre></div>
+    <div class="mid"><span class="arrow" data-a="1">→</span><span data-t="mid">over the internet</span><span class="arrow" data-a="2">←</span></div>
+    <div class="box" data-part="res"><h4>② The response</h4><pre data-t="res" aria-live="polite"></pre></div>
+  </div>
+  <div class="foot">
+    <div class="kv"><b>Who pays, for what</b><span data-t="f1"></span></div>
+    <div class="kv"><b>Same request again?</b><span data-t="f2"></span></div>
+    <div class="kv"><b>What can go wrong</b><span data-t="f3"></span></div>
+  </div>
+  <div class="btns"><button type="button" class="primary" data-go="send">Send request</button><button type="button" data-go="again">Send it again</button></div>
+  <style>
+    #w-api-call .seg { display: inline-flex; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; margin-bottom: 12px; }
+    #w-api-call .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 14px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-api-call .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-api-call .lane { display: grid; grid-template-columns: 1fr 110px 1fr; gap: 10px; align-items: stretch; }
+    #w-api-call .box { border: 2px solid var(--wk-line); border-radius: 10px; background: #fff; padding: 10px 12px; min-width: 0; transition: border-color .2s, background .2s; }
+    #w-api-call .box.on { border-color: var(--wk-orange); background: #fff3ea; }
+    #w-api-call .box h4 { margin: 0 0 6px; font-size: 13px; color: var(--wk-navy); }
+    #w-api-call pre { margin: 0; padding: 0; background: none; border: 0; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word; color: #1f2430; }
+    #w-api-call .mid { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; font: 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); text-align: center; }
+    #w-api-call .arrow { font-size: 22px; color: #c3c8d3; transition: color .2s; }
+    #w-api-call .arrow.on { color: var(--wk-orange); }
+    #w-api-call .foot { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 12px; }
+    #w-api-call .kv { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 8px 10px; font-size: 12.5px; line-height: 1.45; }
+    #w-api-call .kv b { display: block; font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 2px; }
+    #w-api-call .btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    @media (max-width: 640px) { #w-api-call .lane { grid-template-columns: 1fr; } #w-api-call .mid { flex-direction: row; } #w-api-call .arrow { transform: rotate(90deg); } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-api-call");
+    const t = (k) => w.querySelector(`[data-t="${k}"]`);
+    // Figures match book/_static/py/tools.py: Deere Q2-2026, revenue $13.8B, +6.4% year over year.
+    const M = {
+      data: {
+        req: "GET https://api.marketdata.example/v2/financials\n    ?ticker=DE&period=Q2-2026\nAuthorization: Bearer ccr-live-••••••••",
+        res: ["200 OK\n{\n  \"ticker\": \"DE\",\n  \"period\": \"Q2-2026\",\n  \"revenue\": 13800000000,\n  \"yoy\": 0.064\n}"],
+        mid: "about 80 ms",
+        f1: "The firm pays a yearly licence. Each call costs nothing extra, up to a limit.",
+        f2: "The identical answer, every time.",
+        f3: "A wrong ticker gives 404 Not Found, a bad key 401 Unauthorized, too many calls a minute 429 Too Many Requests.",
+      },
+      ai: {
+        req: "POST https://lumen.ncsa.illinois.edu/v1/chat/completions\nAuthorization: Bearer sk-••••••••\n{\n  \"model\": \"glm-5.3-flash\",\n  \"messages\": [{\"role\": \"user\", \"content\":\n    \"In one sentence, how did Deere's revenue change last quarter?\"}]\n}",
+        res: [
+          "200 OK\n{\n  \"content\": \"Deere's revenue grew about 6.4% year over year, to $13.8 billion.\",\n  \"usage\": {\"prompt_tokens\": 21, \"completion_tokens\": 19}\n}",
+          "200 OK\n{\n  \"content\": \"Revenue at Deere rose roughly 6% from a year earlier, reaching about $13.8 billion.\",\n  \"usage\": {\"prompt_tokens\": 21, \"completion_tokens\": 20}\n}",
+          "200 OK\n{\n  \"content\": \"Deere reported $13.8 billion in revenue, up 6.4% on the same quarter last year.\",\n  \"usage\": {\"prompt_tokens\": 21, \"completion_tokens\": 18}\n}",
+        ],
+        mid: "about 1.5 s",
+        f1: "Billed per token: 21 sent plus about 19 back on this call. A longer answer costs more.",
+        f2: "Different wording each time. The figure is only right because the model was given it (chapter 0); ask about a company it has no data on and it may still answer.",
+        f3: "Everything on the left, plus an answer that reads well and is wrong. That still comes back 200 OK.",
+      },
+    };
+    let mode = "data", n = 0, timer = null;
+    const light = (on) => {
+      w.querySelectorAll(".box, .arrow").forEach((el) => el.classList.remove("on"));
+      if (on) on.forEach((sel) => w.querySelector(sel).classList.add("on"));
+    };
+    function reset() {
+      clearTimeout(timer);
+      const m = M[mode];
+      t("req").textContent = m.req;
+      t("res").textContent = "(press Send request)";
+      t("mid").textContent = "over the internet";
+      t("f1").textContent = m.f1; t("f2").textContent = m.f2; t("f3").textContent = m.f3;
+      light(null); n = 0;
+    }
+    function send() {
+      clearTimeout(timer);
+      const m = M[mode];
+      light(['[data-part="req"]', '[data-a="1"]']);
+      t("res").textContent = "…waiting";
+      timer = setTimeout(() => {
+        light(['[data-part="req"]', '[data-a="1"]', '[data-a="2"]', '[data-part="res"]']);
+        t("mid").textContent = m.mid;
+        t("res").textContent = m.res[n % m.res.length];
+        n++;
+      }, mode === "ai" ? 900 : 300);
+    }
+    w.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      w.querySelectorAll(".seg button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
+      mode = b.dataset.m; reset();
+    }));
+    w.querySelector('[data-go="send"]').addEventListener("click", send);
+    w.querySelector('[data-go="again"]').addEventListener("click", send);
+    reset();
+  })();
+  </script>
+</div>

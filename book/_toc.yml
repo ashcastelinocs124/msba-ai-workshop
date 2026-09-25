@@ -9,6 +9,7 @@ parts:
   - caption: Part 0 · Foundations
     chapters:
       - file: ch00-how-llms-work
+      - file: ch00-apis
   - caption: Part I · Agents
     chapters:
       - file: ch01-agent-loop
