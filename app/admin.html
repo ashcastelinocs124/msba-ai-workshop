@@ -86,7 +86,7 @@
       <div class="card">
         <h3>Lecture checkpoints</h3>
         <div class="scroll"><table id="cplist"></table></div>
-        <p class="hint">Students' pages check every 10 seconds, so Open and Close reach the room within a few seconds.</p>
+        <p class="hint">Open shows question 1 only. Next question locks it and shows the next one; Close locks the last and reveals every answer. Students' pages check every 10 seconds.</p>
         <div id="results"></div>
       </div>
       <div class="card">
@@ -193,12 +193,14 @@
     if (selected == null && cps.length) selected = cps[0].id;
     $("cplist").innerHTML = `<tr><th>Checkpoint</th><th>Spot</th><th class="n">Answered</th><th></th></tr>` +
       (cps.map((c) => {
-        const st = c.status === "open" ? `<span class="st open">OPEN</span>` : `<span class="st ${c.opened_at ? "done" : "closed"}">CLOSED</span>`;
+        const n = c.questions.length, live = (c.live ?? 0) + 1;
+        const st = c.status === "open" ? `<span class="st open">Q${live} OF ${n} LIVE</span>` : `<span class="st ${c.opened_at ? "done" : "closed"}">CLOSED</span>`;
         const act = c.status === "open" ? "Close" : c.opened_at ? "Reopen" : "Open";
+        const next = c.status === "open" && live < n ? `<button class="btn small orange" data-toggle="${c.id}" data-to="next">Next question →</button> ` : "";
         return `<tr data-id="${c.id}" class="${c.id === selected ? "sel" : ""}"><td><a href="#" data-pick="${c.id}">${esc(c.title)}</a></td><td class="hint">${esc(c.label)}</td>
-          <td class="n">${c.answered} / ${data.total_students}</td><td style="white-space:nowrap">${st}
+          <td class="n">${c.answered} / ${data.total_students}</td><td><div class="row" style="gap:6px">${st} ${next}
           <button class="btn small ${c.status === "open" ? "" : "orange"}" data-toggle="${c.id}" data-to="${c.status === "open" ? "closed" : "open"}">${act}</button>
-          ${c.answers.length ? "" : `<button class="btn small" data-edit="${c.id}">Edit</button>`}</td></tr>`;
+          ${c.answers.length ? "" : `<button class="btn small" data-edit="${c.id}">Edit</button>`}</div></td></tr>`;
       }).join("") || `<tr><td colspan="4" class="hint">None yet. Build one on the right.</td></tr>`);
     drawResults();
   }
@@ -210,8 +212,9 @@
       const as = c.answers.filter((a) => a.q === i);
       if (q.kind === "short") return `<div class="hbar"><span>Q${i + 1} · ${esc(q.prompt)}</span><span class="hint">short answer</span><span class="v">${as.length}</span></div>`;
       const pct = as.length ? Math.round(100 * as.filter((a) => a.correct).length / as.length) : 0;
+      const liveTag = c.status === "open" && i === (c.live ?? 0) ? ` <span class="st open">LIVE · ${as.length} answered</span>` : "";
       const counts = q.choices.map((ch, j) => `${j === q.correct ? "✓ " : ""}${esc(ch)}: ${as.filter((a) => a.value === String(j)).length}`).join(" · ");
-      return `<div class="hbar"><span>Q${i + 1} · ${esc(q.prompt)}</span><span class="b"><i style="width:${pct}%"></i></span><span class="v">${as.length ? pct + "%" : "—"}</span></div><div class="choices">${counts}</div>`;
+      return `<div class="hbar"><span>Q${i + 1} · ${esc(q.prompt)}${liveTag}</span><span class="b"><i style="width:${pct}%"></i></span><span class="v">${as.length ? pct + "%" : "—"}</span></div><div class="choices">${counts}</div>`;
     }).join("");
     const rows = c.answers.map((a) => {
       const q = c.questions[a.q];

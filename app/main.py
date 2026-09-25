@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, ts TEXT NOT NULL, use
 CREATE INDEX IF NOT EXISTS events_user_ts ON events(user, ts);
 CREATE TABLE IF NOT EXISTS lecture_checkpoints (id INTEGER PRIMARY KEY, spot TEXT UNIQUE NOT NULL,
     title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'closed', questions TEXT NOT NULL,
-    opened_at TEXT, closed_at TEXT);
+    opened_at TEXT, closed_at TEXT, live INTEGER);
 CREATE TABLE IF NOT EXISTS answers (checkpoint_id INTEGER NOT NULL REFERENCES lecture_checkpoints(id),
     user TEXT NOT NULL, q INTEGER NOT NULL, value TEXT NOT NULL, correct INTEGER, ts TEXT NOT NULL,
     PRIMARY KEY (checkpoint_id, user, q));
@@ -106,6 +106,10 @@ def _q(sql: str, args: tuple = ()) -> list[sqlite3.Row]:
     try:
         if APP_DB not in _schema_ready:
             con.executescript(SCHEMA)
+            try:  # databases created before one-question-at-a-time lack this column
+                con.execute("ALTER TABLE lecture_checkpoints ADD COLUMN live INTEGER")
+            except sqlite3.OperationalError:
+                pass  # already there
             _schema_ready.add(APP_DB)
         with con:
             return con.execute(sql, args).fetchall()
@@ -227,17 +231,19 @@ def _checkpoint(spot: str) -> sqlite3.Row | None:
 
 
 def _student_view(cp: sqlite3.Row | None, spot: str, user: str) -> dict:
-    """What a student's page shows. Correct answers only after the checkpoint has been opened and closed again,
-    so a checkpoint that is closed *before* class never gives its answers away."""
+    """What a student's page shows. While a checkpoint is open, only the questions released so far
+    (up to `live`, the one being asked now) are sent, so nobody can read ahead. Correct answers only
+    after the checkpoint has been opened and closed again, so one closed *before* class gives nothing away."""
     if cp is None:
         return {"spot": spot, "status": "none"}
     revealed = cp["status"] == "closed" and cp["opened_at"] is not None
+    qs = json.loads(cp["questions"])
+    shown = qs if revealed else qs[:(cp["live"] or 0) + 1] if cp["status"] == "open" else []
     mine = {r["q"]: r["value"] for r in _q("SELECT q, value FROM answers WHERE checkpoint_id = ? AND user = ?", (cp["id"], user))}
     questions = [{"prompt": q["prompt"], "kind": q["kind"], "choices": q.get("choices", []),
-                  **({"correct": q.get("correct"), "explain": q.get("explain", "")} if revealed else {})}
-                 for q in json.loads(cp["questions"])]
-    return {"spot": spot, "title": cp["title"], "status": cp["status"], "revealed": revealed,
-            "questions": questions, "mine": mine}
+                  **({"correct": q.get("correct"), "explain": q.get("explain", "")} if revealed else {})} for q in shown]
+    return {"spot": spot, "title": cp["title"], "status": cp["status"], "revealed": revealed, "total": len(qs),
+            "live": cp["live"] if cp["status"] == "open" else None, "questions": questions, "mine": mine}
 
 
 @app.get("/api/checkpoints/{spot}")
@@ -261,6 +267,8 @@ async def checkpoint_answer(spot: str, request: Request):
         i = int(k) if str(k).isdigit() else -1
         if not 0 <= i < len(questions):
             raise HTTPException(400, f"no question {k}")
+        if i != (cp["live"] or 0):
+            raise HTTPException(409, f"question {i + 1} is not open right now")
         q = questions[i]
         if q["kind"] == "mc":
             if not isinstance(v, int) or not 0 <= v < len(q["choices"]):
@@ -341,7 +349,7 @@ def admin_data(request: Request, days: int = 7):
         for a in ans:
             a["name"] = names.get(a["user"], "")
         label = next((s["label"] for s in spots if s["spot"] == cp["spot"]), cp["spot"] + " (marker not found in the book)")
-        cps.append({**{c: cp[c] for c in ("id", "spot", "title", "status", "opened_at", "closed_at")},
+        cps.append({**{c: cp[c] for c in ("id", "spot", "title", "status", "opened_at", "closed_at", "live")},
                     "label": label, "questions": qs, "answers": ans, "answered": len({a["user"] for a in ans})})
     last = next((c for c in cps if c["opened_at"]), None)
 
@@ -398,7 +406,7 @@ async def admin_save(request: Request):
         if body.get("id"):
             if _q("SELECT 1 FROM answers WHERE checkpoint_id = ? LIMIT 1", (body["id"],)):
                 raise HTTPException(409, "students have already answered; its questions are locked")
-            _q("UPDATE lecture_checkpoints SET title = ?, spot = ?, questions = ? WHERE id = ?", (title, spot, questions, body["id"]))
+            _q("UPDATE lecture_checkpoints SET title = ?, spot = ?, questions = ?, live = NULL WHERE id = ?", (title, spot, questions, body["id"]))
         else:
             _q("INSERT INTO lecture_checkpoints (spot, title, questions) VALUES (?, ?, ?)", (spot, title, questions))
     except sqlite3.IntegrityError:
@@ -409,13 +417,23 @@ async def admin_save(request: Request):
 @app.post("/admin/api/checkpoints/{cp_id}/status")
 async def admin_status(cp_id: int, request: Request):
     _admin(request)
-    status = (await request.json()).get("status")
-    if status not in ("open", "closed"):
-        raise HTTPException(400, "status is open or closed")
-    col = "opened_at" if status == "open" else "closed_at"
-    if not _q("SELECT 1 FROM lecture_checkpoints WHERE id = ?", (cp_id,)):
+    """open: start at question 1 (a reopen resumes where it stopped); next: lock the live question and
+    release the following one; closed: lock everything and reveal the answers."""
+    action = (await request.json()).get("status")
+    rows = _q("SELECT status, live, questions FROM lecture_checkpoints WHERE id = ?", (cp_id,))
+    if not rows:
         raise HTTPException(404, "no such checkpoint")
-    _q(f"UPDATE lecture_checkpoints SET status = ?, {col} = ? WHERE id = ?", (status, _now(), cp_id))
+    cp = rows[0]
+    if action == "open":
+        _q("UPDATE lecture_checkpoints SET status = 'open', opened_at = ?, live = COALESCE(live, 0) WHERE id = ?", (_now(), cp_id))
+    elif action == "next":
+        if cp["status"] != "open" or (cp["live"] or 0) + 1 >= len(json.loads(cp["questions"])):
+            raise HTTPException(409, "no next question: close the checkpoint instead")
+        _q("UPDATE lecture_checkpoints SET live = live + 1 WHERE id = ?", (cp_id,))
+    elif action == "closed":
+        _q("UPDATE lecture_checkpoints SET status = 'closed', closed_at = ? WHERE id = ?", (_now(), cp_id))
+    else:
+        raise HTTPException(400, "status is open, next or closed")
     return {"ok": True}
 
 

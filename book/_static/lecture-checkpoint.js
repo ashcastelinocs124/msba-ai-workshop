@@ -11,18 +11,21 @@
       `<p>Your instructor opens this during the session. It will appear here without reloading the page, and your answers are saved to your account.</p>`;
   }
 
+  // One question at a time: earlier ones are locked (the student's answer shows), the live one is a form,
+  // later ones are not sent by the server at all.
   function openView(s) {
-    const qs = s.questions.map((q, i) => {
-      const mine = s.mine[i];
-      const body = q.kind === "mc"
-        ? q.choices.map((c, j) => `<label><input type="radio" name="q${i}" value="${j}"${mine === String(j) ? " checked" : ""}> ${esc(c)}</label>`).join("")
-        : `<textarea name="q${i}" maxlength="1000" placeholder="Your answer">${esc(mine || "")}</textarea>`;
-      return `<fieldset class="wk-lcp-q"><legend>${i + 1}. ${esc(q.prompt)}</legend>${body}</fieldset>`;
-    }).join("");
-    const answered = Object.keys(s.mine).length;
-    return head(s.title, "OPEN", "open") + `<form>${qs}
-      <div class="wk-lcp-row"><button type="submit" class="wk-lcp-btn">${answered ? "Update answers" : "Submit answers"}</button>
-      <span class="wk-lcp-hint">You can change your answers until the checkpoint closes.</span></div><div class="wk-lcp-fb" aria-live="polite"></div></form>`;
+    const live = s.live ?? 0, q = s.questions[live], mine = s.mine[live];
+    const shown = (j, v) => (s.questions[j].kind === "mc" ? s.questions[j].choices[+v] : v);
+    const past = s.questions.slice(0, live).map((p, j) =>
+      `<div class="wk-lcp-r"><b>${j + 1}. ${esc(p.prompt)}</b><br>${s.mine[j] != null ? `Your answer: ${esc(shown(j, s.mine[j]))}` : "Not answered"} · locked</div>`).join("");
+    const body = q.kind === "mc"
+      ? q.choices.map((c, j) => `<label><input type="radio" name="q${live}" value="${j}"${mine === String(j) ? " checked" : ""}> ${esc(c)}</label>`).join("")
+      : `<textarea name="q${live}" maxlength="1000" placeholder="Your answer">${esc(mine || "")}</textarea>`;
+    return head(s.title, `QUESTION ${live + 1} OF ${s.total}`, "open") + past + `<form>
+      <fieldset class="wk-lcp-q"><legend>${live + 1}. ${esc(q.prompt)}</legend>${body}</fieldset>
+      <div class="wk-lcp-row"><button type="submit" class="wk-lcp-btn">${mine != null ? "Update answer" : "Submit answer"}</button>
+      <span class="wk-lcp-hint">You can change it until your instructor moves to the next question. Answers are revealed at the end.</span></div>
+      <div class="wk-lcp-fb" aria-live="polite"></div></form>`;
   }
 
   function revealedView(s) {
@@ -47,7 +50,7 @@
     let key = null;
     const render = (s) => {
       // Re-render only when something the student sees has changed, so a half-typed answer survives each poll.
-      const k = JSON.stringify([s.status, s.revealed, s.title, s.questions]);
+      const k = JSON.stringify([s.status, s.revealed, s.title, s.questions, s.live]);
       if (k === key) return;
       key = k;
       el.classList.toggle("open", s.status === "open");
@@ -58,25 +61,21 @@
     async function submit(e, s, form) {
       e.preventDefault();
       const fb = form.querySelector(".wk-lcp-fb"), btn = form.querySelector("button");
-      const answers = {};
-      s.questions.forEach((q, i) => {
-        if (q.kind === "mc") { const c = form.querySelector(`input[name=q${i}]:checked`); if (c) answers[i] = +c.value; }
-        else { const t = form.querySelector(`textarea[name=q${i}]`).value.trim(); if (t) answers[i] = t; }
-      });
-      if (!Object.keys(answers).length) { fb.className = "wk-lcp-fb no"; fb.textContent = "Answer at least one question before submitting."; return; }
+      const i = s.live ?? 0, q = s.questions[i], answers = {};
+      if (q.kind === "mc") { const c = form.querySelector(`input[name=q${i}]:checked`); if (c) answers[i] = +c.value; }
+      else { const t = form.querySelector(`textarea[name=q${i}]`).value.trim(); if (t) answers[i] = t; }
+      if (!Object.keys(answers).length) { fb.className = "wk-lcp-fb no"; fb.textContent = "Pick or write an answer first."; return; }
       btn.disabled = true;
       try {
         const r = await fetch(`/api/checkpoints/${encodeURIComponent(spot)}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ answers }) });
         const body = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(body.detail || "Could not save your answers. Try again.");
-        const missing = s.questions.length - Object.keys(body.mine).length;
         fb.className = "wk-lcp-fb ok";
-        fb.textContent = `Saved at ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.` +
-          (missing ? ` ${missing} question${missing > 1 ? "s" : ""} still unanswered.` : "") + " Correct answers appear here when your instructor closes the checkpoint.";
-        btn.textContent = "Update answers";
+        fb.textContent = `Saved at ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}. The next question appears here when your instructor moves on.`;
+        btn.textContent = "Update answer";
       } catch (err) {
         fb.className = "wk-lcp-fb no"; fb.textContent = err.message;
-        if (/closed/.test(err.message)) poll();
+        if (/closed|not open/.test(err.message)) { key = null; poll(); }
       }
       btn.disabled = false;
     }

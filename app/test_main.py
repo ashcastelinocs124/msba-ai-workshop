@@ -116,6 +116,7 @@ def test_events(tmp_path):
 def test_lecture_checkpoint(tmp_path):
     c = _checkpoint_app(tmp_path)
     url = "/api/checkpoints/ch03-retrieval"
+    status = lambda to: c.post(f"/admin/api/checkpoints/{cp['id']}/status", json={"status": to}, headers=ADMIN)
     assert c.get(url, headers=H).json() == {"spot": "ch03-retrieval", "status": "none"}
     assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "ch03-retrieval", "questions": Q}, headers=H).status_code == 403
     assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "nowhere", "questions": Q}, headers=ADMIN).status_code == 400
@@ -124,25 +125,47 @@ def test_lecture_checkpoint(tmp_path):
     assert c.post("/admin/api/checkpoints", json={"title": "Retrieval", "spot": "ch03-retrieval", "questions": Q}, headers=ADMIN).status_code == 200
     cp = c.get("/admin/api/data", headers=ADMIN).json()["checkpoints"][0]
 
-    view = c.get(url, headers=H).json()                                     # closed before class: no answers leaked
-    assert view["status"] == "closed" and not view["revealed"] and "correct" not in view["questions"][0]
-    assert "explain" not in view["questions"][0]                           # nor the explanation
+    view = c.get(url, headers=H).json()                                     # closed before class: nothing to read ahead
+    assert view["status"] == "closed" and not view["revealed"] and view["questions"] == []
     assert c.post(url, json={"answers": {"0": 2}}, headers=H).status_code == 409
+    assert status("next").status_code == 409                               # can't advance a closed checkpoint
 
-    assert c.post(f"/admin/api/checkpoints/{cp['id']}/status", json={"status": "open"}, headers=ADMIN).status_code == 200
+    assert status("open").status_code == 200                               # question 1 only
+    view = c.get(url, headers=H).json()
+    assert view["live"] == 0 and view["total"] == 2 and len(view["questions"]) == 1 and "correct" not in view["questions"][0]
     assert c.post(url, json={"answers": {"0": 9}}, headers=H).status_code == 400
-    assert c.post(url, json={"answers": {"5": 1}}, headers=H).status_code == 400
-    assert c.post(url, json={"answers": {"0": 0, "1": "Guess"}}, headers=H).json()["mine"] == {"0": "0", "1": "Guess"}
-    assert c.post(url, json={"answers": {"0": 2, "1": "Send it to compliance"}}, headers=H).status_code == 200  # overwrite
+    assert c.post(url, json={"answers": {"1": "Too early"}}, headers=H).status_code == 409   # question 2 not open yet
+    assert c.post(url, json={"answers": {"0": 0}}, headers=H).json()["mine"] == {"0": "0"}
+    assert c.post(url, json={"answers": {"0": 2}}, headers=H).status_code == 200            # change of mind overwrites
     c.post(url, json={"answers": {"0": 1}}, headers=H2)
+
+    assert status("next").status_code == 200                               # question 1 locks, question 2 appears
+    view = c.get(url, headers=H).json()
+    assert view["live"] == 1 and len(view["questions"]) == 2 and "correct" not in view["questions"][0]
+    assert c.post(url, json={"answers": {"0": 0}}, headers=H).status_code == 409             # locked
+    assert c.post(url, json={"answers": {"1": "Send it to compliance"}}, headers=H).status_code == 200
+    assert status("next").status_code == 409                               # it was the last question
     edit = {"id": cp["id"], "title": "Changed", "spot": "ch03-retrieval", "questions": Q}
     assert c.post("/admin/api/checkpoints", json=edit, headers=ADMIN).status_code == 409   # locked once answered
 
-    c.post(f"/admin/api/checkpoints/{cp['id']}/status", json={"status": "closed"}, headers=ADMIN)
-    assert c.post(url, json={"answers": {"0": 0}}, headers=H).status_code == 409
+    assert status("closed").status_code == 200
+    assert c.post(url, json={"answers": {"1": "Later"}}, headers=H).status_code == 409
     view = c.get(url, headers=H).json()
-    assert view["revealed"] and view["questions"][0]["correct"] == 2 and view["mine"] == {"0": "2", "1": "Send it to compliance"}
+    assert view["revealed"] and view["live"] is None and len(view["questions"]) == 2
+    assert view["questions"][0]["correct"] == 2 and view["mine"] == {"0": "2", "1": "Send it to compliance"}
     assert view["questions"][0]["explain"].startswith("Deere was published") and view["questions"][1]["explain"] == ""
     cp = c.get("/admin/api/data", headers=ADMIN).json()["checkpoints"][0]
     assert cp["answered"] == 2 and len(cp["answers"]) == 3
     assert sorted(a["correct"] for a in cp["answers"] if a["q"] == 0) == [0, 1]
+
+
+def test_old_database_gains_live_column(tmp_path):
+    import sqlite3
+    db = tmp_path / "old.db"
+    con = sqlite3.connect(db)                                              # the table as first deployed, without `live`
+    con.execute("CREATE TABLE lecture_checkpoints (id INTEGER PRIMARY KEY, spot TEXT UNIQUE NOT NULL, title TEXT NOT NULL,"
+                " status TEXT NOT NULL DEFAULT 'closed', questions TEXT NOT NULL, opened_at TEXT, closed_at TEXT)")
+    con.execute("INSERT INTO lecture_checkpoints (spot, title, questions) VALUES ('ch03-retrieval', 'Old', ?)", (json.dumps(Q),))
+    con.commit(); con.close()
+    m.APP_DB = str(db)
+    assert m._q("SELECT live FROM lecture_checkpoints")[0][0] is None
