@@ -1,0 +1,71 @@
+<div class="wk-widget wk-tk" id="w-tk">
+  <style>
+    .wk-tk input.in { width: 100%; box-sizing: border-box; border: 1px solid var(--wk-line); border-radius: 6px; padding: 8px 10px; font: 15px system-ui, sans-serif; color: #1f2430; background: #fff; }
+    .wk-tk input.in:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 1px; }
+    .wk-tk .count { font: 600 13px ui-monospace, Menlo, monospace; color: var(--wk-navy); margin: 10px 0 6px; }
+    .wk-tk .words { display: flex; flex-wrap: wrap; gap: 8px; background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 12px; min-height: 40px; }
+    .wk-tk .word { display: inline-flex; border: 2px solid transparent; border-radius: 7px; padding: 3px; cursor: default; }
+    .wk-tk .word:hover, .wk-tk .word.on { border-color: var(--wk-orange); }
+    .wk-tk .word:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 2px; }
+    .wk-tk .p { font: 600 15px ui-monospace, Menlo, monospace; padding: 3px 5px; border-radius: 4px; margin-right: 2px; color: #1f2430; }
+    .wk-tk .p:last-child { margin-right: 0; }
+    .wk-tk .sp { color: #8a93a6; }
+    .wk-tk .c0 { background: #dfe8f7; } .wk-tk .c1 { background: #ffe3cf; } .wk-tk .c2 { background: #dcf1e3; } .wk-tk .c3 { background: #f1e0f5; }
+    .wk-tk .explain { margin-top: 10px; border-left: 3px solid var(--wk-orange); background: #fff; padding: 8px 12px; min-height: 2.8em; font-size: 13.5px; }
+    .wk-tk .explain b { font-family: ui-monospace, Menlo, monospace; }
+    .wk-tk .note { font-size: 12px; color: var(--wk-muted); margin-top: 10px; }
+  </style>
+  <div class="wk-title">/// Interactive · see the tokens in each word</div>
+  <input class="in" data-in value="Caterpillar's revenue grew 3.1% last quarter" aria-label="Sentence to split into tokens">
+  <div class="count" data-count aria-live="polite"></div>
+  <div class="words" data-words></div>
+  <div class="explain" data-ex aria-live="polite">Point at a word, or tab to it, to see how the model splits it.</div>
+  <p class="note">A toy vocabulary of 40 pieces. A real model's has about a hundred thousand, so it splits differently, but the pattern holds: common words whole, names and numbers in pieces. · marks a space, which belongs to the token after it.</p>
+  <script>
+  (() => {
+    const w = document.getElementById("w-tk");
+    // Copy of VOCAB in _static/py/llm_basics.py; keep the two in step. Same greedy longest match as tokenize().
+    const VOCAB = [" revenue", " growth", " grew", " faster", " than", " the", " last", " quarter", " year", " to", " of",
+                   " is", " and", " a", " from", " base", " smaller", " larger", " client", " memo", " prompt",
+                   "Deere", " Deere", "Apple", " Apple", "NVIDIA", " NVIDIA", "Micro", " Micro", "soft",
+                   "Cater", " Cater", "pillar", "'s", "%", "$", "B", ".", ",", "?"];
+    const BY_LEN = [...new Set(VOCAB)].sort((a, b) => b.length - a.length);
+    const tokenize = (t) => { const out = []; let i = 0;
+      while (i < t.length) { const p = BY_LEN.find((v) => t.startsWith(v, i)) || t[i]; out.push(p); i += p.length; }
+      return out; };
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    const inEl = w.querySelector("[data-in]"), box = w.querySelector("[data-words]"), ex = w.querySelector("[data-ex]"), cnt = w.querySelector("[data-count]");
+
+    const render = () => {
+      // Each token joins the word its first visible character belongs to; a bare space joins the next word.
+      const pieces = tokenize(inEl.value), words = []; let pending = [], fresh = true;
+      pieces.forEach((p) => {
+        if (!p.trim()) { pending.push(p); fresh = true; return; }
+        if (fresh || /^\s/.test(p)) words.push([]);
+        words[words.length - 1].push(...pending, p); pending = []; fresh = false;
+      });
+      cnt.textContent = `${words.length} word${words.length === 1 ? "" : "s"} → ${pieces.length} token${pieces.length === 1 ? "" : "s"}`;
+      box.innerHTML = "";
+      ex.textContent = "Point at a word, or tab to it, to see how the model splits it.";
+      words.forEach((g) => {
+        const el = document.createElement("span"); el.className = "word"; el.tabIndex = 0;
+        el.innerHTML = g.map((p, i) => `<span class="p c${i % 4}">${esc(p).replace(/ /g, '<span class="sp">·</span>')}</span>`).join("");
+        const word = g.join("").trim();
+        const spelled = g.filter((p) => p.trim().length === 1 && !VOCAB.includes(p)).length;
+        const why = g.length === 1 ? "It is in the vocabulary whole, so it costs one token."
+          : spelled ? `Part of it is not in the vocabulary at all, so the model spells ${spelled === 1 ? "that character" : "those characters"} one at a time.`
+          : "The whole word is not in the vocabulary, so the model builds it from pieces it does know.";
+        el.setAttribute("aria-label", `${word}: ${g.length} token${g.length > 1 ? "s" : ""}`);
+        const show = () => {
+          box.querySelectorAll(".word").forEach((x) => x.classList.toggle("on", x === el));
+          ex.innerHTML = `<b>${esc(word)}</b> → ${g.length} token${g.length > 1 ? "s" : ""}: ${g.map((p) => `<b>[${esc(p.replace(/ /g, "·"))}]</b>`).join(" ")}. ${why}`;
+        };
+        ["mouseenter", "focus", "click"].forEach((e) => el.addEventListener(e, show));
+        box.appendChild(el);
+      });
+    };
+    inEl.addEventListener("input", render);
+    render();
+  })();
+  </script>
+</div>

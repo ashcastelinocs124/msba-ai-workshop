@@ -10,12 +10,22 @@
     @media (prefers-reduced-motion: reduce) { .wk-nt .sent .caret { animation: none; } }
     .wk-nt .h { font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin: 14px 0 6px; }
     .wk-nt .bars { display: flex; flex-direction: column; gap: 5px; }
-    .wk-nt .bar { display: grid; grid-template-columns: 7.5em 1fr 3.2em; gap: 8px; align-items: center; width: 100%; text-align: left; border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 5px 8px; cursor: pointer; font: 600 13px system-ui, sans-serif; color: #1f2430; }
-    .wk-nt .bar:hover { border-color: var(--wk-navy); }
+    .wk-nt .bar { display: grid; grid-template-columns: 7.5em 1fr 4.8em 3.2em; gap: 8px; align-items: center; width: 100%; text-align: left; border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 5px 8px; cursor: pointer; font: 600 13px system-ui, sans-serif; color: #1f2430; }
+    .wk-nt .bar:hover, .wk-nt .bar.on { border-color: var(--wk-orange); background: #fff8f3; }
     .wk-nt .bar:focus-visible { outline: 2px solid var(--wk-orange); outline-offset: 2px; }
-    .wk-nt .track { height: 12px; background: #eef0f4; border-radius: 3px; overflow: hidden; }
-    .wk-nt .fill { height: 100%; background: var(--wk-navy); border-radius: 3px; transition: width .2s; }
+    .wk-nt .track { display: block; height: 12px; background: #eef0f4; border-radius: 3px; overflow: hidden; }
+    .wk-nt .fill { display: block; height: 100%; background: var(--wk-navy); border-radius: 3px; transition: width .2s; }
     .wk-nt .bar.top .fill { background: var(--wk-orange); }
+    .wk-nt .cnt { font: 600 11.5px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    .wk-nt .why { margin-top: 12px; background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 12px 14px; }
+    .wk-nt .why .h { margin-top: 0; }
+    .wk-nt .sum { font: 600 13.5px/1.5 system-ui, sans-serif; color: #1f2430; }
+    .wk-nt .sum code { background: #fff3ea; color: #1f2430; padding: 1px 5px; border-radius: 3px; }
+    .wk-nt .temp { font-size: 12.5px; color: var(--wk-muted); margin-top: 4px; }
+    .wk-nt ol { margin: 8px 0 0; padding-left: 1.8em; font: 12.5px/1.7 ui-monospace, Menlo, monospace; color: #1f2430; }
+    .wk-nt li.miss { opacity: .4; }
+    .wk-nt mark { background: #fff3ea; color: #1f2430; border-bottom: 2px solid var(--wk-orange); padding: 0 2px; }
+    .wk-nt mark.other { background: #eef0f4; border-bottom-color: #b8c0cf; }
     .wk-nt .pct { font: 600 12px ui-monospace, Menlo, monospace; color: var(--wk-muted); text-align: right; }
     .wk-nt .controls { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; margin-top: 12px; }
     .wk-nt label.t { font-size: 13px; color: #1f2430; }
@@ -26,7 +36,7 @@
     .wk-nt .verdict.ok { border-left-color: #1e8449; }
     .wk-nt .verdict.bad { border-left-color: #c0392b; }
     .wk-nt .note { font-size: 12px; color: var(--wk-muted); margin-top: 10px; }
-    @media (max-width: 560px) { .wk-nt .controls { grid-template-columns: 1fr; } .wk-nt .bar { grid-template-columns: 6em 1fr 3em; } }
+    @media (max-width: 560px) { .wk-nt .controls { grid-template-columns: 1fr; } .wk-nt .bar { grid-template-columns: 6em 1fr 4.4em 3em; } }
   </style>
   <div class="wk-title">/// Interactive · predict the next word</div>
   <div class="starts" role="group" aria-label="First word">
@@ -38,6 +48,12 @@
   <div class="sent" aria-live="polite" data-sent></div>
   <div class="h" data-h>What the model thinks comes next</div>
   <div class="bars" data-bars></div>
+  <div class="why" data-why aria-live="polite">
+    <div class="h">Where this number comes from</div>
+    <div class="sum" data-sum></div>
+    <div class="temp" data-temp></div>
+    <ol data-list></ol>
+  </div>
   <div class="controls">
     <label class="t">Temperature: <b data-tv>1.0</b>
       <input type="range" min="0" max="2" step="0.1" value="1" data-t aria-describedby="w-nt-thelp">
@@ -50,7 +66,7 @@
     </div>
   </div>
   <div class="verdict" data-verdict aria-live="polite"></div>
-  <p class="note">A toy model: it has read thirteen sentences from the firm's memos and counts which word follows which. A real LLM does the same job over tokens, with a neural network trained on trillions of them. Click any bar to choose that word yourself.</p>
+  <p class="note">A toy model: it has read thirteen sentences from the firm's memos and counts which word follows which. A real LLM does the same job over tokens, with a neural network trained on trillions of them. Point at a bar to see how its number is counted; click it to choose that word yourself.</p>
   <script>
   (() => {
     const w = document.getElementById("w-nt");
@@ -95,24 +111,49 @@
     };
 
     const sentEl = w.querySelector("[data-sent]"), barsEl = w.querySelector("[data-bars]"), tEl = w.querySelector("[data-t]"),
-          tvEl = w.querySelector("[data-tv]"), vEl = w.querySelector("[data-verdict]"), hEl = w.querySelector("[data-h]");
+          tvEl = w.querySelector("[data-tv]"), vEl = w.querySelector("[data-verdict]"), hEl = w.querySelector("[data-h]"),
+          whyEl = w.querySelector("[data-why]"), sumEl = w.querySelector("[data-sum]"), tmpEl = w.querySelector("[data-temp]"), listEl = w.querySelector("[data-list]");
     let start = "Deere", words = [start];
     const done = () => words[words.length - 1] === "." || words.length >= 14 || !follows[words[words.length - 1]];
+
+    // Show the counting behind one bar: how often `word` followed `prev` in CORPUS, with those pairs highlighted.
+    const explain = (prev, word, p) => {
+      barsEl.querySelectorAll(".bar").forEach((b) => b.classList.toggle("on", b.dataset.w === word));
+      const c = follows[prev], total = Object.values(c).reduce((a, b) => a + b, 0), n = c[word] || 0, share = Math.round(n / total * 100);
+      sumEl.innerHTML = `“${prev}” appears ${total} time${total > 1 ? "s" : ""} in the memos with a word after it. <code>${word}</code> comes next ${n} of those times: ${n} ÷ ${total} = <b>${share}%</b>.`;
+      const t = +tEl.value, pp = Math.round(p * 100);
+      tmpEl.textContent = t === 1 ? "" : t === 0 ? `At temperature 0 the favourite always wins, so the bar shows ${pp}% instead of ${share}%.`
+                                                 : `At temperature ${t.toFixed(1)} the odds are reshaped, so the bar shows ${pp}% instead of ${share}%.`;
+      listEl.innerHTML = CORPUS.map((s) => {
+        const ws = s.split(" "); let has = false, hit = false;
+        const out = [];
+        for (let i = 0; i < ws.length; i++) {
+          if (ws[i] === prev && i + 1 < ws.length) { has = true; if (ws[i + 1] === word) hit = true;
+            out.push(`<mark class="${ws[i + 1] === word ? "" : "other"}">${ws[i]} ${ws[i + 1]}</mark>`); i++; }
+          else out.push(ws[i]);
+        }
+        return `<li class="${hit ? "hit" : has ? "" : "miss"}">${out.join(" ")}</li>`;
+      }).join("");
+    };
 
     const render = () => {
       const t = +tEl.value; tvEl.textContent = t.toFixed(1);
       sentEl.innerHTML = words.map((x, i) => `<span class="w${i === words.length - 1 && i ? " new" : ""}">${x}</span>`).join("") + (done() ? "" : '<span class="caret" aria-hidden="true"></span>');
       barsEl.innerHTML = "";
       w.querySelectorAll("[data-act=top],[data-act=roll]").forEach((b) => { b.disabled = done(); });
+      whyEl.hidden = done();
       if (done()) { hEl.textContent = "Sentence finished"; const [cls, msg] = check(words); vEl.className = "verdict " + cls; vEl.textContent = msg; return; }
       hEl.textContent = `What the model thinks comes after “${words[words.length - 1]}”`; vEl.className = "verdict"; vEl.textContent = "";
-      probs(words[words.length - 1], t).slice(0, 6).forEach(([word, p], i) => {
-        const b = document.createElement("button"); b.type = "button"; b.className = "bar" + (i === 0 ? " top" : "");
+      const prev = words[words.length - 1], shown = probs(prev, t).slice(0, 6);
+      shown.forEach(([word, p], i) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "bar" + (i === 0 ? " top" : ""); b.dataset.w = word;
         b.setAttribute("aria-label", `${word}, ${Math.round(p * 100)} percent. Choose it.`);
-        b.innerHTML = `<span>${word}</span><span class="track"><span class="fill" style="width:${(p * 100).toFixed(1)}%"></span></span><span class="pct">${Math.round(p * 100)}%</span>`;
+        b.innerHTML = `<span>${word}</span><span class="track"><span class="fill" style="width:${(p * 100).toFixed(1)}%"></span></span><span class="cnt">${follows[prev][word]} of ${Object.values(follows[prev]).reduce((a, c) => a + c, 0)}</span><span class="pct">${Math.round(p * 100)}%</span>`;
         b.addEventListener("click", () => { words.push(word); render(); });
+        ["mouseenter", "focus"].forEach((e) => b.addEventListener(e, () => explain(prev, word, p)));
         barsEl.appendChild(b);
       });
+      explain(prev, shown[0][0], shown[0][1]);
     };
     w.querySelectorAll("[data-start]").forEach((b) => b.addEventListener("click", () => {
       w.querySelectorAll("[data-start]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));

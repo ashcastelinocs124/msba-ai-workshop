@@ -24,7 +24,13 @@ An LLM is a program that has read a very large amount of text and learned one sk
 
 A model does not read words. It reads **tokens**, pieces of text from a fixed vocabulary of about a hundred thousand. Common words are usually one token each. Rarer words, names and numbers are split into several.
 
-The cell below uses a toy vocabulary to show the idea. Change the sentence and run it again:
+Point at each word to see the pieces a toy vocabulary splits it into. Type your own sentence too:
+
+```{raw} html
+:file: widgets/ch00-tokens.html
+```
+
+The same split in Python. Change the sentence and run it again:
 
 ```{code-block} python
 :class: pyodide
@@ -33,7 +39,7 @@ from llm_basics import show_tokens
 show_tokens("Caterpillar's revenue grew 3.1% last quarter")
 ```
 
-`·` marks a space, which is part of the token that follows it. "revenue" is one token; "Caterpillar" is two; "3.1%" is four. A real tokenizer splits differently, but the pattern holds.
+`·` marks a space, which is part of the token that follows it. "revenue" is one token; "Caterpillar's" is three; "3.1%" is five, counting the space in front of it. A real tokenizer splits differently, but the pattern holds.
 
 Tokens matter to you for three reasons:
 
