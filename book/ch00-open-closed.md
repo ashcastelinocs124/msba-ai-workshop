@@ -20,7 +20,7 @@
 
 Training (page 0B) produces the model's **weights**, the billions of numbers that decide which token comes next. A model is two things: those weights, and the code that runs them. Who can get the weights is the difference.
 
-| | Closed-source | Open-source (open-weight) |
+| | Closed | Open-weight |
 |---|---|---|
 | Examples | OpenAI's GPT models, Anthropic's Claude, Google's Gemini | Meta's Llama, Alibaba's Qwen, Z.ai's GLM, Mistral |
 | How you use it | Only through the company's API, on its servers | Download the weights and run it on hardware you choose |
@@ -29,7 +29,33 @@ Training (page 0B) produces the model's **weights**, the billions of numbers tha
 | Changing it | Prompting, and fine-tuning only where the provider allows it | Inspect it, fine-tune it, run it offline |
 | Trade-off | Usually the strongest models, with no servers to run | You run, secure and update it; the best open models tend to trail the best closed ones |
 
-"Open" has limits. Most open models publish their weights and code, but not their training data, and each comes with a license that says what you may do with it. Read the license before you build on one.
+### Open weights is not the same as open source
+
+"Open-source model" is often used loosely for any model you can download. Strictly, those are **open-weight** models, and most of them are not open source. The two words mean different things:
+
+- **Open weights**: the trained weights are published, so you can download the model and run it. That is usually all. The training data and the code that trained the model stay private, and a licence sets the terms: some allow almost any use, others add conditions, such as limits on commercial use or on very large companies.
+- **Open source**: everything needed to study and rebuild the model, under terms that let anyone use, change and share it for any purpose. The [Open Source Initiative's definition](https://opensource.org/ai/open-source-ai-definition) asks for the weights, the code used to train and run the model, and enough detail about the training data for a skilled person to build a similar one.
+
+So openness is a ladder, not a switch:
+
+| | What is published | Example |
+|---|---|---|
+| **Closed** | Nothing; you reach the model only through its maker's API | GPT, Claude, Gemini |
+| **Open code, closed weights** | The code that runs the model, but not the trained weights | Meta's first LLaMA (2023): its code was under an open-source licence (GPL v3), but the weights went only to researchers who applied, under a non-commercial licence |
+| **Open weights** | The trained weights, under a licence; no training data, usually no training code | Llama, Qwen, DeepSeek, GLM, Mistral |
+| **Fully open source** | Weights, training and running code, and the training data | Ai2's OLMo, EleutherAI's Pythia, LLM360's K2, Hugging Face's SmolLM3, the Swiss AI Initiative's Apertus |
+
+Fully open models are fewer and mostly come from research groups and non-profits, because publishing the training data is costly and legally hard. The main ones:
+
+- **[OLMo](https://allenai.org/olmo)** (Ai2, the Allen Institute for AI): weights, training code, the full training data and the training logs, at several sizes.
+- **[Pythia](https://github.com/EleutherAI/pythia)** (EleutherAI): a family of models trained on a public dataset, with 154 snapshots of each saved during training, so researchers can watch a model learn.
+- **[K2](https://www.llm360.ai)** (LLM360): a 65-billion-parameter model released with its data, code and intermediate checkpoints, built to be reproduced.
+- **[SmolLM3](https://huggingface.co/blog/smollm3)** (Hugging Face): a small 3-billion-parameter model with its datasets and training recipe, small enough to run on a laptop.
+- **[Apertus](https://www.swiss-ai.org/apertus)** (the Swiss AI Initiative, from EPFL and ETH Zurich): a national, multilingual model with its training data, code, weights and methods all documented.
+
+Fully open models tend to trail the best open-weight models on capability, since the biggest labs keep their data private. What they offer instead is the ability to check exactly what went in, which matters for research and for anyone who has to answer where a model's knowledge came from.
+
+Two things follow. First, a project can be open source and still not give you a model you can run: open code without the weights is a recipe without the finished dish. Training the weights yourself would take months of GPU time. Second, "open" on a model card tells you little until you read the licence. Before the firm builds on an open-weight model, someone has to check that the licence allows commercial use, since the firm sells its research.
 
 For a firm like Champaign Capital, the data row often decides it: client data that may not leave the building can still go to a model the firm runs itself.
 
