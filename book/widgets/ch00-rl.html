@@ -1,0 +1,124 @@
+<div class="wk-widget" id="w-rl" style="background:#fff">
+  <div class="wk-title">/// Reinforcement learning · the model learns from scored attempts</div>
+  <div class="prompt">Request, round after round: <b>"What was NVIDIA's revenue growth last quarter?"</b> <span class="truth">the right figure is 58.0%</span></div>
+  <div class="judge" role="group" aria-label="Who scores the answers">
+    <span class="jl">Scored by</span>
+    <button type="button" data-j="tone" class="on" aria-pressed="true">👥 Reviewers who like a confident tone</button>
+    <button type="button" data-j="check" aria-pressed="false">🔎 Reviewers who check the figure</button>
+    <button type="button" data-j="run" aria-pressed="false">✅ A check that can be run</button>
+  </div>
+  <div class="grid">
+    <div class="styles"></div>
+    <div class="right">
+      <div class="round"><div class="rh">This round: 4 attempts, each scored</div><div class="samples"><span class="empty">Press Train one round.</span></div></div>
+      <svg class="chart" viewBox="0 0 260 130" role="img" aria-label="How likely each answer style is, round by round">
+        <line x1="26" y1="110" x2="254" y2="110"/><line x1="26" y1="8" x2="26" y2="110"/>
+        <text x="0" y="14">100%</text><text x="8" y="112">0%</text><text x="140" y="126" text-anchor="middle">rounds</text>
+        <g class="lines"></g>
+      </svg>
+    </div>
+  </div>
+  <div class="cap" aria-live="polite"></div>
+  <div class="nav"><button type="button" class="primary one">Train one round</button><button type="button" class="many">▶ Train 25 rounds</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-rl .prompt { font-size: 13.5px; color: var(--wk-muted); }
+    #w-rl .prompt b { color: var(--wk-navy); }
+    #w-rl .truth { font: 700 11px ui-monospace, Menlo, monospace; background: #e8f7ee; color: #136c3a; border-radius: 999px; padding: 2px 8px; margin-left: 4px; white-space: nowrap; }
+    #w-rl .judge { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+    #w-rl .jl { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); }
+    #w-rl .judge button { border-radius: 999px; font: 600 12px system-ui, sans-serif; }
+    #w-rl .judge button.on { background: var(--wk-navy); color: #fff; }
+    #w-rl .grid { display: grid; grid-template-columns: 1fr 270px; gap: 14px; margin-top: 12px; }
+    #w-rl .styles { display: grid; gap: 8px; align-content: start; }
+    #w-rl .sty { border: 2px solid var(--wk-line); border-left: 6px solid var(--c); border-radius: 10px; padding: 7px 10px; background: #fafbfc; }
+    #w-rl .sty .top { display: flex; justify-content: space-between; gap: 8px; }
+    #w-rl .sty b { font-size: 12.5px; color: var(--wk-navy); }
+    #w-rl .sty .pct { font: 700 13px ui-monospace, Menlo, monospace; color: var(--c); }
+    #w-rl .sty q { display: block; font-size: 12.5px; color: #1f2430; margin: 3px 0 5px; quotes: "“" "”"; }
+    #w-rl .sty .bar { height: 8px; background: #eef0f4; border-radius: 999px; overflow: hidden; }
+    #w-rl .sty .bar i { display: block; height: 100%; background: var(--c); transition: width .5s; }
+    #w-rl .round { border: 1px solid var(--wk-line); border-radius: 10px; padding: 8px 10px; background: #fafbfc; min-height: 96px; }
+    #w-rl .rh { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); margin-bottom: 6px; }
+    #w-rl .samples { display: grid; gap: 4px; }
+    #w-rl .samples .empty { font-size: 12.5px; color: var(--wk-muted); }
+    #w-rl .smp { display: grid; grid-template-columns: 12px 1fr 44px; gap: 6px; align-items: center; font-size: 12px; animation: wkin .3s; }
+    @keyframes wkin { from { opacity: 0; transform: translateX(-6px); } }
+    #w-rl .smp .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+    #w-rl .smp .sc { font: 700 11.5px ui-monospace, Menlo, monospace; text-align: right; border-radius: 6px; padding: 1px 5px; }
+    #w-rl .smp .sc.hi { background: #e8f7ee; color: #136c3a; } #w-rl .smp .sc.lo { background: #fdeeee; color: #9c2323; } #w-rl .smp .sc.mid { background: #f5f6f9; color: var(--wk-muted); }
+    #w-rl .chart { width: 100%; height: auto; margin-top: 8px; background: #fafbfc; border: 1px solid var(--wk-line); border-radius: 8px; }
+    #w-rl .chart line { stroke: #c3c8d3; } #w-rl .chart text { font: 8.5px ui-monospace, Menlo, monospace; fill: var(--wk-muted); }
+    #w-rl .chart polyline { fill: none; stroke-width: 2.2; stroke-linejoin: round; }
+    #w-rl .cap { margin-top: 10px; font-size: 13.5px; line-height: 1.5; min-height: 3em; }
+    #w-rl .cap .warn { color: #9c2323; font-weight: 600; }
+    #w-rl .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    @media (max-width: 640px) { #w-rl .grid { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-rl");
+    const S = [
+      { name: "Careful and sourced", text: "NVIDIA's revenue grew 58.0% year over year. [source: Q2-2026 filing]", c: "#2f9e44" },
+      { name: "Confident and right", text: "NVIDIA crushed it: revenue up 58%!", c: "#1c7ed6" },
+      { name: "Confident and wrong", text: "NVIDIA grew a massive 85% last quarter. A clear winner.", c: "#c92a2a" },
+      { name: "Hedging, no figure", text: "Growth figures vary by source; it's hard to say.", c: "#868e96" },
+    ];
+    // Score each style gets from each kind of judge (0 to 1).
+    const R = {
+      tone:  { r: [0.5, 0.95, 0.9, 0.1], cap: "These reviewers reward sounding sure. They don't check the number." },
+      check: { r: [1.0, 0.6, 0.0, 0.2], cap: "These reviewers check the figure against the filing and like a source." },
+      run:   { r: [1.0, 1.0, 0.0, 0.0], cap: "A program checks only whether the figure is 58.0%: right scores 1, anything else 0. Tone doesn't count." },
+    };
+    const LR = 1.6;
+    let judge = "tone", logits, hist, seed, round;
+    const $ = (s) => w.querySelector(s);
+    const soft = (z) => { const e = z.map(Math.exp), t = e.reduce((a, b) => a + b, 0); return e.map((v) => v / t); };
+    const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };   // repeatable dice
+    const pick = (p) => { let x = rand(); for (let i = 0; i < p.length; i++) { if ((x -= p[i]) < 0) return i; } return p.length - 1; };
+
+    $(".styles").innerHTML = S.map((s, i) => `<div class="sty" style="--c:${s.c}"><div class="top"><b>${s.name}</b><span class="pct" data-p="${i}"></span></div><q>${s.text}</q><div class="bar"><i data-b="${i}"></i></div></div>`).join("");
+    function draw() {
+      const p = soft(logits);
+      p.forEach((v, i) => { $(`[data-p="${i}"]`).textContent = Math.round(v * 100) + "%"; $(`[data-b="${i}"]`).style.width = (v * 100) + "%"; });
+      const n = Math.max(25, hist.length - 1);
+      $(".lines").innerHTML = S.map((s, i) => `<polyline stroke="${s.c}" points="${hist.map((h, k) => `${26 + k * (228 / n)},${110 - h[i] * 102}`).join(" ")}"/>`).join("");
+    }
+    function caption() {
+      const p = soft(logits), top = p.indexOf(Math.max(...p));
+      let t = `${R[judge].cap} After ${round} round${round === 1 ? "" : "s"}, the model most often answers <b>${S[top].name.toLowerCase()}</b> (${Math.round(p[top] * 100)}%).`;
+      if (judge === "tone" && p[2] > 0.3) t += ` <span class="warn">It now says 85% about ${Math.round(p[2] * 100)}% of the time: it learned to sound sure, not to be right.</span>`;
+      if (judge === "run" && round >= 10) t += " Both right answers win; the program can't tell a careful answer from a brash one.";
+      $(".cap").innerHTML = round ? t : `${R[judge].cap} Every style starts equally likely. Train a round.`;
+    }
+    function train() {
+      const p = soft(logits), r = R[judge].r;
+      const got = [0, 1, 2, 3].map(() => pick(p));
+      const scores = got.map((i) => r[i]);
+      const base = scores.reduce((a, b) => a + b, 0) / scores.length;          // compare each attempt with this round's average
+      got.forEach((i, k) => {
+        const adv = scores[k] - base;
+        logits = logits.map((z, j) => z + LR / got.length * adv * ((j === i ? 1 : 0) - p[j]));   // policy-gradient nudge
+      });
+      round++; hist.push(soft(logits));
+      $(".samples").innerHTML = got.map((i, k) => {
+        const s = scores[k], cls = s >= 0.75 ? "hi" : s <= 0.25 ? "lo" : "mid";
+        return `<div class="smp" style="--c:${S[i].c}"><span class="dot"></span><span>${S[i].name}</span><span class="sc ${cls}">${s.toFixed(2)}</span></div>`;
+      }).join("");
+      draw(); caption();
+    }
+    function reset() {
+      logits = [0, 0, 0, 0]; hist = [soft(logits)]; seed = 7; round = 0;
+      $(".samples").innerHTML = `<span class="empty">Press Train one round.</span>`;
+      draw(); caption();
+    }
+    w.querySelectorAll(".judge button").forEach((b) => b.addEventListener("click", () => {
+      w.querySelectorAll(".judge button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
+      judge = b.dataset.j; reset();
+    }));
+    $(".one").addEventListener("click", train);
+    $(".many").addEventListener("click", () => { let k = 0; const t = setInterval(() => { train(); if (++k >= 25) clearInterval(t); }, 90); });
+    $(".reset").addEventListener("click", reset);
+    reset();
+  })();
+  </script>
+</div>

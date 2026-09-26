@@ -52,6 +52,12 @@ The score comes from one of two places:
 - **People's preferences.** Reviewers compare two answers and pick the better one, and a second model learns to predict their choice. This is often called RLHF, reinforcement learning from human feedback. It is what makes a model polite, clear and helpful.
 - **A check that can be run.** For a maths problem the final number is right or wrong; for code the tests pass or fail. Rewarding correct results over many attempts is how "reasoning" models learned to work through a problem step by step before answering.
 
+Run it. Pick who scores the answers, then train: each round the model writes four answers, each is scored, and the styles that beat the round's average become more likely. Try all three scorers, starting over each time:
+
+```{raw} html
+:file: widgets/ch00-rl.html
+```
+
 Reinforcement learning teaches the model what gets rewarded, not what is true. Reviewers tend to prefer answers that are confident and agreeable, so a model can learn to sound sure of itself even when it is not (chapter 0's section 0.6).
 
 **Checkpoint.**
