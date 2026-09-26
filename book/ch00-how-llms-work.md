@@ -126,7 +126,7 @@ Two consequences shape the rest of this book:
 - **It knows nothing after its training cutoff.** Last quarter's results may have come out after the model was trained. Chapter 1 gives it tools to look them up.
 - **It has never seen the firm's private data.** Client preferences, the policy handbook and last week's memos were not in its training text. Chapter 2 puts them in front of it on each call.
 
-What that network looks like inside is on [0A Transformers and Mixture of Experts](ch00-transformers.md); the three stages of training that turn it from a text predictor into an assistant are on [0B How a Model Is Trained](ch00-training.md); who can get a trained model's weights, and why that matters to the firm, is on [0C Open-Source and Closed-Source Models](ch00-open-closed.md).
+What that network looks like inside is on [0A Transformers and Mixture of Experts](ch00-transformers.md); the three stages of training that turn it from a text predictor into an assistant are on [0B How a Model Is Trained](ch00-training.md); who can get a trained model's weights, and why that matters to the firm, is on [0C Open-Source and Closed-Source Models](ch00-open-closed.md); and what training and answering each cost in computing power is on [0D Training and Inference Compute](ch00-compute.md).
 
 ## 0.5 The context window
 

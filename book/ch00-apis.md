@@ -1,4 +1,4 @@
-# 0D What an API Is
+# 0E What an API Is
 
 ```{raw} html
 <p class="wk-lede">The agent in chapter 1 never reads a filing. It asks another program for the figures, and that program answers. That request and answer is an API call. See what one looks like, how the firm already depends on dozens of them, and what changes when the program answering is an AI model. This page is pre-reading, with no session of its own.</p>
@@ -15,7 +15,7 @@
 - Describe how an AI API differs from a classic one, and why chapter 1's agent calls APIs itself.
 ```
 
-## 0D.1 What an API is
+## 0E.1 What an API is
 
 When Marcus opens his spreadsheet on Monday, Deere's latest quarterly revenue is already in it. Nobody typed it in and nobody read a filing. The spreadsheet asked a market-data vendor's computer for the figure, and the vendor's computer answered in a fraction of a second.
 
@@ -52,7 +52,7 @@ The classic API returned four labelled fields and would return the same four fie
 </div>
 ```
 
-## 0D.2 How companies use APIs
+## 0E.2 How companies use APIs
 
 Almost every piece of software a company runs is talking to other companies' software through APIs. Champaign Capital Research is typical:
 
@@ -72,14 +72,14 @@ Three things are worth noticing in that table.
 
 **Companies both buy and sell.** The firm buys data through four APIs and sells its own research through a fifth. When a pension-fund client's portfolio system shows the firm's latest rating on Deere, that is the client calling the firm's API.
 
-## 0D.3 What changes in the AI era
+## 0E.3 What changes in the AI era
 
 An AI model is also reached through an API. Your Lumen key from [Setup](setup.md) is an API key, and the campus copy's in-page cells call Azure through one. The four parts are the same: an address, a key, a request, a response. But four things change, and each one shapes the chapters that follow.
 
 1. **The request is plain English.** A classic API accepts only the fields it defines; send an unknown ticker and it refuses. An AI API accepts any text, which makes it flexible and also means nothing stops a badly worded or hostile request. Checking what goes in, and what comes out, becomes your job (chapters 2 and 6).
 2. **The same request can come back different.** You saw it in the widget: the wording changed on every call, because the model picks each next token with some randomness (chapter 0, section 0.3). The market-data API is deterministic; the model is not. That is why a figure the firm publishes comes from a tool, not from the model's memory.
 3. **You pay per token, not per call.** The price depends on how much you send and how much comes back, so a long document or a long answer costs more. Chapter 2 counts those tokens.
-4. **The model becomes the caller.** This is the biggest change. In a classic setup a programmer decides which API to call and writes the code that calls it. In chapter 1, you give the model a list of APIs, each with a short description of what it does and what it needs, and the model decides which one to call, with which inputs, and when to stop. Those APIs are called **tools**. Because a model now reads the descriptions, they have to be written for a model as much as for a programmer, and open standards such as the Model Context Protocol (MCP) exist so that one set of tools can be offered to any model ([page 0E](ch00-skills-mcp.md)).
+4. **The model becomes the caller.** This is the biggest change. In a classic setup a programmer decides which API to call and writes the code that calls it. In chapter 1, you give the model a list of APIs, each with a short description of what it does and what it needs, and the model decides which one to call, with which inputs, and when to stop. Those APIs are called **tools**. Because a model now reads the descriptions, they have to be written for a model as much as for a programmer, and open standards such as the Model Context Protocol (MCP) exist so that one set of tools can be offered to any model ([page 0F](ch00-skills-mcp.md)).
 
 One risk grows with all four: **data leaves the building.** Everything you put in a request to a hosted model is sent to the provider. A client's holdings pasted into a prompt have left the firm, which is one reason open-weight models run on hardware the firm controls ([page 0C](ch00-open-closed.md)) matter.
 
@@ -97,7 +97,7 @@ One risk grows with all four: **data leaves the building.** Everything you put i
 </div>
 ```
 
-## 0D.4 Where you have already met one
+## 0E.4 Where you have already met one
 
 - **Setup.** The Lumen key you created and saved in Colab Secrets is an API key. The notebooks send it with every request, and Lumen counts your tokens against it.
 - **The campus copy.** When you run a cell against the real model, the page calls the book's own small API, which adds the firm's key and passes the request on to Azure. That is why the key never reaches your browser.

@@ -1,0 +1,88 @@
+<div class="wk-widget" id="w-cmp" style="background:#fff">
+  <div class="wk-title">/// Training once vs answering forever · a compute calculator</div>
+  <div class="ctl">
+    <div class="grp"><span>Model</span><div class="seg" data-g="model"></div></div>
+    <div class="grp"><span>Who is using it</span><div class="seg" data-g="use"></div></div>
+    <label class="rsn"><input type="checkbox"> Reasoning mode: the model thinks for ~8,000 extra tokens per answer</label>
+  </div>
+  <div class="bars">
+    <div class="row"><div class="lb">Training<small>once, before anyone asks anything</small></div><div class="b"><i class="tr"></i></div><div class="v" data-v="train"></div></div>
+    <div class="row"><div class="lb">Inference, one day<small>every question, every day</small></div><div class="b"><i class="inf"></i></div><div class="v" data-v="day"></div></div>
+    <div class="row"><div class="lb">Inference, one year<small>the same use for 365 days</small></div><div class="b"><i class="inf yr"></i></div><div class="v" data-v="year"></div></div>
+  </div>
+  <div class="cross" aria-live="polite"></div>
+  <div class="note">GPU-hours on an Nvidia H100. Training figures are what the makers reported. Inference is estimated at 2 × active parameters × tokens operations per answer, 1,500 tokens per question, at 30% of the chip's peak speed. Bars use a log scale, so each gridline is 10× the one before.</div>
+  <style>
+    #w-cmp .ctl { display: grid; gap: 8px; }
+    #w-cmp .grp { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    #w-cmp .grp > span { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); width: 118px; }
+    #w-cmp .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-cmp .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 5px 12px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-cmp .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-cmp .rsn { font-size: 13px; }
+    #w-cmp .bars { margin-top: 14px; display: grid; gap: 10px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 12px; }
+    #w-cmp .row { display: grid; grid-template-columns: 170px 1fr 150px; gap: 10px; align-items: center; }
+    #w-cmp .lb { font: 700 13px system-ui, sans-serif; color: var(--wk-navy); }
+    #w-cmp .lb small { display: block; font-weight: 400; font-size: 11px; color: var(--wk-muted); }
+    #w-cmp .b { height: 22px; border-radius: 6px; overflow: hidden; background: repeating-linear-gradient(90deg, #eef0f4 0 calc(100%/9 - 1px), #dfe3ea calc(100%/9 - 1px) calc(100%/9)); }
+    #w-cmp .b i { display: block; height: 100%; border-radius: 6px; transition: width .6s; }
+    #w-cmp .b i.tr { background: var(--wk-navy); } #w-cmp .b i.inf { background: var(--wk-orange); } #w-cmp .b i.yr { background: #b54200; }
+    #w-cmp .v { font: 700 13px ui-monospace, Menlo, monospace; color: #1f2430; text-align: right; }
+    #w-cmp .v small { display: block; font: 400 11px system-ui, sans-serif; color: var(--wk-muted); }
+    #w-cmp .cross { margin-top: 12px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-cmp .cross b { color: #b54200; }
+    #w-cmp .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-cmp .row { grid-template-columns: 1fr; } #w-cmp .v { text-align: left; } #w-cmp .grp > span { width: auto; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-cmp");
+    // train: reported training GPU-hours; active: parameters used per token (all of them, except in a mixture of experts)
+    const MODELS = [
+      { k: "8b", label: "Llama 3.1 8B", train: 1.46e6, active: 8e9 },
+      { k: "70b", label: "Llama 3.1 70B", train: 7.0e6, active: 70e9 },
+      { k: "405b", label: "Llama 3.1 405B", train: 30.84e6, active: 405e9 },
+      { k: "ds", label: "DeepSeek-V3 (MoE)", train: 2.788e6, active: 37e9 },
+    ];
+    const USES = [
+      { k: "firm", label: "Champaign Capital · 5,000 questions/day", q: 5000 },
+      { k: "bank", label: "A large bank · 1 million/day", q: 1e6 },
+      { k: "chat", label: "A popular chatbot · 1 billion/day", q: 1e9 },
+    ];
+    const TOK = 1500, THINK = 8000, GPU = 989e12 * 0.30;          // tokens per question; extra reasoning tokens; H100 FLOP/s at 30%
+    let model = MODELS[2], use = USES[0];
+    const $ = (s) => w.querySelector(s);
+    const seg = (g, items, cur) => { $(`[data-g="${g}"]`).innerHTML = items.map((m) => `<button type="button" data-k="${m.k}" class="${m === cur ? "on" : ""}">${m.label}</button>`).join(""); };
+    const fmt = (h) => h >= 1e6 ? (h / 1e6).toFixed(h >= 1e7 ? 0 : 1) + "M" : h >= 1e3 ? (h / 1e3).toFixed(h >= 1e4 ? 0 : 1) + "k" : h >= 10 ? h.toFixed(0) : h >= 1 ? h.toFixed(1) : h.toFixed(2);
+    const money = (h) => { const d = h * 2; return d >= 1e6 ? "$" + (d / 1e6).toFixed(d >= 1e7 ? 0 : 1) + "M" : d >= 1e3 ? "$" + (d / 1e3).toFixed(0) + "k" : "$" + d.toFixed(d >= 10 ? 0 : 2); };
+    const span = (days) => days < 1 ? `${(days * 24).toFixed(1)} hours` : days < 60 ? `${days.toFixed(0)} days` : days < 730 ? `${(days / 30.4).toFixed(0)} months` : `${(days / 365).toLocaleString(undefined, { maximumFractionDigits: 0 })} years`;
+    const LOG_MIN = -1, LOG_MAX = 8;                                  // bar scale: 0.1 to 100 million GPU-hours
+    const width = (h) => Math.max(0.5, Math.min(100, (Math.log10(Math.max(h, 0.1)) - LOG_MIN) / (LOG_MAX - LOG_MIN) * 100));
+
+    function draw() {
+      seg("model", MODELS, model); seg("use", USES, use);
+      const tokens = TOK + ($(".rsn input").checked ? THINK : 0);
+      const perQ = 2 * model.active * tokens / GPU / 3600;          // GPU-hours per question
+      const day = perQ * use.q, year = day * 365, train = model.train;
+      $(".tr").style.width = width(train) + "%";
+      w.querySelectorAll(".inf")[0].style.width = width(day) + "%";
+      w.querySelectorAll(".inf")[1].style.width = width(year) + "%";
+      $('[data-v="train"]').innerHTML = `${fmt(train)} GPU-h<small>≈ ${money(train)} at $2 an hour</small>`;
+      $('[data-v="day"]').innerHTML = `${fmt(day)} GPU-h<small>≈ ${money(day)} a day</small>`;
+      $('[data-v="year"]').innerHTML = `${fmt(year)} GPU-h<small>≈ ${money(year)} a year</small>`;
+      const days = train / day;
+      $(".cross").innerHTML = days > 365 * 50
+        ? `At ${use.q.toLocaleString()} questions a day, inference would take <b>${span(days)}</b> to use as much compute as training did. For a firm this size, the model's cost is almost all in the training someone else paid for.`
+        : `At ${use.q.toLocaleString()} questions a day, inference uses as much compute as the whole training run every <b>${span(days)}</b>. After that, answering questions costs more than building the model did, and it keeps going.`;
+    }
+    w.addEventListener("click", (e) => {
+      const b = e.target.closest(".seg button"); if (!b) return;
+      const g = b.parentElement.dataset.g;
+      if (g === "model") model = MODELS.find((m) => m.k === b.dataset.k); else use = USES.find((u) => u.k === b.dataset.k);
+      draw();
+    });
+    $(".rsn input").addEventListener("change", draw);
+    draw();
+  })();
+  </script>
+</div>

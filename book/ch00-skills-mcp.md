@@ -1,4 +1,4 @@
-# 0E Agent Skills and MCP
+# 0F Agent Skills and MCP
 
 ```{raw} html
 <p class="wk-lede">An agent is only as useful as what it can reach and what it knows how to do. Two open standards now handle each: the Model Context Protocol (MCP) plugs an agent into the firm's data and tools, and Agent Skills hand it the firm's procedures, loaded only when a task needs them. This page is pre-reading, with no session of its own.</p>
@@ -16,9 +16,9 @@
 - Say whether a need at the firm calls for an MCP server, a skill, or both.
 ```
 
-## 0E.1 MCP: one standard plug
+## 0F.1 MCP: one standard plug
 
-Page 0D showed that every data source has its own API, with its own address, key and request shape. Now connect three AI apps to four of the firm's sources: every app needs custom code for every source. Toggle MCP on, add a source, then watch one request go through:
+Page 0E showed that every data source has its own API, with its own address, key and request shape. Now connect three AI apps to four of the firm's sources: every app needs custom code for every source. Toggle MCP on, add a source, then watch one request go through:
 
 ```{raw} html
 :file: widgets/ch00-mcp.html
@@ -45,9 +45,9 @@ So the tools you wrote by hand in chapter 1 could be served once, as an MCP serv
 </div>
 ```
 
-## 0E.2 MCP vs API: written for developers, written for agents
+## 0F.2 MCP vs API: written for developers, written for agents
 
-If MCP servers answer requests, how is that different from the APIs on page 0D? The difference is who reads the instructions.
+If MCP servers answer requests, how is that different from the APIs on page 0E? The difference is who reads the instructions.
 
 An **API is built for a human developer**. Its documentation is a web page: a person reads it, works out which address to call and what each field means, and writes code for that one API, weeks before anyone asks a question. The program can make only the calls someone wired up, and when the API changes, a person has to read about it and change the code.
 
@@ -68,7 +68,7 @@ Play both lanes, then change the vendor's data:
 
 MCP does not replace APIs. A market-data MCP server usually calls the vendor's API underneath; MCP adds a layer that an agent can read and use on its own. And because the model now decides which tool to call, the quality of those descriptions matters as much as the code, which is the lesson of chapter 1's section 1.7.
 
-## 0E.3 Agent skills: know-how on demand
+## 0F.3 Agent skills: know-how on demand
 
 MCP gives an agent access. It does not tell the agent how the firm does things: how a note is laid out, which rules a trade request is checked against, what may never go to a client. Chapter 2 put that know-how in the system prompt, where it is read on every call whether it is needed or not.
 
@@ -94,7 +94,7 @@ This is context engineering (section 2.2) done by the agent: the firm can keep d
 </div>
 ```
 
-## 0E.4 MCP or a skill?
+## 0F.4 MCP or a skill?
 
 | | MCP server | Agent skill |
 |---|---|---|

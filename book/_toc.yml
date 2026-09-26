@@ -12,6 +12,7 @@ parts:
       - file: ch00-transformers
       - file: ch00-training
       - file: ch00-open-closed
+      - file: ch00-compute
       - file: ch00-apis
       - file: ch00-skills-mcp
   - caption: Part I · Agents
