@@ -1,0 +1,102 @@
+<div class="wk-widget" id="w-adam" style="background:#fff">
+  <div class="wk-title">/// Adam vs gradient descent · the same valley, the same start</div>
+  <svg class="map" viewBox="0 0 560 230" role="img" aria-label="Contour map with two paths: gradient descent in grey and Adam in orange">
+    <g class="rings"></g>
+    <line x1="0" y1="115" x2="560" y2="115" class="axis"/><line x1="280" y1="0" x2="280" y2="230" class="axis"/>
+    <text x="552" y="108" class="lbl" text-anchor="end">weight 1 → (gentle slope)</text><text x="288" y="14" class="lbl">weight 2 ↑ (steep slope)</text>
+    <circle cx="280" cy="115" r="5" class="goal"/>
+    <polyline class="p gd" points=""/><polyline class="p ad" points=""/>
+    <circle class="b gd" r="6"/><circle class="b ad" r="7"/>
+  </svg>
+  <div class="legend">
+    <span><i class="k gd"></i>Gradient descent <b data-r="gd">—</b></span>
+    <span><i class="k ad"></i>Adam <b data-r="ad">—</b></span>
+  </div>
+  <div class="meters">
+    <div class="m"><span>Adam's step for weight 1 (gentle)</span><div class="g"><i data-m="w1"></i><em class="ref"></em></div><b data-t="w1">—</b></div>
+    <div class="m"><span>Adam's step for weight 2 (steep)</span><div class="g"><i data-m="w2"></i><em class="ref"></em></div><b data-t="w2">—</b></div>
+  </div>
+  <div class="cap">The grey tick on each bar is gradient descent's step size, the same for every weight. Adam picks its own step for each weight from how steep that weight's slope has been lately.</div>
+  <div class="nav"><button type="button" class="primary run">▶ Race</button><button type="button" class="one">One step</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-adam .map { width: 100%; height: auto; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-adam .rings ellipse { fill: none; stroke: #c3cbe0; stroke-width: 1.2; }
+    #w-adam .rings ellipse:nth-child(odd) { fill: rgba(19, 41, 75, .035); }
+    #w-adam .axis { stroke: #e6e8ee; stroke-dasharray: 3 4; }
+    #w-adam .lbl { font: 10px ui-monospace, Menlo, monospace; fill: var(--wk-muted); }
+    #w-adam .goal { fill: #2f9e44; }
+    #w-adam .p { fill: none; stroke-width: 2; stroke-linejoin: round; }
+    #w-adam .p.gd { stroke: #868e96; } #w-adam .p.ad { stroke: var(--wk-orange); }
+    #w-adam .b { stroke: #fff; stroke-width: 2; } #w-adam .b.gd { fill: #868e96; } #w-adam .b.ad { fill: var(--wk-orange); }
+    #w-adam .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 8px; font-size: 13px; }
+    #w-adam .legend b { font: 700 12.5px ui-monospace, Menlo, monospace; color: var(--wk-navy); margin-left: 4px; }
+    #w-adam .k { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+    #w-adam .k.gd { background: #868e96; } #w-adam .k.ad { background: var(--wk-orange); }
+    #w-adam .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+    #w-adam .m span { font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .05em; text-transform: uppercase; color: var(--wk-muted); }
+    #w-adam .g { position: relative; height: 14px; background: #f0f2f6; border-radius: 999px; overflow: hidden; margin: 4px 0 3px; }
+    #w-adam .g i { display: block; height: 100%; background: var(--wk-orange); border-radius: 999px; transition: width .3s; }
+    #w-adam .g .ref { position: absolute; top: 0; bottom: 0; width: 3px; background: #495057; left: calc(100% * 1 / 3); }
+    #w-adam .m b { font: 700 12.5px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-adam .cap { margin-top: 8px; font-size: 13.5px; line-height: 1.5; }
+    #w-adam .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    @media (max-width: 640px) { #w-adam .meters { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-adam");
+    const A = 1, B = 100, X0 = -4.5, Y0 = 1.6, DONE = 0.02, MAX = 300, LR_GD = 0.018, LR_ADAM = 0.3;
+    const err = (x, y) => 0.5 * (A * x * x + B * y * y);
+    const px = (x) => 280 + Math.max(-6, Math.min(6, x)) * 56, py = (y) => 115 - Math.max(-2.3, Math.min(2.3, y)) * 57.5;
+    const $ = (s) => w.querySelector(s);
+    $(".rings").innerHTML = [160, 100, 60, 32, 16, 8, 4, 1.6, 0.5, 0.12].map((c) => `<ellipse cx="280" cy="115" rx="${Math.sqrt(2 * c / A) * 56}" ry="${Math.sqrt(2 * c / B) * 57.5}"/>`).join("");
+    // Bar scale: log of (Adam's step ÷ gradient descent's step), from 1/30 to 30; the grey tick marks "the same".
+    const LO = Math.log(1 / 30), HI = Math.log(30);
+    w.querySelectorAll(".ref").forEach((r) => { r.style.left = ((0 - LO) / (HI - LO) * 100) + "%"; });
+    let gd, ad, timer = null;
+    function reset() {
+      clearInterval(timer); timer = null; $(".run").textContent = "▶ Race";
+      gd = { x: X0, y: Y0, t: 0, pts: [[X0, Y0]], done: 0 };
+      ad = { x: X0, y: Y0, t: 0, m: [0, 0], v: [0, 0], pts: [[X0, Y0]], done: 0, e: [LR_ADAM, LR_ADAM] };
+      draw();
+    }
+    function step() {
+      if (!gd.done) {
+        gd.t++; gd.x -= LR_GD * A * gd.x; gd.y -= LR_GD * B * gd.y; gd.pts.push([gd.x, gd.y]);
+        if (err(gd.x, gd.y) < DONE) gd.done = gd.t;
+      }
+      if (!ad.done) {
+        ad.t++; const gx = A * ad.x, gy = B * ad.y;
+        ad.m = [0.9 * ad.m[0] + 0.1 * gx, 0.9 * ad.m[1] + 0.1 * gy];
+        ad.v = [0.999 * ad.v[0] + 0.001 * gx * gx, 0.999 * ad.v[1] + 0.001 * gy * gy];
+        const c1 = 1 - 0.9 ** ad.t, c2 = 1 - 0.999 ** ad.t;
+        ad.e = [LR_ADAM / (Math.sqrt(ad.v[0] / c2) + 1e-8), LR_ADAM / (Math.sqrt(ad.v[1] / c2) + 1e-8)];   // Adam's own step size per weight
+        ad.x -= ad.e[0] * ad.m[0] / c1; ad.y -= ad.e[1] * ad.m[1] / c1; ad.pts.push([ad.x, ad.y]);
+        if (err(ad.x, ad.y) < DONE) ad.done = ad.t;
+      }
+      draw();
+      if ((gd.done && ad.done) || gd.t >= MAX) { clearInterval(timer); timer = null; $(".run").textContent = "▶ Race"; }
+    }
+    function draw() {
+      [["gd", gd], ["ad", ad]].forEach(([k, s]) => {
+        $(`.p.${k}`).setAttribute("points", s.pts.map(([x, y]) => `${px(x).toFixed(1)},${py(y).toFixed(1)}`).join(" "));
+        const [x, y] = s.pts[s.pts.length - 1]; $(`.b.${k}`).setAttribute("cx", px(x)); $(`.b.${k}`).setAttribute("cy", py(y));
+        $(`[data-r="${k}"]`).textContent = s.done ? `✓ bottom in ${s.done} steps` : `step ${s.t}`;
+      });
+      ad.e.forEach((e, i) => {
+        const ratio = e / LR_GD, f = Math.max(0, Math.min(1, (Math.log(ratio) - LO) / (HI - LO)));
+        $(`[data-m="w${i + 1}"]`).style.width = (f * 100) + "%";
+        $(`[data-t="w${i + 1}"]`).textContent = ad.t === 0 ? "—" : ratio >= 1 ? `${ratio.toFixed(1)}× gradient descent's step` : `${(1 / ratio).toFixed(0)}× smaller than gradient descent's step`;
+      });
+    }
+    $(".run").addEventListener("click", () => {
+      if (timer) { clearInterval(timer); timer = null; $(".run").textContent = "▶ Race"; return; }
+      if (gd.done && ad.done) reset();
+      $(".run").textContent = "❚❚ Pause"; timer = setInterval(step, 45);
+    });
+    $(".one").addEventListener("click", step);
+    $(".reset").addEventListener("click", reset);
+    reset();
+  })();
+  </script>
+</div>

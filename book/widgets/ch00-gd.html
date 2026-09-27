@@ -1,0 +1,101 @@
+<div class="wk-widget" id="w-gd" style="background:#fff">
+  <div class="wk-title">/// Gradient descent · walking downhill on the error</div>
+  <div class="ctl">
+    <div class="seg" data-g="opt" role="group" aria-label="Optimizer">
+      <button type="button" data-k="gd" class="on">Gradient descent</button><button type="button" data-k="mom">With momentum</button>
+    </div>
+    <div class="seg" data-g="lr" role="group" aria-label="Step size">
+      <button type="button" data-k="0">Small steps</button><button type="button" data-k="1" class="on">Medium steps</button><button type="button" data-k="2">Large steps</button>
+    </div>
+  </div>
+  <svg class="map" viewBox="0 0 560 230" role="img" aria-label="Contour map of the error, with the optimizer's path from the start to the lowest point">
+    <g class="rings"></g>
+    <line x1="0" y1="115" x2="560" y2="115" class="axis"/><line x1="280" y1="0" x2="280" y2="230" class="axis"/>
+    <text x="552" y="108" class="lbl" text-anchor="end">weight 1 →</text><text x="288" y="14" class="lbl">weight 2 ↑</text>
+    <circle cx="280" cy="115" r="5" class="goal"/><text x="290" y="130" class="lbl goalt">lowest error</text>
+    <polyline class="path" points=""/>
+    <circle class="ball" r="7" cx="0" cy="0"/>
+  </svg>
+  <div class="read"><span>Step <b data-r="step">0</b></span><span>Error <b data-r="err">—</b></span><span class="res" aria-live="polite"></span></div>
+  <div class="cap"></div>
+  <div class="nav"><button type="button" class="primary run">▶ Run</button><button type="button" class="one">One step</button><button type="button" class="reset">Start over</button></div>
+  <style>
+    #w-gd .ctl { display: flex; flex-wrap: wrap; gap: 8px; }
+    #w-gd .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-gd .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 13px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-gd .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-gd .map { width: 100%; height: auto; margin-top: 10px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-gd .rings ellipse { fill: none; stroke: #c3cbe0; stroke-width: 1.2; }
+    #w-gd .rings ellipse:nth-child(odd) { fill: rgba(19, 41, 75, .035); }
+    #w-gd .axis { stroke: #e6e8ee; stroke-dasharray: 3 4; }
+    #w-gd .lbl { font: 10px ui-monospace, Menlo, monospace; fill: var(--wk-muted); }
+    #w-gd .goal { fill: #2f9e44; } #w-gd .goalt { fill: #136c3a; font-weight: 700; }
+    #w-gd .path { fill: none; stroke: var(--wk-orange); stroke-width: 2; stroke-linejoin: round; }
+    #w-gd .ball { fill: var(--wk-orange); stroke: #fff; stroke-width: 2; }
+    #w-gd .read { display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline; margin-top: 8px; font: 13px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    #w-gd .read b { color: var(--wk-navy); font-size: 15px; }
+    #w-gd .res { font-family: system-ui, sans-serif; font-weight: 700; }
+    #w-gd .res.ok { color: #136c3a; } #w-gd .res.bad { color: #9c2323; }
+    #w-gd .cap { margin-top: 6px; font-size: 13.5px; line-height: 1.5; min-height: 3em; }
+    #w-gd .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-gd");
+    // The error is a long, narrow valley: shallow along weight 1, steep along weight 2.
+    const A = 1, B = 100, X0 = -4.5, Y0 = 1.6, MAX = 300, DONE = 0.02;
+    const err = (x, y) => 0.5 * (A * x * x + B * y * y), grad = (x, y) => [A * x, B * y];
+    const LR = { gd: [0.006, 0.018, 0.021], mom: [0.001, 0.003, 0.008] };
+    const CAP = {
+      gd: "Each step moves straight down the slope under its feet, scaled by the step size. The valley is steep across and shallow along, so it bounces between the walls and creeps along the floor. Too large a step and the bounces grow until it flies off.",
+      mom: "Momentum keeps part of the last step's direction, like a ball rolling downhill. The bounces across the valley cancel out, and the pushes along it add up, so it builds speed towards the bottom.",
+    };
+    const px = (x) => 280 + x * 56, py = (y) => 115 - y * 57.5;
+    const $ = (s) => w.querySelector(s);
+    $(".rings").innerHTML = [160, 100, 60, 32, 16, 8, 4, 1.6, 0.5, 0.12].map((c) => `<ellipse cx="280" cy="115" rx="${Math.sqrt(2 * c / A) * 56}" ry="${Math.sqrt(2 * c / B) * 57.5}"/>`).join("");
+    let opt = "gd", lvl = 1, st, timer = null;
+    function reset() {
+      clearInterval(timer); timer = null; $(".run").textContent = "▶ Run";
+      st = { x: X0, y: Y0, vx: 0, vy: 0, m: [0, 0], v: [0, 0], t: 0, pts: [[X0, Y0]], over: false };
+      $(".cap").textContent = CAP[opt]; draw();
+    }
+    function step() {
+      if (st.over) return;
+      const lr = LR[opt][lvl], [gx, gy] = grad(st.x, st.y); st.t++;
+      if (opt === "gd") { st.x -= lr * gx; st.y -= lr * gy; }
+      else { st.vx = 0.9 * st.vx + gx; st.vy = 0.9 * st.vy + gy; st.x -= lr * st.vx; st.y -= lr * st.vy; }
+      st.pts.push([st.x, st.y]);
+      const e = err(st.x, st.y);
+      if (!isFinite(e) || Math.abs(st.y) > 4 || Math.abs(st.x) > 12) { st.over = "bad"; }
+      else if (e < DONE) { st.over = "ok"; }
+      else if (st.t >= MAX) { st.over = "slow"; }
+      draw();
+    }
+    function draw() {
+      const vis = st.pts.map(([x, y]) => [Math.max(-6, Math.min(6, x)), Math.max(-2.3, Math.min(2.3, y))]);
+      $(".path").setAttribute("points", vis.map(([x, y]) => `${px(x).toFixed(1)},${py(y).toFixed(1)}`).join(" "));
+      const [bx, by] = vis[vis.length - 1]; $(".ball").setAttribute("cx", px(bx)); $(".ball").setAttribute("cy", py(by));
+      $('[data-r="step"]').textContent = st.t;
+      const e = err(st.x, st.y); $('[data-r="err"]').textContent = isFinite(e) && e < 1e4 ? e.toFixed(e < 1 ? 3 : 1) : "blew up";
+      const r = $(".res");
+      r.className = "res " + (st.over === "ok" ? "ok" : st.over ? "bad" : "");
+      r.textContent = st.over === "ok" ? `✓ reached the bottom in ${st.t} steps` : st.over === "bad" ? "✗ overshot: the steps grew until it left the valley" : st.over === "slow" ? `✗ still not there after ${MAX} steps` : "";
+      if (st.over && timer) { clearInterval(timer); timer = null; $(".run").textContent = "▶ Run"; }
+    }
+    w.querySelectorAll(".seg").forEach((g) => g.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      g.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+      if (g.dataset.g === "opt") opt = b.dataset.k; else lvl = +b.dataset.k;
+      reset();
+    }));
+    $(".run").addEventListener("click", () => {
+      if (timer) { clearInterval(timer); timer = null; $(".run").textContent = "▶ Run"; return; }
+      if (st.over) reset();
+      $(".run").textContent = "❚❚ Pause"; timer = setInterval(step, 40);
+    });
+    $(".one").addEventListener("click", step);
+    $(".reset").addEventListener("click", reset);
+    reset();
+  })();
+  </script>
+</div>

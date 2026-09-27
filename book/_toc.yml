@@ -11,6 +11,7 @@ parts:
       - file: ch00-how-llms-work
       - file: ch00-transformers
       - file: ch00-training
+      - file: ch00-post-training
       - file: ch00-open-closed
       - file: ch00-compute
       - file: ch00-apis

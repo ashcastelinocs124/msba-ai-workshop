@@ -1,4 +1,4 @@
-# 0C Open-Source and Closed-Source Models
+# 0D Open-Source and Closed-Source Models
 
 ```{raw} html
 <p class="wk-lede">Once a model is trained, someone holds its weights. Whether you can download them, or can only reach the model through its maker's API, decides where your data goes, what you pay, and what you can change. This page is pre-reading, with no session of its own.</p>
@@ -16,9 +16,9 @@
 ```
 
 (open-closed-models)=
-## 0C.1 Who holds the weights
+## 0D.1 Who holds the weights
 
-Training (page 0B) produces the model's **weights**, the billions of numbers that decide which token comes next. A model is two things: those weights, and the code that runs them. Who can get the weights is the difference.
+Training (pages 0B and 0C) produces the model's **weights**, the billions of numbers that decide which token comes next. A model is two things: those weights, and the code that runs them. Who can get the weights is the difference.
 
 | | Closed | Open-weight |
 |---|---|---|
@@ -59,7 +59,7 @@ Two things follow. First, a project can be open source and still not give you a 
 
 For a firm like Champaign Capital, the data row often decides it: client data that may not leave the building can still go to a model the firm runs itself.
 
-## 0C.2 Running an open model on campus GPUs
+## 0D.2 Running an open model on campus GPUs
 
 Open weights mean the campus can run a model itself. NCSA does this for Lumen, and you can do the same on NCSA's research GPUs, such as the [Delta cluster](https://docs.ncsa.illinois.edu/systems/delta/en/latest/) (access comes through an allocation, for example from [Illinois Computes](https://computes.illinois.edu/)). The steps, on a GPU node:
 
@@ -96,11 +96,11 @@ On a shared cluster you would usually run this as a batch job on an allocated GP
 </div>
 ```
 
-## 0C.3 Exercise
+## 0D.3 Exercise
 
 For each task, choose an open-weight or a closed model, with one reason: a memo that quotes a client's private holdings; a summary of public news about Deere; a first draft of a Python script for the data team.
 
-## 0C.4 How they compare today
+## 0D.4 How they compare today
 
 How capable are the models on each side? [Artificial Analysis](https://artificialanalysis.ai/models) runs the same ten tests on hundreds of models and combines them into one score, its Intelligence Index. Here are the top 25, captured on 25 September 2026:
 
