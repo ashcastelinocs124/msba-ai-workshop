@@ -4,10 +4,6 @@
 <p class="wk-lede">A model costs computing power twice: once to train it, and again every time anyone asks it something. The two are different in size, in timing and in who pays, and the difference explains model prices, why open-weight models are cheap to adopt, and much of the demand for the chips the firm's semiconductor analysts cover. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Tell training compute from inference compute: when each is spent, how much, and on what hardware.

@@ -5,10 +5,6 @@
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch03-agent-memory.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Explain why a model has no memory of its own, and what "memory" means for an agent.

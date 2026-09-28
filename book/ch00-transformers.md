@@ -4,10 +4,6 @@
 <p class="wk-lede">Chapter 0 showed what a model does: predict the next token, again and again. This page opens it up: the design almost every model shares, the transformer, and the trick that lets the largest ones run cheaply, mixture of experts. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Describe the three steps a transformer takes to predict the next token, and why attention makes long inputs cost more.

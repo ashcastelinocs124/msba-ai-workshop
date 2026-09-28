@@ -4,10 +4,6 @@
 <p class="wk-lede">Once a model is trained, someone holds its weights. Whether you can download them, or can only reach the model through its maker's API, decides where your data goes, what you pay, and what you can change. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Tell an open-weight model from a closed one, and name what each means for data, cost and control.

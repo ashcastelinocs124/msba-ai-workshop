@@ -4,10 +4,6 @@
 <p class="wk-lede">An agent is only as useful as what it can reach and what it knows how to do. Two open standards now handle each: the Model Context Protocol (MCP) plugs an agent into the firm's data and tools, and Agent Skills hand it the firm's procedures, loaded only when a task needs them. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Explain the problem MCP solves, and what an MCP server offers an agent.

@@ -4,10 +4,6 @@
 <p class="wk-lede">The agent in chapter 1 never reads a filing. It asks another program for the figures, and that program answers. That request and answer is an API call. See what one looks like, how the firm already depends on dozens of them, and what changes when the program answering is an AI model. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Say what an API is and name the parts of one call: the address, the key, the request and the response.

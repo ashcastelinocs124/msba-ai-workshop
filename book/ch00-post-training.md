@@ -4,10 +4,6 @@
 <p class="wk-lede">The training loop from page 0B runs in three stages, each on different material: a vast read of everything, a focused course, and then learning the job from examples and scored attempts. People learn a profession the same way. The last stage, reinforcement learning, is where a model learns to be helpful, and also where it can learn to sound sure without being right. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Name the three stages of training (pre-training, mid-training and post-training) and what each one adds.

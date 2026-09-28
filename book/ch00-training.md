@@ -4,10 +4,6 @@
 <p class="wk-lede">A transformer starts out knowing nothing. It learns by one small loop, repeated billions of times: guess the next token, measure the miss, and adjust every weight a little. This page opens up that loop and the optimizer that decides each adjustment; page 0C shows the three stages of training built from it. This page is pre-reading, with no session of its own.</p>
 ```
 
-```{raw} html
-:file: widgets/goal-map.html
-```
-
 ```{admonition} Learning objectives
 :class: note
 - Describe one training step: predict, measure the error, go back through the layers, and let the optimizer adjust the weights.
