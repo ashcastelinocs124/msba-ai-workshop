@@ -16,7 +16,27 @@
 
 ## 0C.1 Pre-training, mid-training and post-training
 
-Training happens in three stages. Each one starts from the model the stage before produced.
+Training happens in three stages. Each one starts from the model the stage before produced, and each changes what the model is good at.
+
+### 0C.1.1 Pre-training
+
+Pre-training is the long first read. The model is shown trillions of tokens of public text (web pages, books, code, encyclopedias, company filings) and at every position does the one task from page 0B: guess the next token, compare it with the real one, and nudge the weights. It runs for weeks or months on thousands of GPUs, and it is by far the most expensive stage (page 0E).
+
+Almost everything the model knows comes from here: grammar, facts, how a 10-K is laid out, what "operating margin" means, what Deere sells. What comes out, called a *base model*, can only continue a document. Ask it "What was Deere's revenue growth last year?" and it may carry on with three more questions, as if it were writing a quiz, because that is a plausible next piece of text. It does not yet act like an assistant.
+
+### 0C.1.2 Mid-training
+
+Mid-training is a shorter, focused course on a smaller, carefully chosen set of text: high-quality writing, maths, code, very long documents, and sometimes a specialist field such as finance or medicine. The task is still next-token prediction; only the reading list changes.
+
+It does two things. It makes the model better at what its makers care most about, because good text read late in training has more effect than the same text lost among the whole web. And it stretches the context window (chapter 0's section 0.5): practice on long documents is how a model learns to read a whole annual report at once rather than a few pages. The result is still a base model, only a better-read one.
+
+### 0C.1.3 Post-training
+
+Post-training teaches the model to do the job. It stops reading documents and learns from requests instead. First it studies example conversations written by people, each a request with a good answer; then it is scored on answers it writes itself (reinforcement learning, section 0C.2).
+
+This is where it learns to follow instructions, answer in a useful shape, reason step by step, call tools, and decline some requests. It adds little new knowledge: a post-trained model knows about the same facts as its base model, but now answers "What was Deere's revenue growth last year?" with an answer instead of more questions. Every chatbot and agent in this book is a post-trained model.
+
+### The three stages side by side
 
 | Stage | What it reads | What it learns |
 |---|---|---|
