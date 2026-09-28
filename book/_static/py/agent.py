@@ -10,7 +10,7 @@ from tools import TOOLS
 
 # "get_x" -> looks up / looked up x. "search_x" -> searches / searched x. Add a verb pair here
 # if a future chapter's tools use a different prefix; anything unlisted falls back to its own name.
-_VERBS = {"get": ("look up", "looked up"), "search": ("search", "searched")}
+_VERBS = {"get": ("look up", "looked up"), "search": ("search", "searched"), "remember": ("remember", "remembered")}
 
 
 def _fmt_value(v):
@@ -104,7 +104,7 @@ def agent(question, tools=TOOLS, model=_mock_model, max_steps=6, verbose=True, s
         name, args = reply["tool"], reply["args"]
         t0 = time.time()
         try:
-            result = tools[name](**args)
+            result = tools[name](**args) if name in tools else {"error": f"no tool called {name} is available to this agent"}
         except Exception as e:  # a bad tool call is data, not a crash
             result = {"error": f"{type(e).__name__}: {e}"}
         ms = (time.time() - t0) * 1000
@@ -155,4 +155,14 @@ if __name__ == "__main__":
     assert len(log) == 3 and "NVIDIA" not in ans, (ans, log)
     ans, log = agent(q, system=REASONING, verbose=False)
     assert len(log) == 4 and ans.startswith("Plan:") and "NVIDIA is growing" in ans, (ans, log)
+    # chapter 3.1: retrieval on the desk, and an agent that searches again
+    from retrieval import with_sources
+    q = "Can Tom sell his Deere shares 6 days after we published research on Deere?"
+    ans, _ = agent(q, verbose=False)
+    assert "[source:" not in ans, ans
+    ans, _ = agent(q, system=with_sources(q), verbose=False)
+    assert "personal-trading-2" in ans and "14-day" in ans, ans
+    ans, log = agent("Can I dump my Caterpillar shares a week after buying them?", verbose=False)
+    assert [e.get("tool") for e in log[:2]] == ["search_handbook", "search_handbook"], log
+    assert "personal-trading-3" in ans, ans
     print("ok")

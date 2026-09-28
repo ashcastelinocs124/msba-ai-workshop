@@ -9,7 +9,10 @@ Colab notebooks swap this for a real model on Lumen (glm-5.3-flash).
 What the mock honours in a system prompt (§2.1.3): a role (adds a draft header), a rule
 against investment recommendations, a table format, few-shot memo examples (copies their header
 and sign-off), a client card that "prefers tables", a retrieved data-licensing clause, and a
-planning instruction. The planning branch is scripted: on a "fastest" question naming three or more
+planning instruction. Since chapter 3 it also answers a trading question from a retrieved clause
+when one is on the desk, and makes up a confident, uncited answer when none is (§3.1.1, the
+failure retrieval fixes); and it rewrites a slangy handbook question and searches again when the
+first search finds nothing relevant (§3.1.5). The planning branch is scripted: on a "fastest" question naming three or more
 companies, the mock without a plan stops one lookup short, every time. A real model does this only
 sometimes, and §2.1.5 measures it. The mock does not imitate long-prompt attention decay.
 """
@@ -39,7 +42,7 @@ def _style(msgs):
     return {
         "role": "champaign capital" in s,
         "no_reco": "investment recommendation" in s,
-        "table": "as a table" in s or "prefers tables" in s,
+        "table": "as a table" in s or "prefers tables" in s or "prefer tables" in s,
         "fewshot": "memo ·" in s,
         "no_raw": "may not be redistributed" in s,
         "plan": "before calling any tool" in s,
@@ -116,6 +119,29 @@ def _finish(text, style, rows, q):
     return text.replace("\n", "\n  ")
 
 
+# Everyday words the handbook does not use, and the handbook's word for them (§3.1.5's rewrite).
+_REWRITE = {"a week after buying them": "minimum holding period", "after buying": "minimum holding period",
+            "dump": "sell", "offload": "sell", "get rid of": "sell"}
+_SLANG = ("dump", "offload", "get rid of")
+
+
+def _rewrite(q):
+    for slang, formal in _REWRITE.items():
+        q = q.replace(slang, formal)
+    return q
+
+
+def _system_text(msgs):
+    return " ".join(m["content"] for m in msgs if m["role"] == "system")
+
+
+def _memory_text(msgs):
+    """The recalled notes in the system prompt (section 3.2), if any: memory.recall's block only,
+    so the figures in chapter 2's few-shot examples are never mistaken for remembered ones."""
+    s = _system_text(msgs)
+    return s[s.index("What we remember about"):] if "What we remember about" in s else ""
+
+
 def model(msgs, tools=None):
     """Return the mock model's reply for the current message list."""
     q = _last_user(msgs)
@@ -143,6 +169,46 @@ def model(msgs, tools=None):
             return {"type": "text", "text": f"RECOMMEND: DECLINE. {who}: the position has been held {r['holding_days']} days, under the 30-day minimum. [source: personal-trading-3]"}
         return {"type": "text", "text": f"RECOMMEND: APPROVE. {who}: not restricted, outside the blackout window, holding period satisfied. Pre-clearance is required and is granted by compliance, not by this assistant. [source: personal-trading-1]"}
 
+    # §3.2.4: the agent saves a note with its remember_note tool. Asked to remember the memo's figures,
+    # it copies them with a decimal slip on the first company, 6.4% written as 64.0%.
+    # ponytail: scripted failure for §3.2.5; a real model makes this kind of slip only sometimes.
+    if "remember" in q:
+        if not seen:
+            prior = " ".join(m["content"] for m in earlier if m["role"] == "assistant")
+            rows = _figures_in(prior)
+            if rows and ("figure" in q or "number" in q):
+                rows[0] = {**rows[0], "yoy": rows[0]["yoy"] * 10}
+                note = "; ".join(f"{r['name']} grew revenue {r['yoy']*100:.1f}% YoY to ${r['revenue']/1e9:.1f}B" for r in rows) + " in Q2-2026"
+            else:
+                note = re.sub(r"^.*?remember (that )?", "", q, flags=re.I).rstrip(".?! ")
+                note = note[:1].upper() + note[1:]
+            return {"type": "tool_call", "tool": "remember_note", "args": {"note": note, "client": "meridian"}}
+        r = seen[-1]["content"]
+        if isinstance(r, dict) and "error" in r:
+            return {"type": "text", "text": f"I can't save that: {r['error']}. Someone would have to note it by hand."}
+        return {"type": "text", "text": f"Noted for next time: {r['saved']}"}
+
+    # §3.1.1: a trading question with no request number. With the blackout clause retrieved onto the
+    # desk, the answer follows it and cites it; without it, the model has only its training, and answers
+    # the general question confidently and wrongly. ponytail: scripted, like every mock answer.
+    if "published" in q and not req:
+        if "[personal-trading-2]" in _system_text(msgs):
+            return {"type": "text", "text": "No, not yet. The firm published research on Deere 6 days ago, which is inside the handbook's 14-day blackout window: no employee may trade a security within 14 days before or after the firm publishes research on it. Tom can ask for pre-clearance again after day 14. [source: personal-trading-2]"}
+        return {"type": "text", "text": "Yes. Employees can generally sell shares they already own at any time, and I'm not aware of any rule that would stop Tom selling his Deere shares today."}
+
+    # §3.1.5: agentic retrieval. Search in the asker's words; if nothing relevant comes back, rewrite the
+    # query in the handbook's words and search again; then answer from the best clause and cite it.
+    if any(w in q for w in _SLANG):
+        if not seen:
+            return {"type": "tool_call", "tool": "search_handbook", "args": {"query": q.rstrip("?"), "method": "keyword"}}
+        hits = seen[-1]["content"]
+        relevant = [h for h in hits if h["id"] == "personal-trading-3"]
+        if not relevant and len(seen) < 2:
+            return {"type": "tool_call", "tool": "search_handbook", "args": {"query": _rewrite(q).rstrip("?"), "method": "keyword"}}
+        if not relevant:
+            return {"type": "text", "text": "I searched the handbook twice and found no clause that answers this. Ask compliance directly."}
+        return {"type": "text", "text": f"Not yet. {relevant[0]['text']} A week is well short of that, so the sale would need to wait, or you could ask compliance about a hardship exception. [source: personal-trading-3]"}
+
     # "The raw vendor numbers behind that?" — a request the handbook forbids. The mock only knows that
     # if the clause is on the desk (§2.2.2); otherwise it obliges, which is the failure.
     if "raw" in q or "vendor" in q:
@@ -162,14 +228,15 @@ def model(msgs, tools=None):
     # A follow-up like "And NVIDIA?" only makes sense if the previous exchange is on the desk.
     if named and not topic and not any(k in q for k in ("policy", "handbook", "doc", "blackout", "expense", "search")):
         prior_q = " ".join(m["content"].lower() for m in earlier if m["role"] == "user")
-        if not any(k in prior_q for k in _TOPIC):
+        prior_memo = " ".join(m["content"] for m in earlier if m["role"] == "assistant") + _memory_text(msgs)
+        if not any(k in prior_q for k in _TOPIC) and "grew revenue" not in prior_memo:
             return {"type": "text", "text": f"{_DISPLAY[named[0]]} what? Tell me what you would like to know about it: revenue and growth, or price."}
         topic = True
 
     if topic:
         # One lookup per company named, in order; then the answer. Two or more names → the client memo.
         # A follow-up reuses figures from the earlier memo and looks up only what is new.
-        prior_rows = _figures_in(" ".join(m["content"] for m in earlier if m["role"] == "assistant"))
+        prior_rows = _figures_in(" ".join(m["content"] for m in earlier if m["role"] == "assistant") + " " + _memory_text(msgs))
         want = named or _tickers(" ".join(m["content"] for m in earlier if m["role"] == "user")) or ["DE"]
         known = {r["name"] for r in prior_rows}
         todo = [t for t in want if _DISPLAY[t] not in known]
@@ -192,7 +259,7 @@ def model(msgs, tools=None):
             names = [_DISPLAY[t] for t in want]
             text = f"Plan: revenue and YoY growth for {', '.join(names[:-1])} and {names[-1]} ({len(names)} lookups).\n{text}"
         if prior_rows and "error" not in rows[-1]:
-            text = f"Adding {rows[-1]['name']} to the comparison. {text}"
+            text = f"Adding {rows[-1]['name']} to the comparison.{chr(10) if style['table'] else ' '}{text}"
         return {"type": "text", "text": _finish(text, style, rows, q)}
 
     if "policy" in q or "doc" in q or "handbook" in q or "search" in q or "blackout" in q or "expense" in q:

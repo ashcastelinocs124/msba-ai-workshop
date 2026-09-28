@@ -1,0 +1,60 @@
+<div class="wk-widget wk-rba" id="w-rba">
+  <style>
+    .wk-rba .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; margin-bottom: 12px; }
+    .wk-rba .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 14px; font: 700 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-rba .seg button.on { background: var(--wk-navy); color: #fff; }
+    .wk-rba .flow { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; gap: 6px; align-items: stretch; }
+    .wk-rba .arrow { display: flex; align-items: center; justify-content: center; color: var(--wk-muted); font-weight: 700; }
+    .wk-rba .box { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 10px; font-size: 12.5px; line-height: 1.45; }
+    .wk-rba .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 6px; }
+    .wk-rba .card { border-left: 3px solid #1a7f5a; background: #f2faf6; padding: 6px 8px; border-radius: 4px; margin-top: 6px; font-size: 12px; }
+    .wk-rba .card.dim { border-left-color: var(--wk-line); background: #f7f8fa; color: var(--wk-muted); }
+    .wk-rba .card code { font-size: 11px; }
+    .wk-rba .empty { color: var(--wk-muted); font-style: italic; }
+    .wk-rba .ans.bad { border-color: #f0b4b4; background: #fff2f2; }
+    .wk-rba .ans.good { border-color: #b9e2cf; background: #f2faf6; }
+    .wk-rba .tag { display: inline-block; margin-top: 6px; font: 700 10px ui-monospace, Menlo, monospace; padding: 2px 6px; border-radius: 4px; }
+    .wk-rba .tag.bad { background: #b83232; color: #fff; } .wk-rba .tag.good { background: #1a7f5a; color: #fff; }
+    @media (max-width: 760px) { .wk-rba .flow { grid-template-columns: 1fr; } .wk-rba .arrow { transform: rotate(90deg); height: 18px; } }
+  </style>
+  <div class="wk-title">/// Interactive · the same question, with and without retrieval</div>
+  <div class="seg" role="group" aria-label="Retrieval">
+    <button type="button" data-m="off" class="on" aria-pressed="true">Without retrieval</button>
+    <button type="button" data-m="on" aria-pressed="false">With retrieval</button>
+  </div>
+  <div class="flow">
+    <div class="box"><div class="h">1 · Retrieve</div><div data-ret></div></div>
+    <div class="arrow">→</div>
+    <div class="box"><div class="h">2 · On the desk</div><div><b>Question:</b> Can Tom sell his Deere shares 6 days after we published research on Deere?</div><div data-desk></div></div>
+    <div class="arrow">→</div>
+    <div class="box ans" data-ansbox><div class="h">3 · The answer</div><div data-ans></div></div>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-rba");
+  const S = {
+    off: {
+      ret: '<div class="empty">Nothing retrieved. The model has only what it read in training, which never included the firm\'s handbook.</div>',
+      desk: '<div class="card dim">No handbook passages.</div>',
+      ans: 'Yes. Employees can generally sell shares they already own at any time, and I\'m not aware of any rule that would stop Tom selling his Deere shares today.<br><span class="tag bad">no source · wrong for this firm</span>',
+      cls: "bad",
+    },
+    on: {
+      ret: 'Search the handbook for the question. The two closest clauses come back:<div class="card dim"><code>conflicts-2</code> analysts may not cover a company they hold</div><div class="card"><code>personal-trading-2</code> the blackout window</div>',
+      desk: '<div class="card dim"><code>[conflicts-2]</code> An analyst may not write research on a company in which they … hold shares …</div><div class="card"><code>[personal-trading-2]</code> Blackout window: no employee may trade a security within 14 days before or after the firm publishes research on it.</div>',
+      ans: 'No, not yet. The firm published research on Deere 6 days ago, which is inside the handbook\'s 14-day blackout window. Tom can ask for pre-clearance again after day 14.<br><span class="tag good">[source: personal-trading-2]</span>',
+      cls: "good",
+    },
+  };
+  function show(m) {
+    w.querySelectorAll(".seg button").forEach((b) => { const on = b.dataset.m === m; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    w.querySelector("[data-ret]").innerHTML = S[m].ret;
+    w.querySelector("[data-desk]").innerHTML = S[m].desk;
+    w.querySelector("[data-ans]").innerHTML = S[m].ans;
+    const box = w.querySelector("[data-ansbox]"); box.classList.remove("bad", "good"); box.classList.add(S[m].cls);
+  }
+  w.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => show(b.dataset.m)));
+  show("off");
+})();
+</script>

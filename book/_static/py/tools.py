@@ -52,7 +52,14 @@ def search_docs(query: str, k: int = 3) -> list:
     return [d for _, d in scored[:k]]
 
 
-TOOLS = {"get_financials": get_financials, "get_price": get_price, "get_trade_request": get_trade_request, "search_docs": search_docs}
+def search_handbook(query: str, method: str = "keyword", k: int = 3) -> list:
+    """Search the full compliance handbook (chapter 3) by keyword, semantic, hybrid or rerank. Returns top-k clauses with ids."""
+    from retrieval import search
+    return [{"id": r["id"], "text": r["text"]} for r in search(query, method, k)]
+
+
+TOOLS = {"get_financials": get_financials, "get_price": get_price, "get_trade_request": get_trade_request, "search_docs": search_docs,
+         "search_handbook": search_handbook}
 
 
 def describe_schema(schema):
@@ -86,5 +93,12 @@ TOOL_SCHEMAS = [
      "description": "Keyword search over the firm's policy handbook. Do not call with an empty or one-word query.",
      "input_schema": {"type": "object",
                       "properties": {"query": {"type": "string", "minLength": 4}, "k": {"type": "integer", "minimum": 1, "maximum": 5}},
+                      "required": ["query"], "additionalProperties": False}},
+    {"name": "search_handbook",
+     "description": "Search the firm's full compliance handbook. Returns clauses with ids to cite. If none of the results answers the question, rewrite the query in the handbook's own words and search again.",
+     "input_schema": {"type": "object",
+                      "properties": {"query": {"type": "string", "minLength": 4},
+                                     "method": {"type": "string", "enum": ["keyword", "semantic", "hybrid", "rerank"]},
+                                     "k": {"type": "integer", "minimum": 1, "maximum": 5}},
                       "required": ["query"], "additionalProperties": False}},
 ]

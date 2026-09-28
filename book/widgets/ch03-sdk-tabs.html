@@ -1,0 +1,93 @@
+<div class="wk-widget wk-sdk" id="w-sdk">
+  <style>
+    .wk-sdk .tabs { display: inline-flex; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
+    .wk-sdk .tabs button { border: 0; background: #fff; color: var(--wk-muted); padding: 6px 14px; font: 700 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-sdk .tabs button.on { background: var(--wk-navy); color: #fff; }
+    .wk-sdk .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11.5px; color: var(--wk-muted); margin-bottom: 8px; }
+    .wk-sdk .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+    .wk-sdk pre { margin: 0; background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 10px 0; font: 11.5px/1.55 ui-monospace, Menlo, monospace; overflow-x: auto; }
+    .wk-sdk pre span { display: block; padding: 0 12px; white-space: pre; }
+    .wk-sdk .st { background: #eef1fb; box-shadow: inset 3px 0 0 #2b7fb8; }
+    .wk-sdk .lt { background: #f2faf6; box-shadow: inset 3px 0 0 #1a7f5a; }
+    .wk-sdk .c { color: #6a7385; }
+    .wk-sdk .cap { font-size: 12.5px; margin-top: 8px; }
+  </style>
+  <div class="wk-title">/// The same two sessions, in two frameworks · Colab runs both on Lumen</div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-t="oa" class="on" aria-selected="true">OpenAI Agents SDK</button>
+    <button type="button" role="tab" data-t="lg" aria-selected="false">LangGraph</button>
+  </div>
+  <div class="legend"><span><i style="background:#2b7fb8"></i>short-term: this conversation</span><span><i style="background:#1a7f5a"></i>long-term: notes across conversations</span></div>
+  <pre data-code></pre>
+  <div class="cap" data-cap></div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-sdk");
+  const CODE = {
+    oa: [
+      ["c", "# the agent's own notebook: a remember tool that writes a file"],
+      ["lt", "@function_tool"],
+      ["lt", "def remember(note: str) -> str:"],
+      ["lt", "    \"\"\"Save one short note about Meridian Pension Trust for future sessions.\"\"\""],
+      ["lt", "    notes = json.load(open(NOTES)) if os.path.exists(NOTES) else []"],
+      ["lt", "    json.dump(notes + [note], open(NOTES, \"w\"))"],
+      ["lt", "    return \"saved\""],
+      ["", ""],
+      ["c", "# every run reads the notes back into the instructions"],
+      ["lt", "def instructions(ctx, agent):"],
+      ["lt", "    notes = json.load(open(NOTES)) if os.path.exists(NOTES) else []"],
+      ["lt", "    return \"You draft replies for Meridian Pension Trust.\\nWhat we remember:\\n\" + \"\\n\".join(notes)"],
+      ["", ""],
+      ["", "analyst = Agent(name=\"analyst\", instructions=instructions, model=model,"],
+      ["", "                tools=[get_financials, remember])"],
+      ["", ""],
+      ["c", "# Monday: one session holds the whole conversation"],
+      ["st", "monday = SQLiteSession(\"meridian-monday\", \"memory.db\")"],
+      ["st", "await Runner.run(analyst, \"Compare Deere's revenue growth with Caterpillar's.\", session=monday)"],
+      ["st", "await Runner.run(analyst, \"I prefer tables, under 150 words. Remember that.\", session=monday)"],
+      ["", ""],
+      ["c", "# next Monday: a new session, so only the notes carry over"],
+      ["st", "next_week = SQLiteSession(\"meridian-next-monday\", \"memory.db\")"],
+      ["st", "result = await Runner.run(analyst, \"And NVIDIA?\", session=next_week)"],
+    ],
+    lg: [
+      ["c", "# the agent's own notebook: a remember tool that writes to the store"],
+      ["lt", "@tool"],
+      ["lt", "def remember(note: str, runtime: ToolRuntime) -> str:"],
+      ["lt", "    \"\"\"Save one short note about Meridian Pension Trust for future sessions.\"\"\""],
+      ["lt", "    runtime.store.put((\"meridian\", \"notes\"), str(uuid.uuid4()), {\"note\": note})"],
+      ["lt", "    return \"saved\""],
+      ["", ""],
+      ["st", "checkpointer = InMemorySaver()      # short-term: each thread's messages"],
+      ["lt", "store = InMemoryStore()             # long-term: notes shared by every thread"],
+      ["", "analyst = create_agent(llm, tools=[get_financials, remember],"],
+      ["", "                       checkpointer=checkpointer, store=store,"],
+      ["", "                       system_prompt=\"You draft replies for Meridian Pension Trust.\")"],
+      ["", ""],
+      ["c", "# Monday: one thread holds the whole conversation"],
+      ["st", "monday = {\"configurable\": {\"thread_id\": \"meridian-monday\"}}"],
+      ["st", "analyst.invoke({\"messages\": [(\"user\", \"Compare Deere's revenue growth with Caterpillar's.\")]}, monday)"],
+      ["st", "analyst.invoke({\"messages\": [(\"user\", \"I prefer tables, under 150 words. Remember that.\")]}, monday)"],
+      ["", ""],
+      ["c", "# next Monday: a new thread, so only the notes in the store carry over"],
+      ["lt", "notes = [item.value[\"note\"] for item in store.search((\"meridian\", \"notes\"))]"],
+      ["st", "next_week = {\"configurable\": {\"thread_id\": \"meridian-next-monday\"}}"],
+      ["lt", "analyst.invoke({\"messages\": [(\"system\", \"What we remember:\\n\" + \"\\n\".join(notes)),"],
+      ["lt", "                             (\"user\", \"And NVIDIA?\")]}, next_week)"],
+    ],
+  };
+  const CAP = {
+    oa: "The SDK's session stores every turn in SQLite under an id, and replays them on the next run with the same id. Long-term memory is not built in: here it is a tool writing a JSON file, read back by the instructions function. Change the file to a database and nothing else changes.",
+    lg: "LangGraph's checkpointer saves each thread's state under its thread_id; call again with the same id and the conversation continues. The store is separate and shared by every thread, organised in namespaces such as (\"meridian\", \"notes\"). In production both become Postgres or Redis.",
+  };
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function show(t) {
+    w.querySelectorAll("[data-t]").forEach((b) => { const on = b.dataset.t === t; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+    w.querySelector("[data-code]").innerHTML = CODE[t].map(([k, l]) => `<span class="${k}">${esc(l) || " "}</span>`).join("");
+    w.querySelector("[data-cap]").textContent = CAP[t];
+  }
+  w.querySelectorAll("[data-t]").forEach((b) => b.addEventListener("click", () => show(b.dataset.t)));
+  show("oa");
+})();
+</script>

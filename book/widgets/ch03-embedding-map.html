@@ -1,0 +1,77 @@
+<div class="wk-widget wk-emap" id="w-emap">
+  <style>
+    .wk-emap .qs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .wk-emap .qs button { border: 1px solid var(--wk-line); background: #fff; border-radius: 999px; padding: 5px 11px; font-size: 12px; cursor: pointer; text-align: left; }
+    .wk-emap .qs button.on { border-color: var(--wk-orange); background: #fff3ea; font-weight: 600; }
+    .wk-emap .grid { display: grid; grid-template-columns: 1fr 250px; gap: 14px; }
+    .wk-emap svg { width: 100%; height: auto; background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; }
+    .wk-emap .dot { cursor: pointer; }
+    .wk-emap .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--wk-muted); margin-top: 6px; }
+    .wk-emap .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+    .wk-emap .side { font-size: 12.5px; line-height: 1.45; }
+    .wk-emap .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin: 0 0 6px; }
+    .wk-emap .near { border-left: 3px solid var(--wk-orange); background: #fff8f3; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; font-size: 12px; }
+    .wk-emap .near code { font-size: 10.5px; }
+    .wk-emap .near .s { float: right; font: 700 10.5px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    @media (max-width: 760px) { .wk-emap .grid { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · 73 handbook clauses by meaning, squeezed from 256 numbers to 2</div>
+  <div class="qs" data-qs></div>
+  <div class="grid">
+    <div><svg viewBox="0 0 520 380" data-svg role="img" aria-label="Map of handbook clauses by meaning"></svg><div class="legend" data-legend></div></div>
+    <div class="side" aria-live="polite"><div class="h">Closest clauses</div><div data-side>Pick a question above, or click a dot to read its clause.</div></div>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-emap"), svg = w.querySelector("[data-svg]"), NS = "http://www.w3.org/2000/svg";
+  const GROUPS = [
+    ["Trading and pre-clearance", "#ff5f05", /^(personal-trading|pre-clearance|restricted-list)/],
+    ["Research and publication", "#13294b", /^(research-process|publication|conflicts)/],
+    ["Clients, data and communications", "#1a7f5a", /^(client-service|data-licensing|communications)/],
+    ["Gifts, expenses, outside work", "#8a5cf6", /^(gifts|expense|outside)/],
+    ["Security, records, scope", "#8a93a5", /./],
+  ];
+  const group = (id) => GROUPS.find((g) => g[2].test(id));
+  const norm = (q) => q.trim().toLowerCase().replace(/\s+/g, " ").replace(/[?.! ]+$/, "");
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  w.querySelector("[data-legend]").innerHTML = GROUPS.map((g) => `<span><i style="background:${g[1]}"></i>${g[0]}</span>`).join("");
+  fetch(new URL("_static/data/ch03-retrieval.json", document.baseURI)).then((r) => r.json()).then((d) => {
+    const pts = Object.entries(d.map), xs = pts.map((p) => p[1][0]), ys = pts.map((p) => p[1][1]);
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    const X = (x) => 20 + (x - x0) / (x1 - x0) * 480, Y = (y) => 360 - (y - y0) / (y1 - y0) * 340;
+    const text = Object.fromEntries(d.chunks.map((c) => [c.id, c]));
+    const lines = document.createElementNS(NS, "g"); svg.appendChild(lines);
+    const side = w.querySelector("[data-side]");
+    d.chunks.forEach((c) => {
+      const [x, y] = d.map[c.id], dot = document.createElementNS(NS, "circle");
+      dot.setAttribute("cx", X(x)); dot.setAttribute("cy", Y(y)); dot.setAttribute("r", 5); dot.setAttribute("class", "dot");
+      dot.setAttribute("fill", group(c.id)[1]); dot.setAttribute("fill-opacity", ".75");
+      const t = document.createElementNS(NS, "title"); t.textContent = `${c.id}: ${c.text}`; dot.appendChild(t);
+      dot.addEventListener("click", () => { side.innerHTML = `<div class="near"><code>${c.id}</code> · ${esc(c.heading)}<br>${esc(c.text)}</div>`; });
+      svg.appendChild(dot);
+    });
+    const star = document.createElementNS(NS, "text"); star.setAttribute("font-size", "22"); star.setAttribute("text-anchor", "middle");
+    star.setAttribute("fill", "#ff5f05"); star.setAttribute("stroke", "#fff"); star.setAttribute("stroke-width", "1"); star.style.display = "none"; star.textContent = "★";
+    svg.appendChild(star);
+    const qs = w.querySelector("[data-qs]");
+    d.presets.forEach((p, i) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = p.q; qs.appendChild(b);
+      b.addEventListener("click", () => {
+        qs.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+        const [qx, qy] = d.map["q:" + norm(p.q)]; star.setAttribute("x", X(qx)); star.setAttribute("y", Y(qy) + 7); star.style.display = "";
+        lines.innerHTML = "";
+        const near = p.results.semantic.slice(0, 3);
+        near.forEach((r) => {
+          const [cx, cy] = d.map[r.id], l = document.createElementNS(NS, "line");
+          l.setAttribute("x1", X(qx)); l.setAttribute("y1", Y(qy)); l.setAttribute("x2", X(cx)); l.setAttribute("y2", Y(cy));
+          l.setAttribute("stroke", "#ff5f05"); l.setAttribute("stroke-width", "1.5"); l.setAttribute("stroke-dasharray", "4 3"); lines.appendChild(l);
+        });
+        side.innerHTML = near.map((r) => `<div class="near"><span class="s">${r.score.toFixed(2)}</span><code>${r.id}</code>${r.id === p.expect ? " ✓" : ""}<br>${esc(text[r.id].text)}</div>`).join("")
+          + `<div style="font-size:11.5px;color:var(--wk-muted)">Scores are cosine similarity over all 256 numbers. The map keeps only the two directions along which the clauses differ most, so a line can look long and still be the closest.</div>`;
+      });
+      if (i === 0) b.click();
+    });
+  }).catch(() => { w.querySelector("[data-side]").textContent = "Could not load the map. Serve the book over HTTP, not from a file."; });
+})();
+</script>

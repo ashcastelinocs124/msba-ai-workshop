@@ -35,7 +35,7 @@ jobs:
       - name: Replace locked pages on the public copy
         run: |
           # Keep this list in step with LOCKED_PAGES' default in app/main.py. Empty: nothing locked.
-          for stem in ; do
+          for stem in ch03-memory-rag ch03-retrieval-rag ch03-agent-memory; do
             cp app/locked.html "book/_build/html/$stem.html"
             rm -f "book/_build/html/_sources/$stem.md" "book/_build/html/_sources/$stem.ipynb"
           done

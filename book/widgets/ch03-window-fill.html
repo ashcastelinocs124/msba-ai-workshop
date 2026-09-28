@@ -1,0 +1,79 @@
+<div class="wk-widget wk-wf" id="w-wf">
+  <style>
+    .wk-wf .bar { height: 22px; border: 1px solid var(--wk-line); border-radius: 6px; background: #fff; overflow: hidden; display: flex; }
+    .wk-wf .bar i { display: block; height: 100%; transition: width .3s; border-right: 1px solid #fff; }
+    .wk-wf .bar .t { background: #8a5cf6; } .wk-wf .bar .sum { background: #1a7f5a; }
+    .wk-wf .meter { display: flex; justify-content: space-between; font: 700 11px ui-monospace, Menlo, monospace; color: var(--wk-muted); margin: 5px 0 10px; }
+    .wk-wf .meter .over { color: #b83232; }
+    .wk-wf .nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .wk-wf .nav button { border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 6px 12px; font: 700 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-wf .nav button.primary { background: var(--wk-navy); color: #fff; border-color: var(--wk-navy); }
+    .wk-wf .nav button:disabled { opacity: .45; cursor: default; }
+    .wk-wf .turns { display: flex; flex-direction: column; gap: 4px; max-height: 280px; overflow: auto; }
+    .wk-wf .turn { display: flex; gap: 8px; font-size: 12px; padding: 5px 8px; border-radius: 6px; background: #fff; border: 1px solid var(--wk-line); }
+    .wk-wf .turn .r { min-width: 62px; font: 700 10px ui-monospace, Menlo, monospace; color: var(--wk-muted); text-transform: uppercase; padding-top: 2px; }
+    .wk-wf .turn .k { margin-left: auto; font: 10px ui-monospace, Menlo, monospace; color: var(--wk-muted); white-space: nowrap; }
+    .wk-wf .turn.gone { text-decoration: line-through; opacity: .45; }
+    .wk-wf .turn.sum { border-color: #b9e2cf; background: #f2faf6; }
+    .wk-wf .cap { border-radius: 6px; padding: 8px 10px; font-size: 12.5px; margin-top: 10px; background: #f7f8fa; border: 1px solid var(--wk-line); }
+  </style>
+  <div class="wk-title">/// Interactive · a long conversation on a small desk</div>
+  <div class="bar" data-bar></div>
+  <div class="meter"><span data-used></span><span data-left></span></div>
+  <div class="nav">
+    <button type="button" class="primary" data-add>Add a turn</button>
+    <button type="button" data-trim>Trim to last 4 turns</button>
+    <button type="button" data-sum>Summarize older turns</button>
+    <button type="button" data-reset>Start over</button>
+  </div>
+  <div class="turns" data-turns></div>
+  <div class="cap" data-cap aria-live="polite">Add turns one at a time. This desk holds 110 tokens of conversation (real ones hold far more; the squeeze is the same).</div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-wf"), BUDGET = 110;
+  const SCRIPT = [
+    ["client", "Compare Deere's revenue growth with Caterpillar's last quarter. I prefer tables."],
+    ["assistant", "Deere grew revenue 6.4% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B. Deere is growing 2.1× as fast."],
+    ["client", "What drove Deere's growth?"],
+    ["assistant", "The firm's data covers revenue and growth only. The drivers are in the management discussion of Deere's filing, which I can summarize for you."],
+    ["client", "And Caterpillar's margins?"],
+    ["assistant", "The firm's data covers revenue and growth only; margins would need the filing itself."],
+    ["client", "Fine. What is Deere's share price today?"],
+    ["assistant", "Deere last traded at $512.40."],
+    ["client", "And NVIDIA?"],
+  ];
+  const tok = (s) => Math.round(s.split(/\s+/).length * 1.3) + 1;
+  let turns = [], next = 0;
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function render(cap) {
+    const live = turns.filter((t) => !t.gone), sum = live.reduce((a, t) => a + t.k, 0);
+    const bar = w.querySelector("[data-bar]"); bar.innerHTML = "";
+    live.forEach((t) => { const i = document.createElement("i"); i.className = t.sum ? "sum" : "t"; i.style.width = Math.min(t.k / BUDGET * 100, 100) + "%"; bar.appendChild(i); });
+    w.querySelector("[data-used]").textContent = `${sum} / ${BUDGET} tokens`;
+    const left = w.querySelector("[data-left]"); left.textContent = sum > BUDGET ? `${sum - BUDGET} over: the desk is full` : `${BUDGET - sum} free`; left.className = sum > BUDGET ? "over" : "";
+    w.querySelector("[data-turns]").innerHTML = turns.map((t) => `<div class="turn${t.gone ? " gone" : ""}${t.sum ? " sum" : ""}"><span class="r">${t.sum ? "summary" : t.r}</span><span>${esc(t.text)}</span><span class="k">${t.k} tok</span></div>`).join("");
+    w.querySelector("[data-add]").disabled = next >= SCRIPT.length;
+    if (cap) w.querySelector("[data-cap]").textContent = cap;
+  }
+  w.querySelector("[data-add]").addEventListener("click", () => {
+    const [r, text] = SCRIPT[next++]; turns.push({ r, text, k: tok(text) });
+    const last = next === SCRIPT.length;
+    render(last ? "The last question is a follow-up. It only makes sense if the Deere and Caterpillar comparison is still on the desk. Now trim, or summarize." : undefined);
+  });
+  w.querySelector("[data-trim]").addEventListener("click", () => {
+    const live = turns.filter((t) => !t.gone); live.slice(0, Math.max(live.length - 4, 0)).forEach((t) => (t.gone = true));
+    render("Trimmed. The oldest turns are gone word for word, and with them the comparison and the table preference. \"And NVIDIA?\" now has nothing to follow.");
+  });
+  w.querySelector("[data-sum]").addEventListener("click", () => {
+    const live = turns.filter((t) => !t.gone && !t.sum), old = live.slice(0, Math.max(live.length - 4, 0));
+    if (!old.length) return render("Nothing old enough to summarize yet: the last four turns are always kept word for word.");
+    old.forEach((t) => (t.gone = true));
+    const text = "Client prefers tables. Deere grew 6.4% to $13.8B, Caterpillar 3.1% to $16.9B.";
+    turns.splice(turns.indexOf(old[old.length - 1]) + 1, 0, { r: "assistant", text, k: tok(text), sum: true });
+    render("Summarized. The older turns became one short card that kept the figures and the preference. It dropped the question about what drove Deere's growth, because the summary chose to. What a summary leaves out is gone too.");
+  });
+  w.querySelector("[data-reset]").addEventListener("click", () => { turns = []; next = 0; render("Add turns one at a time. This desk holds 110 tokens of conversation."); });
+  render();
+})();
+</script>

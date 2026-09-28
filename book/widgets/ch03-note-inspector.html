@@ -1,0 +1,58 @@
+<div class="wk-widget wk-ni" id="w-ni">
+  <style>
+    .wk-ni .grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; }
+    .wk-ni .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 8px; }
+    .wk-ni .note { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--wk-line); background: #fff; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; font-size: 12.5px; }
+    .wk-ni .note .body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .wk-ni .note small { display: block; font: 10.5px ui-monospace, Menlo, monospace; color: var(--wk-muted); margin-top: 3px; }
+    .wk-ni .note .by { display: inline-block; font: 700 9.5px ui-monospace, Menlo, monospace; padding: 1px 5px; border-radius: 4px; margin-right: 4px; color: #fff; }
+    .wk-ni .by.agent { background: #8a5cf6; } .wk-ni .by.harness { background: var(--wk-navy); }
+    .wk-ni .note.flag { border-color: #f0b4b4; background: #fff2f2; }
+    .wk-ni .note .warn { color: #8a1f1f; font-size: 11.5px; margin-top: 4px; display: none; }
+    .wk-ni .note.flag .warn { display: block; }
+    .wk-ni .note button { border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 4px 9px; font: 700 10.5px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-ni .tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .wk-ni .tools button { border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 6px 12px; font: 700 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-ni .tools button.primary { background: var(--wk-navy); color: #fff; border-color: var(--wk-navy); }
+    .wk-ni .memo { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 10px; font-size: 12.5px; line-height: 1.5; }
+    .wk-ni .memo.bad { border-color: #f0b4b4; background: #fff2f2; }
+    .wk-ni .memo.ask { border-color: #b9e2cf; background: #f2faf6; }
+    @media (max-width: 760px) { .wk-ni .grid { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+  <div class="wk-title">/// Interactive · what the agent remembers about Meridian, and who checks it</div>
+  <div class="grid">
+    <div>
+      <div class="h">Notes about Meridian Pension Trust</div>
+      <div class="tools"><button type="button" class="primary" data-check>Check figures against firm data</button><button type="button" data-reset>Start over</button></div>
+      <div data-notes></div>
+    </div>
+    <div>
+      <div class="h">Next Monday: "And NVIDIA?"</div>
+      <div class="memo" data-memo aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-ni");
+  const START = [
+    { text: "Deere grew revenue 64.0% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B in Q2-2026", by: "agent", src: "the agent's own summary", bad: "The firm's data says Deere grew 6.4%, not 64.0%." },
+    { text: "Dana wants tables, and nothing longer than 150 words", by: "agent", src: "the agent's own summary" },
+  ];
+  let notes, checked;
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function memo() {
+    const m = w.querySelector("[data-memo]"), fig = notes.find((n) => n.bad);
+    if (fig) { m.className = "memo bad"; m.innerHTML = "Adding NVIDIA to the comparison. Deere grew revenue <b>64.0%</b> YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B; NVIDIA grew revenue 58.0% YoY to $52.4B in Q2-2026. <b>Deere is growing 20.6× as fast</b>, from a smaller base; NVIDIA is the larger company. [source: Q2-2026 filings via get_financials]<br><br><i>The figure came from a note, not a lookup, and the answer still cites a source.</i>"; }
+    else { m.className = "memo ask"; m.innerHTML = "NVIDIA what? Tell me what you would like to know about it: revenue and growth, or price.<br><br><i>No figures remembered, so the agent asks. Better to ask than to repeat a wrong number. The table preference is still kept for the next memo.</i>"; }
+  }
+  function render() {
+    w.querySelector("[data-notes]").innerHTML = notes.map((n, i) => `<div class="note${checked && n.bad ? " flag" : ""}"><div class="body"><span class="by ${n.by}">${n.by}</span>${esc(n.text)}<small>from ${esc(n.src)}</small><div class="warn">${n.bad || ""}</div></div><button type="button" data-del="${i}" aria-label="Delete note ${i + 1}">Delete</button></div>`).join("") || '<div style="color:var(--wk-muted);font-size:12px">No notes.</div>';
+    w.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => { notes.splice(+b.dataset.del, 1); render(); }));
+    memo();
+  }
+  w.querySelector("[data-check]").addEventListener("click", () => { checked = true; render(); });
+  w.querySelector("[data-reset]").addEventListener("click", () => { notes = START.map((n) => ({ ...n })); checked = false; render(); });
+  notes = START.map((n) => ({ ...n })); checked = false; render();
+})();
+</script>

@@ -5,7 +5,7 @@ An interactive textbook for the Gies MSBA workshop series. Ten chapters in five 
 | Part | Chapters |
 |---|---|
 | 0 · Foundations | 0 How Large Language Models Work (tokens, next-token prediction, open vs closed models) |
-| I · Agents | 1 Introduction to AI Agents (what an agent is, the loop, tool design) · 2 Prompt and Context Engineering · 3 Memory Retrieval and RAG |
+| I · Agents | 1 Introduction to AI Agents (what an agent is, the loop, tool design) · 2 Prompt and Context Engineering · 3 Memory Retrieval and RAG (chunking, embeddings, keyword/semantic/hybrid/rerank retrieval, agent memory) |
 | II · Machine learning | 4 ML Foundations I · 5 ML Foundations II |
 | III · Systems and decisions | 6 Agent Systems · 7 When to Use ML, Agents, or Neither |
 | IV · Finance | 8 Financial Markets and AI as an Investment Theme · 9 AI for Financial and Investment Research |
@@ -47,7 +47,7 @@ Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the book onc
 | Public | https://ashcastelinocs124.github.io/msba-ai-workshop/ | anyone | mock model only; model cells link to the campus copy |
 | Campus | https://dl-msba-workshop.azurewebsites.net/ | @illinois.edu sign-in (Entra) | run against gpt-5-mini on Azure AI Foundry via `/api/chat` |
 
-The campus copy is the same static site served by a small FastAPI app (`app/main.py`) that adds two routes: `/api/whoami` (signed-in user and today's token use) and `/api/chat`, a proxy that holds the Foundry key (an App Service setting that references Key Vault), fixes the model deployment server-side, caps `max_completion_tokens` and a per-student daily token budget, and forwards to the Foundry `/openai/v1/chat/completions` endpoint. The browser never sees a key. In-page cells reach the model with `from llm import azure_model`, a drop-in for the mock model that the chapter 1 loop accepts as `model=`.
+The campus copy is the same static site served by a small FastAPI app (`app/main.py`) that adds, among others, `/api/whoami` (signed-in user and today's token use), `/api/embed` (a meaning-vector from `text-embedding-3-small`, for chapter 3's retrieval cells) and `/api/chat`, a proxy that holds the Foundry key (an App Service setting that references Key Vault), fixes the model deployment server-side, caps `max_completion_tokens` and a per-student daily token budget, and forwards to the Foundry `/openai/v1/chat/completions` endpoint. The browser never sees a key. In-page cells reach the model with `from llm import azure_model`, a drop-in for the mock model that the chapter 1 loop accepts as `model=`.
 
 Azure resources (resource group `DL_ResourceGroup_01`): web app `dl-msba-workshop` on the shared plan `dl-appplan-01`, Foundry account `dl-foundry-msba-workshop` (deployment `gpt-5-mini`), Key Vault `dl-kv-msba-workshop`. The Azure deploy job needs the repo secret `AZURE_PUBLISH_PROFILE` (the app's publish profile); until it exists that job fails without failing the workflow.
 

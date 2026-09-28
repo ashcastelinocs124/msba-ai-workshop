@@ -1,0 +1,78 @@
+<div class="wk-widget wk-chk" id="w-chk">
+  <style>
+    .wk-chk .ctl { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin-bottom: 10px; font-size: 12.5px; }
+    .wk-chk .ctl label { display: flex; gap: 8px; align-items: center; font-weight: 600; }
+    .wk-chk .ctl input[type=range] { accent-color: var(--wk-orange); width: 150px; }
+    .wk-chk .ctl b { font: 700 12px ui-monospace, Menlo, monospace; min-width: 70px; display: inline-block; }
+    .wk-chk .presets button { border: 1px solid var(--wk-line); background: #fff; border-radius: 999px; padding: 4px 10px; font: 700 10.5px ui-monospace, Menlo, monospace; color: var(--wk-muted); cursor: pointer; margin: 0 4px 4px 0; }
+    .wk-chk .status { border-radius: 6px; padding: 8px 10px; font-size: 12.5px; margin-bottom: 10px; }
+    .wk-chk .status.split { border: 1px solid #f0b4b4; background: #fff2f2; color: #8a1f1f; }
+    .wk-chk .status.buried { border: 1px solid #f3d7a6; background: #fff8ec; color: #7a4b00; }
+    .wk-chk .status.whole { border: 1px solid #b9e2cf; background: #f2faf6; color: #155f42; }
+    .wk-chk .strip { display: flex; flex-direction: column; gap: 6px; max-height: 330px; overflow: auto; padding-right: 4px; }
+    .wk-chk .c { border: 1px solid var(--wk-line); border-radius: 6px; background: #fff; padding: 6px 8px; font-size: 12px; line-height: 1.45; }
+    .wk-chk .c .n { font: 700 10px ui-monospace, Menlo, monospace; color: var(--wk-muted); margin-right: 6px; }
+    .wk-chk .c.hit { border-color: var(--wk-orange); box-shadow: 0 0 0 2px #ffe3d1; }
+    .wk-chk mark { background: #ffe3d1; padding: 0 1px; }
+    .wk-chk .c .ov { color: var(--wk-muted); }
+  </style>
+  <div class="wk-title">/// Interactive · cut the handbook into chunks and follow the blackout rule</div>
+  <div class="ctl">
+    <label>Chunk size <input type="range" min="10" max="400" step="5" value="15" data-size> <b data-sizev></b></label>
+    <label>Overlap <input type="range" min="0" max="50" step="5" value="0" data-ov> <b data-ovv></b></label>
+  </div>
+  <div class="presets" aria-label="Presets">
+    <button type="button" data-p="15,0">15 words, no overlap</button>
+    <button type="button" data-p="15,5">15 words, 5 overlap</button>
+    <button type="button" data-p="60,15">60 words, 15 overlap</button>
+    <button type="button" data-p="400,0">400 words</button>
+  </div>
+  <div class="status" data-status aria-live="polite">Loading the handbook…</div>
+  <div class="strip" data-strip></div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-chk");
+  const RULE = "Blackout window: no employee may trade a security within 14 days before or after the firm publishes research on it.";
+  const size = w.querySelector("[data-size]"), ov = w.querySelector("[data-ov]");
+  let words = [];
+  const ruleStart = () => { const r = RULE.split(" "); for (let i = 0; i <= words.length - r.length; i++) if (r.every((x, j) => words[i + j] === x)) return i; return -1; };
+  let rs = -1, rl = RULE.split(" ").length;
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function render() {
+    const n = +size.value, o = Math.min(+ov.value, n - 5);
+    w.querySelector("[data-sizev]").textContent = n + " words";
+    w.querySelector("[data-ovv]").textContent = o + " words";
+    const step = n - o, chunks = [];
+    for (let i = 0; i < Math.max(words.length - o, 1); i += step) chunks.push([i, Math.min(i + n, words.length)]);
+    const whole = chunks.findIndex(([a, b]) => a <= rs && rs + rl <= b);
+    const touching = chunks.map(([a, b], k) => (a < rs + rl && b > rs ? k : -1)).filter((k) => k >= 0);
+    const st = w.querySelector("[data-status]");
+    if (whole < 0) { st.className = "status split"; st.textContent = `${chunks.length} chunks. The blackout rule is cut across chunks ${touching.map((k) => k + 1).join(" and ")}: neither piece holds the whole rule, so a question about it matches both weakly.`; }
+    else if (n >= 150) { st.className = "status buried"; st.textContent = `${chunks.length} chunks. The rule is whole in chunk ${whole + 1}, but that chunk is ${chunks[whole][1] - chunks[whole][0]} words holding about ${Math.round(n / 30)} other rules. It matches many questions a little, and fills the desk when retrieved.`; }
+    else { st.className = "status whole"; st.textContent = `${chunks.length} chunks. The blackout rule is whole in chunk ${whole + 1}, with little else around it.`; }
+    const show = new Set(); touching.forEach((k) => { for (let d = -1; d <= 1; d++) if (chunks[k + d]) show.add(k + d); });
+    const strip = w.querySelector("[data-strip]"); strip.innerHTML = "";
+    [...show].sort((a, b) => a - b).forEach((k) => {
+      const [a, b] = chunks[k], div = document.createElement("div");
+      div.className = "c" + (touching.includes(k) ? " hit" : "");
+      let html = "";
+      for (let i = a; i < b; i++) {
+        let t = esc(words[i]);
+        if (i >= rs && i < rs + rl) t = `<mark>${t}</mark>`;
+        else if (k > 0 && i < chunks[k - 1][1]) t = `<span class="ov">${t}</span>`;
+        html += t + " ";
+      }
+      div.innerHTML = `<span class="n">#${k + 1}</span>${html}`;
+      strip.appendChild(div);
+    });
+  }
+  size.addEventListener("input", render); ov.addEventListener("input", render);
+  w.querySelectorAll("[data-p]").forEach((b) => b.addEventListener("click", () => { const [s, o] = b.dataset.p.split(","); size.value = s; ov.value = o; render(); }));
+  fetch(new URL("_static/data/ch03-retrieval.json", document.baseURI)).then((r) => r.json()).then((d) => {
+    const heads = []; let text = "";
+    d.chunks.forEach((c) => { if (!heads.includes(c.heading)) { heads.push(c.heading); text += `## ${c.heading} `; } text += c.text + " "; });
+    words = text.trim().split(/\s+/); rs = ruleStart(); render();
+  }).catch(() => { w.querySelector("[data-status]").textContent = "Could not load the handbook. Serve the book over HTTP, not from a file."; });
+})();
+</script>

@@ -1,0 +1,1287 @@
+{
+ "chunks": [
+  {
+   "id": "scope-1",
+   "heading": "1. Purpose and scope",
+   "text": "This handbook sets out the rules every employee of Champaign Capital Research follows when trading for their own account, publishing research, handling client and vendor data, and using firm systems."
+  },
+  {
+   "id": "scope-2",
+   "heading": "1. Purpose and scope",
+   "text": "It applies to all 38 employees in the Champaign and Chicago offices, to contractors with access to research systems, and to interns from their first day. Nobody is exempt because of seniority or role."
+  },
+  {
+   "id": "scope-3",
+   "heading": "1. Purpose and scope",
+   "text": "Compliance, led by Elena Ruiz, owns this handbook, answers questions about it, and reviews it every January. Where a rule is unclear, ask compliance before you act rather than after."
+  },
+  {
+   "id": "scope-4",
+   "heading": "1. Purpose and scope",
+   "text": "Breaking a rule in this handbook can lead to a written warning, the reversal of a trade at the employee's own cost, loss of a bonus, or dismissal. Serious breaches are reported to regulators."
+  },
+  {
+   "id": "personal-trading-1",
+   "heading": "2. Personal trading",
+   "text": "Employees must obtain compliance pre-clearance before trading any security in a sector the firm covers."
+  },
+  {
+   "id": "personal-trading-2",
+   "heading": "2. Personal trading",
+   "text": "Blackout window: no employee may trade a security within 14 days before or after the firm publishes research on it."
+  },
+  {
+   "id": "personal-trading-3",
+   "heading": "2. Personal trading",
+   "text": "Minimum holding period: positions in covered securities must be held at least 30 days before they are sold."
+  },
+  {
+   "id": "personal-trading-4",
+   "heading": "2. Personal trading",
+   "text": "The covered sectors are industrials, agricultural equipment and semiconductors. Compliance publishes the full list of covered companies on the intranet, and a company stays covered for 90 days after the firm drops coverage."
+  },
+  {
+   "id": "personal-trading-5",
+   "heading": "2. Personal trading",
+   "text": "These rules apply to every account an employee can influence: their own, a spouse's or partner's, a dependent child's, and any trust or investment club in which they make or suggest decisions."
+  },
+  {
+   "id": "personal-trading-6",
+   "heading": "2. Personal trading",
+   "text": "Options, warrants, convertible bonds and single-stock futures on a covered company count as trades in that company. Short sales of covered securities are not permitted at all."
+  },
+  {
+   "id": "personal-trading-7",
+   "heading": "2. Personal trading",
+   "text": "Broad index funds, exchange-traded funds that track a whole market, money-market funds and government bonds are exempt from pre-clearance, the blackout window and the minimum holding period."
+  },
+  {
+   "id": "personal-trading-8",
+   "heading": "2. Personal trading",
+   "text": "If a price falls sharply and an employee needs to sell a covered position before the minimum holding period ends, they may ask compliance for a hardship exception. Exceptions are rare, recorded, and never granted inside the blackout window."
+  },
+  {
+   "id": "personal-trading-9",
+   "heading": "2. Personal trading",
+   "text": "Employees must give compliance duplicate statements for every brokerage account within 10 days of joining and every quarter after that. Compliance compares them with pre-clearance records."
+  },
+  {
+   "id": "pre-clearance-1",
+   "heading": "3. Pre-clearance procedure",
+   "text": "To request pre-clearance, email compliance with the ticker, whether you want to buy or sell, the number of shares, and the account. Each request receives a four-digit request number."
+  },
+  {
+   "id": "pre-clearance-2",
+   "heading": "3. Pre-clearance procedure",
+   "text": "Compliance checks each request against the restricted list, the date the firm last published research on the company, and, for a sale, how long the position has been held."
+  },
+  {
+   "id": "pre-clearance-3",
+   "heading": "3. Pre-clearance procedure",
+   "text": "An approval is valid until the end of the next business day. An order not filled by then needs a new request, and a partly filled order needs a new request for the rest."
+  },
+  {
+   "id": "pre-clearance-4",
+   "heading": "3. Pre-clearance procedure",
+   "text": "Only a compliance officer can approve a request. A recommendation from a colleague, a manager, or a software assistant is advice to compliance, not an approval, and trading on it is a breach."
+  },
+  {
+   "id": "pre-clearance-5",
+   "heading": "3. Pre-clearance procedure",
+   "text": "Compliance aims to answer every request within four business hours. A request received after 3 pm is answered the next business morning."
+  },
+  {
+   "id": "pre-clearance-6",
+   "heading": "3. Pre-clearance procedure",
+   "text": "A declined request can be submitted again once the reason has passed, for example after the blackout window ends or the holding period is complete. Compliance does not keep a queue of declined requests."
+  },
+  {
+   "id": "restricted-list-1",
+   "heading": "4. Restricted list",
+   "text": "Securities on the restricted list may not be traded by any employee; compliance maintains the list and reviews it weekly."
+  },
+  {
+   "id": "restricted-list-2",
+   "heading": "4. Restricted list",
+   "text": "A company is added to the restricted list when the firm is preparing a new report on it, when an employee holds material non-public information about it, or when a client relationship creates a conflict."
+  },
+  {
+   "id": "restricted-list-3",
+   "heading": "4. Restricted list",
+   "text": "The restricted list is confidential. Do not tell anyone outside the firm which companies are on it, because the list itself can reveal research the firm has not yet published."
+  },
+  {
+   "id": "restricted-list-4",
+   "heading": "4. Restricted list",
+   "text": "If you learn something about a company that may not be public, tell compliance at once and do not trade or discuss it. Compliance decides whether the company goes on the restricted list."
+  },
+  {
+   "id": "research-process-1",
+   "heading": "5. Research process",
+   "text": "Every figure in a published note must cite its source document or data vendor field; uncited figures block publication."
+  },
+  {
+   "id": "research-process-2",
+   "heading": "5. Research process",
+   "text": "Financial models are re-run on the latest filings before a note is published, and the run is logged with a timestamp."
+  },
+  {
+   "id": "research-process-3",
+   "heading": "5. Research process",
+   "text": "A second analyst reviews every note before publication and checks each figure against its cited source. The reviewer signs the review log; a note without a signed review cannot be published."
+  },
+  {
+   "id": "research-process-4",
+   "heading": "5. Research process",
+   "text": "Analysts may use software assistants to draft text, look up figures and summarize filings. The analyst remains responsible for every word and figure, and must check each figure the assistant produced against its source."
+  },
+  {
+   "id": "research-process-5",
+   "heading": "5. Research process",
+   "text": "Corrections to a published note are issued as a dated correction notice sent to every client who received the note. The original note is never silently edited."
+  },
+  {
+   "id": "publication-1",
+   "heading": "6. Publication and embargo",
+   "text": "Research is published to all subscribing clients at the same time, at 7 am Central, through the client portal. No client may receive a note, a rating or a price target before the others."
+  },
+  {
+   "id": "publication-2",
+   "heading": "6. Publication and embargo",
+   "text": "A note is under embargo from the moment its draft is approved until it is published. During the embargo its conclusions may not be discussed with clients, the press or anyone outside the research team."
+  },
+  {
+   "id": "publication-3",
+   "heading": "6. Publication and embargo",
+   "text": "Changes of rating or price target are published only as part of a full note. They are never announced first by email, phone, chat or social media."
+  },
+  {
+   "id": "publication-4",
+   "heading": "6. Publication and embargo",
+   "text": "When the firm starts or stops covering a company, compliance records the date. That date starts the blackout window and the 90-day covered period for personal trading."
+  },
+  {
+   "id": "data-licensing-1",
+   "heading": "7. Data licensing",
+   "text": "Raw vendor data (prices, fundamentals, estimates) may not be redistributed to clients; only derived figures may appear in notes."
+  },
+  {
+   "id": "data-licensing-2",
+   "heading": "7. Data licensing",
+   "text": "A derived figure is one the firm calculated, such as a growth rate, a margin or a ratio. Copying a vendor's number into a note unchanged counts as redistribution, even with a citation."
+  },
+  {
+   "id": "data-licensing-3",
+   "heading": "7. Data licensing",
+   "text": "Vendor data may not be pasted into an outside website, chatbot or AI service that is not on the firm's approved-tools list, because the vendor's licence does not allow it to leave firm systems."
+  },
+  {
+   "id": "data-licensing-4",
+   "heading": "7. Data licensing",
+   "text": "Company filings, press releases and other public documents are not vendor data and may be quoted with a citation."
+  },
+  {
+   "id": "client-service-1",
+   "heading": "8. Client service",
+   "text": "Client data requests are answered within one business day; investment recommendations are given only in published notes."
+  },
+  {
+   "id": "client-service-2",
+   "heading": "8. Client service",
+   "text": "Every client has a named contact at the firm. Requests go through that contact, who records each one in the client log with the date, the question and the reply."
+  },
+  {
+   "id": "client-service-3",
+   "heading": "8. Client service",
+   "text": "Client preferences, such as a preferred format or a sector of interest, are recorded on the client's card so every colleague answers in the same way. The card never holds personal data beyond a contact name and role."
+  },
+  {
+   "id": "client-service-4",
+   "heading": "8. Client service",
+   "text": "Replies to clients restate figures from published notes or filings with their source. An analyst may explain a published view but may not offer a new one in a private reply."
+  },
+  {
+   "id": "communications-1",
+   "heading": "9. Communications and social media",
+   "text": "Business communication with clients happens only on firm email, the client portal and the firm's recorded phone lines. Personal messaging apps may not be used for firm business."
+  },
+  {
+   "id": "communications-2",
+   "heading": "9. Communications and social media",
+   "text": "All business communications are archived for seven years and may be reviewed by compliance at any time."
+  },
+  {
+   "id": "communications-3",
+   "heading": "9. Communications and social media",
+   "text": "Employees may not comment publicly on companies the firm covers, including on social media, podcasts or conference panels, without approval from compliance and the head of research."
+  },
+  {
+   "id": "communications-4",
+   "heading": "9. Communications and social media",
+   "text": "Press enquiries go to the managing partner. Do not answer a journalist's question about a covered company, even informally or off the record."
+  },
+  {
+   "id": "gifts-1",
+   "heading": "10. Gifts and entertainment",
+   "text": "Employees may accept gifts from clients, vendors or companies the firm covers worth up to $100 per giver per year. Anything more valuable is declined or handed to compliance."
+  },
+  {
+   "id": "gifts-2",
+   "heading": "10. Gifts and entertainment",
+   "text": "Meals and events with a client or vendor are allowed when the host attends and the purpose is business. Travel or hotel costs paid by a covered company are never accepted."
+  },
+  {
+   "id": "gifts-3",
+   "heading": "10. Gifts and entertainment",
+   "text": "Every gift or entertainment above $25 is recorded in the gifts log within five business days, with the giver, the date and an estimated value."
+  },
+  {
+   "id": "gifts-4",
+   "heading": "10. Gifts and entertainment",
+   "text": "Analysts may not accept any gift or hospitality from a company they cover during the blackout window around their own research on it."
+  },
+  {
+   "id": "expense-1",
+   "heading": "11. Expenses and travel",
+   "text": "Expense reports must be submitted within 30 days with itemized receipts for any item over $25."
+  },
+  {
+   "id": "expense-2",
+   "heading": "11. Expenses and travel",
+   "text": "Meals while traveling are reimbursed up to $60 per day; alcohol is not reimbursable."
+  },
+  {
+   "id": "expense-3",
+   "heading": "11. Expenses and travel",
+   "text": "Air travel is booked in economy through the firm's travel agent. Flights over six hours may be booked in premium economy with the managing partner's approval."
+  },
+  {
+   "id": "expense-4",
+   "heading": "11. Expenses and travel",
+   "text": "Site visits to covered companies are paid for by the firm, never by the company being visited, so the research stays independent."
+  },
+  {
+   "id": "security-1",
+   "heading": "12. Information security",
+   "text": "Laptops must use full-disk encryption and auto-lock after 10 minutes of inactivity."
+  },
+  {
+   "id": "security-2",
+   "heading": "12. Information security",
+   "text": "Report a suspected phishing email to security@champaigncapital.example within one hour of receipt."
+  },
+  {
+   "id": "security-3",
+   "heading": "12. Information security",
+   "text": "Passwords are at least 14 characters and unique to each system, and every firm account uses two-factor sign-in. Never share a password or a sign-in code, even with a colleague."
+  },
+  {
+   "id": "security-4",
+   "heading": "12. Information security",
+   "text": "Only software on the firm's approved-tools list may be installed on a firm laptop or connected to firm data. Ask the data team to review a new tool before you use it."
+  },
+  {
+   "id": "security-5",
+   "heading": "12. Information security",
+   "text": "A lost or stolen laptop or phone must be reported to the data team at once, day or night, so it can be locked and wiped remotely."
+  },
+  {
+   "id": "conflicts-1",
+   "heading": "13. Conflicts of interest",
+   "text": "A conflict of interest is any situation in which an employee's own interest, or a family member's, could influence or appear to influence their work. Every employee declares conflicts to compliance when they join and whenever something changes."
+  },
+  {
+   "id": "conflicts-2",
+   "heading": "13. Conflicts of interest",
+   "text": "An analyst may not write research on a company in which they, their spouse or partner, or a dependent child holds shares, options or a job. Coverage passes to a colleague until the holding is sold or the job ends."
+  },
+  {
+   "id": "conflicts-3",
+   "heading": "13. Conflicts of interest",
+   "text": "An analyst who owns shares in a covered company from before they joined the firm may keep them, but must declare them, and any sale follows the pre-clearance, blackout and holding-period rules like any other trade."
+  },
+  {
+   "id": "conflicts-4",
+   "heading": "13. Conflicts of interest",
+   "text": "The firm does not do investment banking, underwriting or paid consulting for companies it covers, and does not accept payment from a company in return for research on it."
+  },
+  {
+   "id": "conflicts-5",
+   "heading": "13. Conflicts of interest",
+   "text": "A client's request to see a note before it is published, to change a rating, or to add or drop coverage of a company is declined and reported to compliance, whoever the client is."
+  },
+  {
+   "id": "conflicts-6",
+   "heading": "13. Conflicts of interest",
+   "text": "Each published note states whether the author or the firm holds any position in the companies it discusses, and whether any other conflict applies. A note with no disclosure statement cannot be published."
+  },
+  {
+   "id": "outside-1",
+   "heading": "14. Outside activities",
+   "text": "Employees must ask compliance before taking a second job, a paid speaking role, a board seat or an advisory position with any company, whether or not the firm covers it."
+  },
+  {
+   "id": "outside-2",
+   "heading": "14. Outside activities",
+   "text": "Board seats and advisory roles at companies in a covered sector are not approved. Unpaid roles with charities, schools and community groups are usually approved, but still need to be declared."
+  },
+  {
+   "id": "outside-3",
+   "heading": "14. Outside activities",
+   "text": "Teaching, writing and speaking about markets in general are encouraged. Discussing a covered company in a class, article or talk needs the same approval as a public comment."
+  },
+  {
+   "id": "outside-4",
+   "heading": "14. Outside activities",
+   "text": "Personal investments in private companies, such as a friend's start-up, are declared to compliance before the money is committed, so compliance can check them against the firm's coverage."
+  },
+  {
+   "id": "outside-5",
+   "heading": "14. Outside activities",
+   "text": "Political donations and campaign work in an employee's own name and time are private matters, but may not use the firm's name, email, premises or client lists."
+  },
+  {
+   "id": "records-1",
+   "heading": "15. Records and AI assistants",
+   "text": "Firm records are the documents the firm relies on: published notes, models, the client log, pre-clearance decisions and the gifts log. They are kept for seven years and changed only by the people responsible for them."
+  },
+  {
+   "id": "records-2",
+   "heading": "15. Records and AI assistants",
+   "text": "AI assistants approved by the firm may read firm records through read-only tools. No assistant may change a firm record, approve a trade, or send anything to a client without a person."
+  },
+  {
+   "id": "records-3",
+   "heading": "15. Records and AI assistants",
+   "text": "An assistant may keep working notes, such as a client's preferred format or figures it looked up, so it can pick up where it left off. These notes are not firm records and are never the source for a figure in a note."
+  },
+  {
+   "id": "records-4",
+   "heading": "15. Records and AI assistants",
+   "text": "Every note an assistant keeps must show where it came from and when it was written. Any employee may read the notes kept about their clients and delete one that is wrong."
+  },
+  {
+   "id": "records-5",
+   "heading": "15. Records and AI assistants",
+   "text": "Before an assistant repeats a figure from its notes to a client, the figure must be checked again against the firm's data. A note is a reminder of where to look, not evidence."
+  }
+ ],
+ "map": {
+  "scope-1": [
+   0.072,
+   0.159
+  ],
+  "scope-2": [
+   0.053,
+   0.069
+  ],
+  "scope-3": [
+   0.047,
+   -0.012
+  ],
+  "scope-4": [
+   0.186,
+   -0.05
+  ],
+  "personal-trading-1": [
+   0.355,
+   0.001
+  ],
+  "personal-trading-2": [
+   0.278,
+   -0.125
+  ],
+  "personal-trading-3": [
+   0.369,
+   -0.279
+  ],
+  "personal-trading-4": [
+   0.258,
+   0.05
+  ],
+  "personal-trading-5": [
+   0.153,
+   0.271
+  ],
+  "personal-trading-6": [
+   0.337,
+   0.114
+  ],
+  "personal-trading-7": [
+   0.263,
+   -0.121
+  ],
+  "personal-trading-8": [
+   0.335,
+   -0.229
+  ],
+  "personal-trading-9": [
+   0.16,
+   -0.139
+  ],
+  "pre-clearance-1": [
+   0.146,
+   -0.16
+  ],
+  "pre-clearance-2": [
+   0.174,
+   -0.006
+  ],
+  "pre-clearance-3": [
+   -0.061,
+   -0.489
+  ],
+  "pre-clearance-4": [
+   0.051,
+   -0.069
+  ],
+  "pre-clearance-5": [
+   0.045,
+   -0.464
+  ],
+  "pre-clearance-6": [
+   0.187,
+   -0.451
+  ],
+  "restricted-list-1": [
+   0.346,
+   -0.028
+  ],
+  "restricted-list-2": [
+   0.21,
+   0.195
+  ],
+  "restricted-list-3": [
+   0.09,
+   0.238
+  ],
+  "restricted-list-4": [
+   0.296,
+   0.1
+  ],
+  "research-process-1": [
+   -0.4,
+   0.05
+  ],
+  "research-process-2": [
+   -0.317,
+   -0.231
+  ],
+  "research-process-3": [
+   -0.473,
+   -0.101
+  ],
+  "research-process-4": [
+   -0.352,
+   0.01
+  ],
+  "research-process-5": [
+   -0.377,
+   -0.203
+  ],
+  "publication-1": [
+   -0.234,
+   -0.145
+  ],
+  "publication-2": [
+   -0.194,
+   0.048
+  ],
+  "publication-3": [
+   -0.278,
+   -0.076
+  ],
+  "publication-4": [
+   0.31,
+   -0.132
+  ],
+  "data-licensing-1": [
+   -0.357,
+   0.142
+  ],
+  "data-licensing-2": [
+   -0.315,
+   0.073
+  ],
+  "data-licensing-3": [
+   -0.066,
+   0.098
+  ],
+  "data-licensing-4": [
+   -0.293,
+   0.247
+  ],
+  "client-service-1": [
+   -0.124,
+   -0.15
+  ],
+  "client-service-2": [
+   -0.362,
+   -0.054
+  ],
+  "client-service-3": [
+   -0.242,
+   -0.02
+  ],
+  "client-service-4": [
+   -0.426,
+   0.107
+  ],
+  "communications-1": [
+   -0.138,
+   0.141
+  ],
+  "communications-2": [
+   0.065,
+   -0.049
+  ],
+  "communications-3": [
+   0.039,
+   0.351
+  ],
+  "communications-4": [
+   -0.106,
+   0.221
+  ],
+  "gifts-1": [
+   0.086,
+   0.162
+  ],
+  "gifts-2": [
+   0.11,
+   0.159
+  ],
+  "gifts-3": [
+   -0.095,
+   -0.212
+  ],
+  "gifts-4": [
+   0.126,
+   0.177
+  ],
+  "expense-1": [
+   0.113,
+   -0.299
+  ],
+  "expense-2": [
+   0.105,
+   -0.345
+  ],
+  "expense-3": [
+   0.107,
+   -0.022
+  ],
+  "expense-4": [
+   -0.075,
+   0.256
+  ],
+  "security-1": [
+   0.259,
+   -0.381
+  ],
+  "security-2": [
+   0.1,
+   -0.311
+  ],
+  "security-3": [
+   0.139,
+   -0.15
+  ],
+  "security-4": [
+   0.043,
+   -0.032
+  ],
+  "security-5": [
+   0.081,
+   -0.226
+  ],
+  "conflicts-1": [
+   0.247,
+   0.32
+  ],
+  "conflicts-2": [
+   0.057,
+   0.305
+  ],
+  "conflicts-3": [
+   0.163,
+   0.208
+  ],
+  "conflicts-4": [
+   0.016,
+   0.357
+  ],
+  "conflicts-5": [
+   -0.101,
+   -0.054
+  ],
+  "conflicts-6": [
+   -0.147,
+   0.326
+  ],
+  "outside-1": [
+   0.259,
+   0.237
+  ],
+  "outside-2": [
+   0.179,
+   0.208
+  ],
+  "outside-3": [
+   -0.057,
+   0.178
+  ],
+  "outside-4": [
+   0.288,
+   0.207
+  ],
+  "outside-5": [
+   0.072,
+   0.305
+  ],
+  "records-1": [
+   -0.26,
+   -0.024
+  ],
+  "records-2": [
+   -0.166,
+   0.006
+  ],
+  "records-3": [
+   -0.515,
+   -0.085
+  ],
+  "records-4": [
+   -0.386,
+   -0.065
+  ],
+  "records-5": [
+   -0.456,
+   -0.108
+  ],
+  "q:blackout window": [
+   0.27,
+   -0.463
+  ],
+  "q:can i buy puts on caterpillar": [
+   0.13,
+   0.008
+  ],
+  "q:can i dump my caterpillar shares a week after buying them": [
+   0.125,
+   -0.124
+  ],
+  "q:can i invest in my friend's start-up": [
+   0.082,
+   0.08
+  ],
+  "q:can i offload stock i picked up last week": [
+   0.146,
+   -0.116
+  ],
+  "q:can i paste factset estimates into chatgpt": [
+   -0.2,
+   -0.062
+  ],
+  "q:can i short nvidia": [
+   0.174,
+   -0.139
+  ],
+  "q:can i sit on the board of a tractor company": [
+   0.142,
+   0.152
+  ],
+  "q:can i tell a client our new rating before 7 am": [
+   -0.17,
+   -0.257
+  ],
+  "q:can i trade during the quiet period after we publish": [
+   0.023,
+   -0.222
+  ],
+  "q:can i use whatsapp to message a client": [
+   -0.18,
+   -0.103
+  ],
+  "q:can the agent's notes be used as a source": [
+   -0.435,
+   -0.003
+  ],
+  "q:can the assistant approve a trade request": [
+   -0.049,
+   -0.231
+  ],
+  "q:can tom sell his deere shares 6 days after we published research on deere": [
+   0.018,
+   0.034
+  ],
+  "q:do i need permission to buy an s&p 500 index fund": [
+   0.03,
+   -0.022
+  ],
+  "q:does my wife's brokerage account count": [
+   0.002,
+   0.033
+  ],
+  "q:how long do we keep emails": [
+   -0.149,
+   -0.244
+  ],
+  "q:how long is an approval good for": [
+   0.021,
+   -0.353
+  ],
+  "q:how quickly must i report a lost phone": [
+   0.068,
+   -0.307
+  ],
+  "q:is a $150 bottle of wine from a vendor ok": [
+   -0.051,
+   -0.197
+  ],
+  "q:is the restricted list secret": [
+   0.124,
+   -0.041
+  ],
+  "q:minimum holding period": [
+   0.223,
+   -0.328
+  ],
+  "q:premium economy": [
+   0.12,
+   -0.094
+  ],
+  "q:security@champaigncapital.example": [
+   0.07,
+   -0.043
+  ],
+  "q:sell shares i bought recently": [
+   0.099,
+   -0.045
+  ],
+  "q:what does the embargo rule say": [
+   0.118,
+   -0.017
+  ],
+  "q:what happens if i break the rules": [
+   0.038,
+   -0.178
+  ],
+  "q:what is the limit on gifts": [
+   0.072,
+   0.004
+  ],
+  "q:what should i do with a suspicious email": [
+   -0.042,
+   -0.136
+  ],
+  "q:who approves my trade": [
+   0.007,
+   -0.142
+  ],
+  "q:who pays when i visit a company's factory": [
+   -0.07,
+   0.055
+  ]
+ },
+ "presets": [
+  {
+   "q": "Can I trade during the quiet period after we publish?",
+   "expect": "personal-trading-2",
+   "hit": [
+    "semantic",
+    "hybrid",
+    "rerank"
+   ],
+   "miss": [
+    "keyword"
+   ],
+   "why": "The handbook never says quiet period; it says blackout window. Keyword search matches trade and period in a clause about shares an employee owned before joining the firm. Meaning search sees that a quiet period after publishing is the blackout window, and hybrid and rerank keep that.",
+   "results": {
+    "keyword": [
+     {
+      "id": "conflicts-3",
+      "score": 4.639
+     },
+     {
+      "id": "gifts-4",
+      "score": 3.806
+     },
+     {
+      "id": "publication-2",
+      "score": 3.195
+     },
+     {
+      "id": "personal-trading-2",
+      "score": 3.089
+     },
+     {
+      "id": "personal-trading-3",
+      "score": 2.976
+     }
+    ],
+    "semantic": [
+     {
+      "id": "personal-trading-2",
+      "score": 0.534
+     },
+     {
+      "id": "publication-1",
+      "score": 0.473
+     },
+     {
+      "id": "publication-4",
+      "score": 0.437
+     },
+     {
+      "id": "personal-trading-1",
+      "score": 0.414
+     },
+     {
+      "id": "publication-2",
+      "score": 0.408
+     }
+    ],
+    "hybrid": [
+     {
+      "id": "personal-trading-2",
+      "score": 0.032
+     },
+     {
+      "id": "publication-2",
+      "score": 0.031
+     },
+     {
+      "id": "conflicts-3",
+      "score": 0.031
+     },
+     {
+      "id": "publication-4",
+      "score": 0.031
+     },
+     {
+      "id": "restricted-list-4",
+      "score": 0.03
+     }
+    ],
+    "rerank": [
+     {
+      "id": "personal-trading-2",
+      "score": 0.534
+     },
+     {
+      "id": "publication-1",
+      "score": 0.473
+     },
+     {
+      "id": "publication-4",
+      "score": 0.437
+     },
+     {
+      "id": "personal-trading-1",
+      "score": 0.414
+     },
+     {
+      "id": "publication-2",
+      "score": 0.408
+     }
+    ]
+   }
+  },
+  {
+   "q": "Can I short NVIDIA?",
+   "expect": "personal-trading-6",
+   "hit": [
+    "keyword",
+    "hybrid"
+   ],
+   "miss": [
+    "semantic",
+    "rerank"
+   ],
+   "why": "The rule says short sales are not permitted. Keyword search finds the rare word short. Meaning search ranks the hardship-exception clause first, because it is also about selling. Hybrid rescues it; this rerank, which leans on meaning, does not.",
+   "results": {
+    "keyword": [
+     {
+      "id": "personal-trading-6",
+      "score": 3.763
+     }
+    ],
+    "semantic": [
+     {
+      "id": "personal-trading-8",
+      "score": 0.332
+     },
+     {
+      "id": "pre-clearance-1",
+      "score": 0.322
+     },
+     {
+      "id": "conflicts-3",
+      "score": 0.289
+     },
+     {
+      "id": "personal-trading-6",
+      "score": 0.27
+     },
+     {
+      "id": "security-4",
+      "score": 0.265
+     }
+    ],
+    "hybrid": [
+     {
+      "id": "personal-trading-6",
+      "score": 0.032
+     },
+     {
+      "id": "personal-trading-8",
+      "score": 0.016
+     },
+     {
+      "id": "pre-clearance-1",
+      "score": 0.016
+     },
+     {
+      "id": "conflicts-3",
+      "score": 0.016
+     },
+     {
+      "id": "security-4",
+      "score": 0.015
+     }
+    ],
+    "rerank": [
+     {
+      "id": "personal-trading-8",
+      "score": 0.332
+     },
+     {
+      "id": "pre-clearance-1",
+      "score": 0.322
+     },
+     {
+      "id": "conflicts-3",
+      "score": 0.289
+     },
+     {
+      "id": "personal-trading-6",
+      "score": 0.27
+     },
+     {
+      "id": "security-4",
+      "score": 0.265
+     }
+    ]
+   }
+  },
+  {
+   "q": "Is a $150 bottle of wine from a vendor OK?",
+   "expect": "gifts-1",
+   "hit": [
+    "semantic",
+    "rerank"
+   ],
+   "miss": [
+    "keyword",
+    "hybrid"
+   ],
+   "why": "The word vendor pulls keyword search to the data-licensing clauses. Meaning search knows a bottle of wine is a gift. Hybrid merges the two lists, and the data-licensing clauses keyword liked push gifts-1 down to fifth. The rerank reads each candidate again and puts gifts-1 first.",
+   "results": {
+    "keyword": [
+     {
+      "id": "data-licensing-3",
+      "score": 2.94
+     },
+     {
+      "id": "data-licensing-4",
+      "score": 2.72
+     },
+     {
+      "id": "data-licensing-1",
+      "score": 2.572
+     },
+     {
+      "id": "research-process-1",
+      "score": 2.503
+     },
+     {
+      "id": "gifts-2",
+      "score": 2.318
+     }
+    ],
+    "semantic": [
+     {
+      "id": "gifts-1",
+      "score": 0.399
+     },
+     {
+      "id": "gifts-2",
+      "score": 0.329
+     },
+     {
+      "id": "gifts-3",
+      "score": 0.289
+     },
+     {
+      "id": "pre-clearance-3",
+      "score": 0.281
+     },
+     {
+      "id": "data-licensing-1",
+      "score": 0.263
+     }
+    ],
+    "hybrid": [
+     {
+      "id": "data-licensing-3",
+      "score": 0.032
+     },
+     {
+      "id": "gifts-2",
+      "score": 0.032
+     },
+     {
+      "id": "data-licensing-1",
+      "score": 0.031
+     },
+     {
+      "id": "data-licensing-2",
+      "score": 0.029
+     },
+     {
+      "id": "gifts-1",
+      "score": 0.016
+     }
+    ],
+    "rerank": [
+     {
+      "id": "gifts-1",
+      "score": 0.399
+     },
+     {
+      "id": "gifts-2",
+      "score": 0.329
+     },
+     {
+      "id": "gifts-3",
+      "score": 0.289
+     },
+     {
+      "id": "pre-clearance-3",
+      "score": 0.281
+     },
+     {
+      "id": "data-licensing-1",
+      "score": 0.263
+     }
+    ]
+   }
+  },
+  {
+   "q": "Who approves my trade?",
+   "expect": "pre-clearance-4",
+   "hit": [
+    "semantic",
+    "rerank"
+   ],
+   "miss": [
+    "keyword",
+    "hybrid"
+   ],
+   "why": "Keyword search matches trade in a clause about shares an employee owned before joining the firm, which says nothing about who approves. Meaning search finds the clause saying only a compliance officer can approve, and the rerank restores it after hybrid lets the AI-assistants clause edge ahead.",
+   "results": {
+    "keyword": [
+     {
+      "id": "conflicts-3",
+      "score": 5.21
+     },
+     {
+      "id": "personal-trading-2",
+      "score": 3.089
+     },
+     {
+      "id": "research-process-5",
+      "score": 3.016
+     },
+     {
+      "id": "client-service-2",
+      "score": 3.016
+     },
+     {
+      "id": "restricted-list-4",
+      "score": 2.633
+     }
+    ],
+    "semantic": [
+     {
+      "id": "pre-clearance-4",
+      "score": 0.53
+     },
+     {
+      "id": "pre-clearance-1",
+      "score": 0.478
+     },
+     {
+      "id": "pre-clearance-3",
+      "score": 0.463
+     },
+     {
+      "id": "records-2",
+      "score": 0.42
+     },
+     {
+      "id": "outside-3",
+      "score": 0.417
+     }
+    ],
+    "hybrid": [
+     {
+      "id": "records-2",
+      "score": 0.031
+     },
+     {
+      "id": "conflicts-3",
+      "score": 0.016
+     },
+     {
+      "id": "pre-clearance-4",
+      "score": 0.016
+     },
+     {
+      "id": "personal-trading-2",
+      "score": 0.016
+     },
+     {
+      "id": "pre-clearance-1",
+      "score": 0.016
+     }
+    ],
+    "rerank": [
+     {
+      "id": "pre-clearance-4",
+      "score": 0.53
+     },
+     {
+      "id": "pre-clearance-1",
+      "score": 0.478
+     },
+     {
+      "id": "pre-clearance-3",
+      "score": 0.463
+     },
+     {
+      "id": "records-2",
+      "score": 0.42
+     },
+     {
+      "id": "outside-3",
+      "score": 0.417
+     }
+    ]
+   }
+  },
+  {
+   "q": "Do I need permission to buy an S&P 500 index fund?",
+   "expect": "personal-trading-7",
+   "hit": [],
+   "miss": [
+    "keyword",
+    "semantic",
+    "hybrid",
+    "rerank"
+   ],
+   "why": "Every method puts the general pre-clearance rule first, and the index-fund exemption second or lower. This is why a retrieval step hands the model the top three, not only the top one.",
+   "results": {
+    "keyword": [
+     {
+      "id": "pre-clearance-1",
+      "score": 3.763
+     },
+     {
+      "id": "outside-2",
+      "score": 3.677
+     },
+     {
+      "id": "personal-trading-7",
+      "score": 3.595
+     },
+     {
+      "id": "personal-trading-5",
+      "score": 2.457
+     },
+     {
+      "id": "expense-3",
+      "score": 2.177
+     }
+    ],
+    "semantic": [
+     {
+      "id": "pre-clearance-1",
+      "score": 0.456
+     },
+     {
+      "id": "personal-trading-7",
+      "score": 0.428
+     },
+     {
+      "id": "personal-trading-1",
+      "score": 0.386
+     },
+     {
+      "id": "outside-1",
+      "score": 0.379
+     },
+     {
+      "id": "outside-3",
+      "score": 0.378
+     }
+    ],
+    "hybrid": [
+     {
+      "id": "pre-clearance-1",
+      "score": 0.033
+     },
+     {
+      "id": "personal-trading-7",
+      "score": 0.032
+     },
+     {
+      "id": "personal-trading-5",
+      "score": 0.031
+     },
+     {
+      "id": "outside-2",
+      "score": 0.016
+     },
+     {
+      "id": "personal-trading-1",
+      "score": 0.016
+     }
+    ],
+    "rerank": [
+     {
+      "id": "pre-clearance-1",
+      "score": 0.456
+     },
+     {
+      "id": "personal-trading-7",
+      "score": 0.428
+     },
+     {
+      "id": "personal-trading-1",
+      "score": 0.386
+     },
+     {
+      "id": "outside-1",
+      "score": 0.379
+     },
+     {
+      "id": "outside-3",
+      "score": 0.378
+     }
+    ]
+   }
+  }
+ ]
+}

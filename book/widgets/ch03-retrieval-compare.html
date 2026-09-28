@@ -1,0 +1,52 @@
+<div class="wk-widget wk-rc" id="w-rc">
+  <style>
+    .wk-rc .qs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .wk-rc .qs button { border: 1px solid var(--wk-line); background: #fff; border-radius: 999px; padding: 5px 11px; font-size: 12px; cursor: pointer; text-align: left; }
+    .wk-rc .qs button.on { border-color: var(--wk-orange); background: #fff3ea; font-weight: 600; }
+    .wk-rc .want { font-size: 12.5px; margin-bottom: 10px; }
+    .wk-rc .want code { background: #f2faf6; border: 1px solid #b9e2cf; padding: 1px 5px; border-radius: 4px; font-size: 11.5px; }
+    .wk-rc .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .wk-rc .col { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 8px; }
+    .wk-rc .col .h { display: flex; justify-content: space-between; align-items: center; font: 700 10.5px ui-monospace, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--wk-navy); margin-bottom: 6px; }
+    .wk-rc .col .v { font-size: 10px; padding: 1px 6px; border-radius: 4px; color: #fff; letter-spacing: 0; }
+    .wk-rc .v.hit { background: #1a7f5a; } .wk-rc .v.miss { background: #b83232; }
+    .wk-rc .r { display: flex; gap: 6px; align-items: baseline; font-size: 11.5px; padding: 4px 5px; border-radius: 4px; margin-bottom: 2px; }
+    .wk-rc .r .n { font: 700 10px ui-monospace, Menlo, monospace; color: var(--wk-muted); width: 12px; }
+    .wk-rc .r code { font-size: 10.5px; word-break: break-all; }
+    .wk-rc .r .s { margin-left: auto; font: 10px ui-monospace, Menlo, monospace; color: var(--wk-muted); }
+    .wk-rc .r.ok { background: #e3f4ec; font-weight: 700; }
+    .wk-rc .why { margin-top: 10px; border-radius: 6px; padding: 8px 10px; font-size: 12.5px; background: #f7f8fa; border: 1px solid var(--wk-line); }
+    .wk-rc .clause { font-size: 12px; color: #333; margin-top: 4px; }
+    @media (max-width: 760px) { .wk-rc .cols { grid-template-columns: 1fr 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · four ways to rank the handbook for one question</div>
+  <div class="qs" data-qs></div>
+  <div class="want" data-want></div>
+  <div class="cols" data-cols></div>
+  <div class="why" data-why aria-live="polite">Loading…</div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-rc");
+  const M = [["keyword", "Keyword"], ["semantic", "Semantic"], ["hybrid", "Hybrid"], ["rerank", "Rerank"]];
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  fetch(new URL("_static/data/ch03-retrieval.json", document.baseURI)).then((r) => r.json()).then((d) => {
+    const text = Object.fromEntries(d.chunks.map((c) => [c.id, c.text]));
+    const qs = w.querySelector("[data-qs]");
+    d.presets.forEach((p, i) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = p.q; qs.appendChild(b);
+      b.addEventListener("click", () => {
+        qs.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+        w.querySelector("[data-want]").innerHTML = `The clause that answers it: <code>${p.expect}</code><div class="clause">${esc(text[p.expect])}</div>`;
+        w.querySelector("[data-cols]").innerHTML = M.map(([k, label]) => {
+          const res = p.results[k], first = res[0] && res[0].id === p.expect;
+          return `<div class="col"><div class="h">${label}<span class="v ${first ? "hit" : "miss"}">${first ? "1st" : "not 1st"}</span></div>` +
+            res.map((r, j) => `<div class="r${r.id === p.expect ? " ok" : ""}" title="${esc(text[r.id])}"><span class="n">${j + 1}</span><code>${r.id}</code><span class="s">${r.score.toFixed(3)}</span></div>`).join("") + "</div>";
+        }).join("");
+        w.querySelector("[data-why]").textContent = p.why;
+      });
+      if (i === 0) b.click();
+    });
+  }).catch(() => { w.querySelector("[data-why]").textContent = "Could not load the rankings. Serve the book over HTTP, not from a file."; });
+})();
+</script>

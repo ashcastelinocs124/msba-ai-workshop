@@ -13,3 +13,4 @@ docs/plans/
 .pytest_cache/
 dist/
 campus.zip
+.superpowers/

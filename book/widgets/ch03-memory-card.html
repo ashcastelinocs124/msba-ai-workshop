@@ -1,0 +1,65 @@
+<div class="wk-widget wk-mc" id="w-mc">
+  <style>
+    .wk-mc .flow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .wk-mc .col { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 10px; font-size: 12px; line-height: 1.45; opacity: .35; transition: opacity .3s; }
+    .wk-mc .col.on { opacity: 1; }
+    .wk-mc .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 8px; }
+    .wk-mc .line { padding: 4px 6px; border-radius: 4px; margin-bottom: 4px; }
+    .wk-mc .line.pick { background: #fff3ea; box-shadow: inset 3px 0 0 var(--wk-orange); }
+    .wk-mc .card { border: 1px solid #b9e2cf; background: #f2faf6; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; }
+    .wk-mc .card small { display: block; color: var(--wk-muted); font: 10.5px ui-monospace, Menlo, monospace; margin-top: 2px; }
+    .wk-mc pre { margin: 6px 0 0; font: 11px/1.4 ui-monospace, Menlo, monospace; background: #fff3ea; border: 1px solid #ffd9c2; border-radius: 6px; padding: 6px; overflow-x: auto; }
+    .wk-mc .nav { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+    .wk-mc .nav button { border: 1px solid var(--wk-line); background: #fff; border-radius: 6px; padding: 6px 12px; font: 700 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-mc .nav button.primary { background: var(--wk-navy); color: #fff; border-color: var(--wk-navy); }
+    .wk-mc .cap { font-size: 12.5px; color: #333; }
+    @media (max-width: 760px) { .wk-mc .flow { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · the harness keeps notes between sessions</div>
+  <div class="flow">
+    <div class="col on" data-c="0">
+      <div class="h">1 · Monday's transcript</div>
+      <div class="line" data-l="u1">client: Compare Deere's revenue growth with Caterpillar's last quarter.</div>
+      <div class="line" data-l="a1">assistant: <b>Deere grew revenue 6.4% YoY to $13.8B</b>; <b>Caterpillar grew revenue 3.1% YoY to $16.9B</b> in Q2-2026. Deere is growing 2.1× as fast.</div>
+      <div class="line" data-l="u2">client: <b>I prefer tables, and keep it under 150 words.</b></div>
+      <div class="line" data-l="a2">assistant: Understood.</div>
+    </div>
+    <div class="col" data-c="1">
+      <div class="h">2 · Session ends: the harness saves notes</div>
+      <div class="card">Deere grew revenue 6.4% YoY to $13.8B<small>from get_financials, Q2-2026</small></div>
+      <div class="card">Caterpillar grew revenue 3.1% YoY to $16.9B<small>from get_financials, Q2-2026</small></div>
+      <div class="card">Preference: I prefer tables, and keep it under 150 words.<small>from the client, in session</small></div>
+      <div style="color:var(--wk-muted);font-size:11px">Rules: every figure the memo stated; every sentence with prefer, always, never, keep it under. Nothing else.</div>
+    </div>
+    <div class="col" data-c="2">
+      <div class="h">3 · Next Monday: a new session</div>
+      <div class="line">system: What we remember about Meridian Pension Trust: the three notes.</div>
+      <div class="line">client: And NVIDIA?</div>
+      <pre>company      revenue   YoY growth
+Deere        $13.8B    6.4%
+Caterpillar  $16.9B    3.1%
+NVIDIA       $52.4B    58.0%</pre>
+    </div>
+  </div>
+  <div class="nav"><button type="button" class="primary" data-next>Next step</button><button type="button" data-reset>Start over</button><span class="cap" data-cap aria-live="polite">Monday's session, as it happened.</span></div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-mc");
+  const CAPS = [
+    "Monday's session, as it happened.",
+    "The session ends. The harness reads the transcript with fixed rules and saves three notes, each with its source. The agent is not asked.",
+    "A week later, a brand-new session. The harness puts the notes in the system prompt, so the follow-up makes sense and arrives as a table.",
+  ];
+  let step = 0;
+  function show() {
+    w.querySelectorAll("[data-c]").forEach((c) => c.classList.toggle("on", +c.dataset.c <= step));
+    w.querySelectorAll("[data-l=a1],[data-l=u2]").forEach((l) => l.classList.toggle("pick", step >= 1));
+    w.querySelector("[data-cap]").textContent = CAPS[step];
+    w.querySelector("[data-next]").disabled = step >= 2;
+  }
+  w.querySelector("[data-next]").addEventListener("click", () => { step = Math.min(step + 1, 2); show(); });
+  w.querySelector("[data-reset]").addEventListener("click", () => { step = 0; show(); });
+  show();
+})();
+</script>

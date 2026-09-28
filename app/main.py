@@ -22,6 +22,7 @@ from fastapi.staticfiles import StaticFiles
 ENDPOINT = os.environ.get("FOUNDRY_ENDPOINT", "").rstrip("/")
 API_KEY = os.environ.get("FOUNDRY_API_KEY", "")
 DEPLOYMENT = os.environ.get("MODEL_DEPLOYMENT", "gpt-5-mini")
+EMBED_DEPLOYMENT = os.environ.get("EMBED_DEPLOYMENT", "text-embedding-3-small")
 DAILY_CAP = int(os.environ.get("DAILY_TOKEN_CAP", "20000"))
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "1024"))
 HTML_DIR = os.environ.get("HTML_DIR", os.path.join(os.path.dirname(__file__), "..", "html"))
@@ -31,7 +32,8 @@ SIGNIN_LOG = os.environ.get("SIGNIN_LOG", "/home/data/signins.csv")
 ADMIN_USERS = {u.strip().lower() for u in os.environ.get("ADMIN_USERS", "").split(",") if u.strip()}
 # Pages only admins may open (matched by file stem, so the page and its _sources copy are both covered).
 # Set LOCKED_PAGES to an empty string in App Service settings to open them to everyone.
-LOCKED_PAGES = {p.strip() for p in os.environ.get("LOCKED_PAGES", "").split(",") if p.strip()}  # e.g. "ch03-memory-rag"
+DEFAULT_LOCKED = "ch03-memory-rag,ch03-retrieval-rag,ch03-agent-memory"  # chapter 3, until its session; keep deploy.yml's list in step
+LOCKED_PAGES = {p.strip() for p in os.environ.get("LOCKED_PAGES", DEFAULT_LOCKED).split(",") if p.strip()}
 LOCKED_HTML = open(os.path.join(os.path.dirname(__file__), "locked.html")).read()
 ADMIN_HTML = open(os.path.join(os.path.dirname(__file__), "admin.html")).read()
 # Usage events and Lecture checkpoints. Like the sign-in list, this never leaves the App Service disk.
@@ -127,7 +129,7 @@ def _log(user: str, kind: str, page: str | None = None, tokens: int | None = Non
 def _used(user: str) -> int:
     """Tokens this user spent today (UTC day), read from the event log so the cap survives restarts."""
     try:
-        return _q("SELECT COALESCE(SUM(tokens), 0) FROM events WHERE user = ? AND kind = 'model_call' AND ts >= ?",
+        return _q("SELECT COALESCE(SUM(tokens), 0) FROM events WHERE user = ? AND kind IN ('model_call', 'embed_call') AND ts >= ?",
                   (user, _today().isoformat()))[0][0]
     except sqlite3.Error:
         return 0
@@ -208,6 +210,26 @@ async def chat(request: Request):
     data = r.json()
     _log(user, "model_call", tokens=int((data.get("usage") or {}).get("total_tokens", 0)))
     return data
+
+
+@app.post("/api/embed")
+async def embed(request: Request):
+    """One text's meaning-vector for chapter 3's retrieval cells. Same sign-in and daily cap as /api/chat."""
+    user = _user(request)
+    if _used(user) >= DAILY_CAP:
+        raise HTTPException(429, "daily token budget used up")
+    text = (await request.json()).get("input")
+    if not isinstance(text, str) or not text.strip() or len(text) > 2000:
+        raise HTTPException(400, "input must be 1 to 2,000 characters of text")
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.post(f"{ENDPOINT}/openai/v1/embeddings",
+                              json={"model": EMBED_DEPLOYMENT, "input": text, "dimensions": 256},
+                              headers={"Authorization": f"Bearer {API_KEY}"})
+    if r.status_code != 200:
+        raise HTTPException(502, f"embedding call failed: {r.text[:300]}")
+    data = r.json()
+    _log(user, "embed_call", tokens=int((data.get("usage") or {}).get("total_tokens", 0)))
+    return {"embedding": data["data"][0]["embedding"]}
 
 
 @app.post("/api/events")
@@ -330,7 +352,7 @@ def admin_data(request: Request, days: int = 7):
         return _q(sql.replace("{NOTADMIN}", notadmin), (*admins, *args))
 
     total = ev("SELECT COUNT(DISTINCT user) FROM events WHERE {NOTADMIN}")[0][0]
-    k = ev("""SELECT COUNT(DISTINCT user), SUM(kind = 'cell_run'), SUM(kind = 'model_call'), COALESCE(SUM(tokens), 0)
+    k = ev("""SELECT COUNT(DISTINCT user), SUM(kind = 'cell_run'), SUM(kind IN ('model_call', 'embed_call')), COALESCE(SUM(tokens), 0)
               FROM events WHERE {NOTADMIN} AND ts >= ?""", (since,))[0]
     daily = [dict(r) for r in ev("""SELECT substr(ts, 1, 10) AS day, COUNT(DISTINCT user) AS users FROM events
                                     WHERE {NOTADMIN} AND ts >= ? GROUP BY day ORDER BY day""", (since,))]

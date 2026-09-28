@@ -3,10 +3,10 @@
 // so cells can `from agent import agent`, `from tools import TOOLS`, etc.
 (() => {
   const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/";
-  const PY_FILES = ["mock_model.py", "tools.py", "agent.py", "docs.py", "llm.py", "context.py", "llm_basics.py"];
+  const PY_FILES = ["mock_model.py", "tools.py", "agent.py", "docs.py", "llm.py", "context.py", "llm_basics.py", "handbook.py", "embeddings.py", "retrieval.py", "memory.py"];
   const BASE = document.currentScript.src.replace(/pyodide-cell\.js.*$/, "");
   let pyodidePromise = null;
-  // The handbook, parsed out of docs.py's source once it is fetched — the Watch view's
+  // The handbook, parsed out of handbook.py's source once it is fetched (docs.py's clauses are a subset) — the Watch view's
   // Policy Handbook window shows the same passages the agent searched, from the same file.
   let HANDBOOK = [];
 
@@ -75,7 +75,7 @@
       for (const f of PY_FILES) {
         const src = await getSource(f);
         py.FS.writeFile(f, src);
-        if (f === "docs.py") HANDBOOK = [...src.matchAll(/"id":\s*"([^"]+)",\s*"text":\s*"([^"]+)"/g)].map((m) => ({ id: m[1], text: m[2] }));
+        if (f === "handbook.py") HANDBOOK = [...src.matchAll(/"id":\s*"([^"]+)",\s*"text":\s*"([^"]+)"/g)].map((m) => ({ id: m[1], text: m[2] }));
       }
       return py;
     })();

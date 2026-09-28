@@ -1,0 +1,60 @@
+<div class="wk-widget wk-ts" id="w-ts">
+  <style>
+    .wk-ts .seg { display: inline-flex; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; margin-bottom: 12px; }
+    .wk-ts .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 6px 14px; font: 700 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+    .wk-ts .seg button.on { background: var(--wk-navy); color: #fff; }
+    .wk-ts .grid { display: grid; grid-template-columns: 1fr 70px 1fr; gap: 8px; align-items: stretch; }
+    .wk-ts .s { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 10px; font-size: 12.5px; line-height: 1.45; }
+    .wk-ts .h { font: 700 10px ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--wk-muted); margin-bottom: 8px; }
+    .wk-ts .msg { border-radius: 8px; padding: 6px 9px; margin-bottom: 6px; max-width: 92%; }
+    .wk-ts .u { background: #eef1f7; margin-left: auto; }
+    .wk-ts .a { background: #fff3ea; border: 1px solid #ffd9c2; }
+    .wk-ts .a.bad { background: #fff2f2; border-color: #f0b4b4; }
+    .wk-ts .a pre { margin: 4px 0 0; font: 11px/1.4 ui-monospace, Menlo, monospace; white-space: pre; overflow-x: auto; }
+    .wk-ts .gap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--wk-muted); font: 700 10px ui-monospace, Menlo, monospace; text-align: center; }
+    .wk-ts .note { border: 1px dashed #1a7f5a; background: #f2faf6; color: #155f42; border-radius: 6px; padding: 5px 7px; font-size: 11px; font-weight: 600; transition: opacity .3s; }
+    .wk-ts .desk { border: 1px dashed var(--wk-line); border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; font-size: 11.5px; color: var(--wk-muted); }
+    .wk-ts .desk.full { border-color: #1a7f5a; color: #155f42; background: #f2faf6; }
+    @media (max-width: 760px) { .wk-ts .grid { grid-template-columns: 1fr; } .wk-ts .gap { flex-direction: row; } }
+  </style>
+  <div class="wk-title">/// Interactive · two sessions a week apart</div>
+  <div class="seg" role="group" aria-label="Memory">
+    <button type="button" data-m="off" class="on" aria-pressed="true">Memory off</button>
+    <button type="button" data-m="on" aria-pressed="false">Memory on</button>
+  </div>
+  <div class="grid">
+    <div class="s">
+      <div class="h">Monday · session 1</div>
+      <div class="msg u">Compare Deere's revenue growth with Caterpillar's last quarter.</div>
+      <div class="msg a">Deere grew revenue 6.4% YoY to $13.8B; Caterpillar grew revenue 3.1% YoY to $16.9B in Q2-2026. Deere is growing 2.1× as fast, from a smaller base.</div>
+      <div class="msg u">I prefer tables, and keep it under 150 words.</div>
+      <div class="msg a">Understood.</div>
+    </div>
+    <div class="gap"><span>one week</span><span>→</span><div class="note" data-note>notes kept</div></div>
+    <div class="s">
+      <div class="h">Next Monday · session 2</div>
+      <div class="desk" data-desk></div>
+      <div class="msg u">And NVIDIA?</div>
+      <div class="msg a" data-ans></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const w = document.getElementById("w-ts");
+  const S = {
+    off: { note: 0, desk: "On the desk: the question. Nothing from Monday.", full: false,
+           ans: "NVIDIA what? Tell me what you would like to know about it: revenue and growth, or price.", bad: true },
+    on: { note: 1, desk: "On the desk: notes about Meridian. Deere 6.4%, Caterpillar 3.1% (get_financials, Q2-2026); prefers tables, under 150 words.", full: true,
+          ans: "Adding NVIDIA to the comparison.<pre>company      revenue   YoY growth\nDeere        $13.8B    6.4%\nCaterpillar  $16.9B    3.1%\nNVIDIA       $52.4B    58.0%</pre>", bad: false },
+  };
+  function show(m) {
+    w.querySelectorAll(".seg button").forEach((b) => { const on = b.dataset.m === m; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    const s = S[m], desk = w.querySelector("[data-desk]"), ans = w.querySelector("[data-ans]");
+    w.querySelector("[data-note]").style.opacity = s.note; desk.textContent = s.desk; desk.classList.toggle("full", s.full);
+    ans.innerHTML = s.ans; ans.classList.toggle("bad", s.bad);
+  }
+  w.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => show(b.dataset.m)));
+  show("off");
+})();
+</script>

@@ -90,6 +90,11 @@ def azure_model(msgs, tools=None, system=SYSTEM, verbose=True):
     return {"type": "text", "text": (msg.get("content") or "").strip()}
 
 
+def azure_embed(text):
+    """The meaning-vector for one text (256 numbers), from the campus copy's /api/embed (section 3.1.3)."""
+    return _post("/api/embed", {"input": text})["embedding"]
+
+
 if __name__ == "__main__":
     # ponytail: self-check of the format conversion only (no network)
     msgs = [{"role": "user", "content": "refund on order #4488?"},
@@ -98,4 +103,9 @@ if __name__ == "__main__":
     om = _openai_messages(msgs, "sys")
     assert om[0]["role"] == "system" and om[2]["tool_calls"][0]["id"] == "call_1" and om[3]["tool_call_id"] == "call_1", om
     assert _openai_tools(TOOL_SCHEMAS)[0]["function"]["name"] == "get_financials"
+    try:  # off Pyodide there is no browser to POST from; retrieval.embed treats any error as "not available"
+        azure_embed("blackout")
+        raise AssertionError("azure_embed should fail outside the browser")
+    except ImportError:
+        pass
     print("ok")

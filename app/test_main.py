@@ -169,3 +169,37 @@ def test_old_database_gains_live_column(tmp_path):
     con.commit(); con.close()
     m.APP_DB = str(db)
     assert m._q("SELECT live FROM lecture_checkpoints")[0][0] is None
+
+
+def fake_embed_transport(usage=10):
+    def handler(request: httpx.Request):
+        assert request.url.path.endswith("/openai/v1/embeddings")
+        body = json.loads(request.read())
+        assert body["model"] == "text-embedding-3-small" and body["dimensions"] == 256
+        return httpx.Response(200, json={"data": [{"embedding": [0.1] * 256}], "usage": {"total_tokens": usage}})
+    return httpx.MockTransport(handler)
+
+
+def test_embed(monkeypatch, tmp_path):
+    m.ENDPOINT, m.API_KEY, m.DAILY_CAP = "https://x.cognitiveservices.azure.com", "k", 25
+    m.APP_DB = str(tmp_path / "app.db")
+    real = httpx.AsyncClient
+    monkeypatch.setattr(m.httpx, "AsyncClient", lambda **kw: real(transport=fake_embed_transport(), **kw))
+    c = TestClient(m.app)
+    assert c.post("/api/embed", json={"input": "blackout"}).status_code == 401          # no Easy Auth header
+    r = c.post("/api/embed", json={"input": "blackout"}, headers=H)
+    assert r.status_code == 200 and len(r.json()["embedding"]) == 256
+    for bad in [{}, {"input": ""}, {"input": 5}, {"input": "x" * 2001}]:
+        assert c.post("/api/embed", json=bad, headers=H).status_code == 400, bad
+    assert c.post("/api/embed", json={"input": "a"}, headers=H).status_code == 200    # 20 tokens used
+    assert c.post("/api/embed", json={"input": "a"}, headers=H).status_code == 200    # 30: over the cap after this call
+    assert c.post("/api/embed", json={"input": "a"}, headers=H).status_code == 429
+
+
+def test_lock_lists_in_step():
+    """deploy.yml replaces the same pages on the public copy that app/main.py locks by default."""
+    import pathlib, re
+    root = pathlib.Path(__file__).resolve().parent.parent
+    stems = re.search(r"for stem in ([^;]*); do", (root / ".github/workflows/deploy.yml").read_text()).group(1).split()
+    assert set(stems) == set(m.DEFAULT_LOCKED.split(",")) - {""}
+    assert {"ch03-memory-rag", "ch03-retrieval-rag", "ch03-agent-memory"} <= set(stems)
