@@ -1,0 +1,60 @@
+<div class="wk-widget wk-dl" id="w-dl">
+  <style>
+    .wk-dl .emails { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .wk-dl .emails button.on { background: var(--wk-navy); color: #fff; }
+    .wk-dl .mail { background: #fff; border: 1px solid var(--wk-line); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 10px; }
+    .wk-dl .mail small { color: var(--wk-muted); display: block; margin-bottom: 2px; }
+    .wk-dl .bar { display: grid; grid-template-columns: 150px 1fr 40px; gap: 8px; align-items: center; font-size: 12.5px; margin: 3px 0; }
+    .wk-dl .track { background: #eceff4; border-radius: 4px; height: 12px; overflow: hidden; }
+    .wk-dl .fill { background: var(--wk-navy); height: 100%; }
+    .wk-dl .fill.top { background: var(--wk-orange); }
+    .wk-dl .route { margin-top: 10px; border: 2px solid var(--wk-line); border-radius: 8px; padding: 8px 12px; font-size: 13px; background: #fff; }
+    .wk-dl .route.act { border-color: #2f9e57; background: #f0faf3; } .wk-dl .route.ask { border-color: var(--wk-orange); background: #fff3ea; }
+    .wk-dl .note { font-size: 12px; color: var(--wk-muted); margin-top: 8px; }
+  </style>
+  <div class="wk-title">A System One model in front of an agent</div>
+  <div class="emails" id="dl-emails"></div>
+  <div class="mail" id="dl-mail"></div>
+  <div id="dl-bars"></div>
+  <label for="dl-r" style="display:block;margin-top:8px">Act automatically at or above <b id="dl-v">0.80</b></label>
+  <input id="dl-r" type="range" min="50" max="99" value="80">
+  <div class="route" id="dl-route"></div>
+  <div class="note">The probabilities are made up to show the shape of a Choice answer. They are not real Jev output.</div>
+  <script>
+  (function () {
+    // ponytail: hand-set numbers, no model call; a real System One API would supply these
+    var M = [
+      {who: "Dana Whitfield, Meridian Pension Trust", text: "And NVIDIA?", p: {"reply now": 0.86, "send to an analyst": 0.12, "ignore": 0.02}},
+      {who: "Priya Nair, Meridian", text: "Can you confirm trade #7104 settled? The custodian's numbers look off.", p: {"reply now": 0.31, "send to an analyst": 0.62, "ignore": 0.07}},
+      {who: "MarketWire newsletter", text: "Your weekly digest: ten stocks to watch this quarter.", p: {"reply now": 0.01, "send to an analyst": 0.03, "ignore": 0.96}}
+    ];
+    var cur = 0, r = document.getElementById("dl-r");
+    var eb = document.getElementById("dl-emails");
+    M.forEach(function (m, i) {
+      var b = document.createElement("button"); b.textContent = m.who.split(",")[0].split(" ")[0] === "MarketWire" ? "Newsletter" : m.who.split(" ")[0] + "'s email";
+      b.onclick = function () { cur = i; draw(); }; eb.appendChild(b);
+    });
+    function draw() {
+      var m = M[cur], bar = r.value / 100, keys = Object.keys(m.p), top = keys[0];
+      keys.forEach(function (k) { if (m.p[k] > m.p[top]) top = k; });
+      document.getElementById("dl-v").textContent = bar.toFixed(2);
+      Array.prototype.forEach.call(eb.children, function (b, i) { b.className = i === cur ? "on" : ""; });
+      document.getElementById("dl-mail").innerHTML = "<small>" + m.who + "</small>" + m.text;
+      document.getElementById("dl-bars").innerHTML = keys.map(function (k) {
+        return '<div class="bar"><span>' + k + '</span><div class="track"><div class="fill' + (k === top ? " top" : "") + '" style="width:' + Math.round(m.p[k] * 100) + '%"></div></div><span>' + m.p[k].toFixed(2) + '</span></div>';
+      }).join("");
+      var rt = document.getElementById("dl-route"), c = m.p[top];
+      if (c >= bar) {
+        rt.className = "route act";
+        rt.innerHTML = top === "ignore" ? "<b>Acted on automatically:</b> the email is dropped. No language model was called."
+          : top === "reply now" ? "<b>Acted on automatically:</b> passed to the language model, which writes the reply. Only now is the expensive model used."
+          : "<b>Acted on automatically:</b> routed to an analyst's queue. No language model was called.";
+      } else {
+        rt.className = "route ask";
+        rt.innerHTML = "<b>Sent to a person:</b> the top choice (" + top + ") scored " + c.toFixed(2) + ", below the bar of " + bar.toFixed(2) + ".";
+      }
+    }
+    r.oninput = draw; draw();
+  })();
+  </script>
+</div>
