@@ -4,6 +4,13 @@
 <p class="wk-lede">A large language model answers with sentences, one token at a time. Some jobs inside software do not need a sentence at all: they need a decision, in a fixed shape, with an honest measure of how sure the model is. A newer kind of model, called a System One model, is built for exactly that. This page is pre-reading, with no session of its own.</p>
 ```
 
+```{raw} html
+<figure class="wk-intro-video">
+  <iframe src="https://www.youtube.com/embed/W8pP1qTRja4" title="Quick walkthrough over Jev" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Quick walkthrough over Jev · <a href="https://youtu.be/W8pP1qTRja4">Open on YouTube</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/Jev-tech-education.pdf">Slides (PDF)</a></figcaption>
+</figure>
+```
+
 ```{admonition} Learning objectives
 :class: note
 - Say what a System One model returns, and how that differs from a language model.
@@ -76,6 +83,14 @@ The confidence bar decides when a person is asked (chapter 0's section 0.6 is wh
 
 The figures above come from TypeSafe AI's own announcement of Jev ([*Introducing System One models and Jev*](https://typesafe.ai/blog/introducing-system-one-models-and-jev)): 70 to 500 milliseconds end to end, input priced at $0.042 per million tokens with output free, and a "0%" hallucination rate that follows from the fixed output schema. That last one means Jev cannot return an option you did not define; it does not mean its choices are always right. This book has not tested any of it, access is early-access only, and the category is new. Treat the idea, a fast model with a closed output shape and a trustworthy confidence, as the lasting part, and the numbers as a vendor's claims until you have measured them on the firm's own examples.
 
+## Try it on your own tickets
+
+The notebook sends five support tickets to Jev and prints a department, an urgency and a frustration score for each, then routes any ticket whose department confidence is under 0.6 to a person. It is the same idea as the widget above, with the real model. It needs an early-access key from [typesafe.ai](https://typesafe.ai) saved in Colab Secrets as `TYPESAFE_API_KEY`. This is a different service from Lumen, the campus service the other notebooks use.
+
+```{raw} html
+<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/jev-ticket-triage.ipynb" target="_blank">▶ Open in Colab</a>
+```
+
 **Checkpoint.**
 
 ```{raw} html
@@ -92,5 +107,6 @@ The figures above come from TypeSafe AI's own announcement of Jev ([*Introducing
 
 ## Further reading
 
+- [*Jev: A Model That Returns Decisions*](https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/Jev-tech-education.pdf) — the slide deck that goes with the walkthrough video at the top of this page.
 - TypeSafe AI, [*Introducing System One models and Jev*](https://typesafe.ai/blog/introducing-system-one-models-and-jev) — the announcement; the speed, price and calibration figures on this page come from it.
 - Daniel Kahneman, *Thinking, Fast and Slow* (2011) — where the System 1 and System 2 names come from.
