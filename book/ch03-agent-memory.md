@@ -11,7 +11,7 @@
 - Keep a long conversation going by trimming or summarizing it, and say what each one loses.
 - Save notes between sessions two ways, written by the harness or by the agent, and weigh the trade-off.
 - Spot a wrong remembered figure, and name three guards against it.
-- Explain what a System One model is, and how a fast typed gate can decide what gets saved.
+- Use a System One model (chapter 0's page 0H) as a fast typed gate that decides what gets saved.
 - Map short-term and long-term memory onto the OpenAI Agents SDK and LangGraph.
 ```
 
@@ -241,11 +241,9 @@ With the wrong note gone, and no other notes left in this example, the agent is 
 
 ## 3.2.6 A fast gate for memory writes
 
-Section 3.2.4's `remember_note` accepts any string, which is why "Deere grew 64.0%" got in. A different kind of model suggests a third way. TypeSafe AI calls its model **Jev** a *System One model*, a name borrowed from Daniel Kahneman's fast, intuitive thinking. It does not write sentences. You give it a fixed form to fill in, and it returns only values that fit the form, each with a confidence. Ask it whether a note should be saved and the only possible answers are `save`, `ask` (a person should look) or `skip`. It cannot answer with a paragraph, and it cannot make up a fourth option.
+Section 3.2.4's `remember_note` accepts any string, which is why "Deere grew 64.0%" got in. A different kind of model suggests a third way: a **System One model**, which returns a decision in a fixed form with a confidence, not a sentence (chapter 0's page 0H). Ask one whether a note should be saved and the only possible answers are `save`, `ask` (a person should look) or `skip`. It cannot answer with a paragraph, and it cannot make up a fourth option. It is also cheap and fast enough to run on every candidate note, before anything is saved.
 
-TypeSafe AI reports 70 to 500 milliseconds per call and a very low price, because there is no long answer to generate. Those are the vendor's own figures, and this book has not tested them. That speed is the reason to use one as a gate: it is cheap enough to run on every candidate note, before anything is saved.
-
-The cell below uses a **scripted stand-in**, not Jev. `gate` fills in the same three fields with hand-set confidences, the way this book's mock model stands in for a real one. It does use the figure check from section 3.2.5, so a wrong figure scores low.
+The cell below uses a **scripted stand-in**, not a real System One model such as Jev. `gate` fills in the same three fields with hand-set confidences, the way this book's mock model stands in for a real one. It does use the figure check from section 3.2.5, so a wrong figure scores low.
 
 ```{code-block} python
 :class: pyodide
@@ -266,7 +264,7 @@ Three of the four are decided without a person: the preference is saved, the sma
 :file: widgets/ch03-memory-gate.html
 ```
 
-Two limits. A gate is only as good as its confidence: a real model can be confidently wrong, so the check against the firm's data in section 3.2.5 (`records-5`) still runs before a figure goes to a client. And this idea is the book's own; TypeSafe AI's post describes the model, not a memory design.
+Two limits. A gate is only as good as its confidence: a real model can be confidently wrong, so the check against the firm's data in section 3.2.5 (`records-5`) still runs before a figure goes to a client. And this idea is the book's own; TypeSafe AI's post describes the model (page 0H), not a memory design.
 
 **Checkpoint.**
 

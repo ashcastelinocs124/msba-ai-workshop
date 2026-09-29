@@ -16,6 +16,7 @@ parts:
       - file: ch00-compute
       - file: ch00-apis
       - file: ch00-skills-mcp
+      - file: ch00-system-one
   - caption: Part I · Agents
     chapters:
       - file: ch01-agent-loop
