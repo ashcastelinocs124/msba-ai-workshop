@@ -5,7 +5,7 @@
 ```
 
 ```{raw} html
-<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch00-transformers.ipynb" target="_blank">▶ Open in Colab</a>
+<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch00-foundations.ipynb" target="_blank">▶ Open the chapter 0 notebook in Colab (section 3)</a>
 ```
 
 ```{admonition} Learning objectives

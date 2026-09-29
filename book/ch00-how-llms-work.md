@@ -8,6 +8,10 @@
 :file: widgets/goal-map.html
 ```
 
+```{raw} html
+<a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch00-foundations.ipynb" target="_blank">▶ Open the chapter 0 notebook in Colab (tokens to reinforcement learning)</a>
+```
+
 ```{admonition} Learning objectives
 :class: note
 - Say what a token is, and why a model's costs and limits are counted in tokens rather than words.
@@ -196,7 +200,7 @@ print(explain_reply(reply))
 
 ## 0.8 Exercise
 
-These use the cells on this page; there is no Colab notebook for this chapter.
+These use the cells on this page. The single chapter 0 notebook (button at the top of the page) runs this page and pages 0A to 0C (transformers, training, reinforcement learning) in one place, with no API key.
 
 1. In the tokens cell in 0.2, try a sentence from your own work or internship. Which words split into several tokens, and what do they have in common?
 2. In the widget, start from NVIDIA and build a sentence that is true, then one that is false, by clicking the bars. How many choices did each take?
