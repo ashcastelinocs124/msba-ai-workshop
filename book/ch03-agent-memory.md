@@ -11,6 +11,7 @@
 - Keep a long conversation going by trimming or summarizing it, and say what each one loses.
 - Save notes between sessions two ways, written by the harness or by the agent, and weigh the trade-off.
 - Spot a wrong remembered figure, and name three guards against it.
+- Explain what a System One model is, and how a fast typed gate can decide what gets saved.
 - Map short-term and long-term memory onto the OpenAI Agents SDK and LangGraph.
 ```
 
@@ -238,7 +239,50 @@ With the wrong note gone, and no other notes left in this example, the agent is 
 <div class="wk-lcp" data-spot="ch03-memory" data-label="3.2 Agent Memory · after §3.2.5 when memory goes wrong"></div>
 ```
 
-## 3.2.6 Memory in real frameworks
+## 3.2.6 A fast gate for memory writes
+
+Section 3.2.4's `remember_note` accepts any string, which is why "Deere grew 64.0%" got in. A different kind of model suggests a third way. TypeSafe AI calls its model **Jev** a *System One model*, a name borrowed from Daniel Kahneman's fast, intuitive thinking. It does not write sentences. You give it a fixed form to fill in, and it returns only values that fit the form, each with a confidence. Ask it whether a note should be saved and the only possible answers are `save`, `ask` (a person should look) or `skip`. It cannot answer with a paragraph, and it cannot make up a fourth option.
+
+TypeSafe AI reports 70 to 500 milliseconds per call and a very low price, because there is no long answer to generate. Those are the vendor's own figures, and this book has not tested them. That speed is the reason to use one as a gate: it is cheap enough to run on every candidate note, before anything is saved.
+
+The cell below uses a **scripted stand-in**, not Jev. `gate` fills in the same three fields with hand-set confidences, the way this book's mock model stands in for a real one. It does use the figure check from section 3.2.5, so a wrong figure scores low.
+
+```{code-block} python
+:class: pyodide
+from memory import MEMORY, gated_save, show_notes
+
+MEMORY.clear()
+gated_save("Dana wants tables, under 150 words")
+gated_save("Deere grew revenue 64.0% YoY to $12.0B", source="the agent's summary")
+gated_save("Thanks, that's all for today")
+gated_save("Deere grew revenue 6.4% YoY to $13.8B", source="get_financials, Q2-2026")
+print()
+show_notes("meridian")
+```
+
+Three of the four are decided without a person: the preference is saved, the small talk is dropped, and the sourced figure is saved. The 64.0% note is not saved. Its confidence is too low, so it goes to a person, who sees it with its source before it can ever reach a memo. Move the bar in the widget and watch which notes change side:
+
+```{raw} html
+:file: widgets/ch03-memory-gate.html
+```
+
+Two limits. A gate is only as good as its confidence: a real model can be confidently wrong, so the check against the firm's data in section 3.2.5 (`records-5`) still runs before a figure goes to a client. And this idea is the book's own; TypeSafe AI's post describes the model, not a memory design.
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="b"
+     data-ok="Correct. Because the output is a fixed form, nothing free-form can slip into memory, and a low confidence sends the note to a person. It still needs the re-check, because a confident score can be wrong."
+     data-no="Think about what the gate is allowed to return, and what happens to a note it is unsure about.">
+  <p class="q">Why is a System One gate safer than letting the agent call <code>remember_note</code> with any text?</p>
+  <label><input type="radio" name="ch32-q4" value="a"> It is always right, so notes never need re-checking</label>
+  <label><input type="radio" name="ch32-q4" value="b"> It can only answer save, ask or skip, and low-confidence notes go to a person</label>
+  <label><input type="radio" name="ch32-q4" value="c"> It writes longer, more careful notes</label>
+  <div class="fb"></div>
+</div>
+```
+
+## 3.2.7 Memory in real frameworks
 
 Everything above is a Python dictionary in this browser tab, and it empties when you reload the page. Real agent frameworks keep memory in a database, and they draw the same line between short-term and long-term:
 
@@ -255,7 +299,7 @@ The same Monday-and-next-Monday task, written in each:
 
 In both frameworks the ideas are the ones from this page: a conversation is replayed from storage, notes are kept under a client's name, and a tool lets the agent write them. What the frameworks add is persistence, many users at once, and search over large numbers of notes. What they do not add is judgment about what to keep, or a check that a note is right. Those are still yours.
 
-## 3.2.7 Run it against a real model
+## 3.2.8 Run it against a real model
 
 On the campus copy, these cells send the same memory to the GPT deployment on Illinois Azure through `/api/chat`. A real model decides for itself whether a note is worth using, and whether to call `remember_note` at all.
 
@@ -294,7 +338,7 @@ show_notes("meridian")
 
 Did it call `remember_note`? Is the note in your words or its own, and does it say where it came from?
 
-## 3.2.8 Exercise
+## 3.2.9 Exercise
 
 Open the Colab notebook. It runs the Monday and next-Monday task twice on `glm-5.3-flash` via Lumen, once with the OpenAI Agents SDK and once with LangGraph (see [Setup](setup.md) for the key).
 

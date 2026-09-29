@@ -1,0 +1,38 @@
+<div class="wk-widget wk-mg" id="w-mg">
+  <style>
+    .wk-mg .row { display: grid; grid-template-columns: minmax(0, 1fr) 46px 96px; gap: 8px; padding: 7px 0; border-top: 1px solid var(--wk-line); font-size: 12.5px; align-items: center; }
+    .wk-mg .row span:first-child { overflow-wrap: anywhere; }
+    .wk-mg .pill { border-radius: 99px; padding: 2px 9px; font: 700 10.5px ui-monospace, Menlo, monospace; text-align: center; }
+    .wk-mg .p-save { background: #e3f6e7; color: #1b6b2f; } .wk-mg .p-ask { background: #fff3ea; color: #a04400; } .wk-mg .p-skip { background: #eceff4; color: var(--wk-muted); }
+    .wk-mg .sum { font-size: 12.5px; color: var(--wk-muted); margin-top: 8px; }
+  </style>
+  <div class="wk-title">The confidence bar</div>
+  <label for="mg-r">Save without asking at or above <b id="mg-v">0.80</b></label>
+  <input id="mg-r" type="range" min="50" max="99" value="80">
+  <div id="mg-rows"></div>
+  <div class="sum" id="mg-sum"></div>
+  <script>
+  (function () {
+    // decision and confidence copy memory.gate's hand-set values; keep them in step
+    var D = [["Dana wants tables, under 150 words", 0.97], ["Deere grew 64.0% (the agent's summary)", 0.58],
+             ["Thanks, that's all for today", 0.93, 1], ["Deere grew 6.4% (get_financials, Q2-2026)", 0.91],
+             ["Priya prefers Friday memos (no source)", 0.74]];
+    var r = document.getElementById("mg-r"), v = document.getElementById("mg-v"),
+        rows = document.getElementById("mg-rows"), sum = document.getElementById("mg-sum");
+    function draw() {
+      var bar = r.value / 100, saved = 0, asked = 0, h = "";
+      v.textContent = bar.toFixed(2);
+      D.forEach(function (d) {
+        var k, c;
+        if (d[2]) { k = "skip"; c = "p-skip"; }
+        else if (d[1] >= bar) { k = "save"; c = "p-save"; saved++; }
+        else { k = "ask a person"; c = "p-ask"; asked++; }
+        h += '<div class="row"><span>' + d[0] + '</span><span>' + d[1].toFixed(2) + '</span><span class="pill ' + c + '">' + k + '</span></div>';
+      });
+      rows.innerHTML = h;
+      sum.textContent = saved + " saved automatically, " + asked + " waiting for a person. Raise the bar and more notes go to a person; lower it and mistakes get through.";
+    }
+    r.oninput = draw; draw();
+  })();
+  </script>
+</div>

@@ -8,7 +8,7 @@ and recalled in the next one (long-term). Two ways to write those notes:
 - remember_note: a tool the agent calls itself, to save what it thinks matters.
 
 ponytail: MEMORY is a dict in this browser tab, so it empties when the page reloads. Real systems
-keep it in a database or a file (section 3.2.6), keyed by client or user.
+keep it in a database or a file (section 3.2.7), keyed by client or user.
 """
 import re
 
@@ -44,7 +44,7 @@ MEMORY_TOOL_SCHEMAS = TOOL_SCHEMAS + [
 
 
 def azure_memory_model(msgs):
-    """The campus copy's real model (llm.azure_model), shown the remember_note tool as well (section 3.2.7)."""
+    """The campus copy's real model (llm.azure_model), shown the remember_note tool as well (section 3.2.8)."""
     from llm import azure_model
     return azure_model(msgs, tools=MEMORY_TOOL_SCHEMAS)
 
@@ -124,6 +124,36 @@ def forget_wrong(client):
     return len(bad)
 
 
+_WANTS = re.compile(r"\b(wants?|prefers?|keep it under|always|never)\b", re.I)
+_CHAT = re.compile(r"\b(thanks|thank you|that's all|bye|got it)\b", re.I)
+
+
+def gate(text, source=""):
+    """A scripted stand-in for a System One model (section 3.2.6): it cannot write text, only fill in
+    a fixed form {decision: save | ask | skip, kind, confidence}. A real one, such as TypeSafe AI's
+    Jev, would compute the confidence; here the numbers are hand-set so the cell always prints the same."""
+    if _CHAT.search(text):
+        return {"decision": "skip", "kind": "small talk", "confidence": 0.93, "text": text}
+    if _FIG.search(text):
+        if _wrong({"text": text}):                       # disagrees with the firm's data (records-5)
+            return {"decision": "ask", "kind": "figure", "confidence": 0.58, "text": text}
+        sourced = "get_financials" in source
+        return {"decision": "save" if sourced else "ask", "kind": "figure",
+                "confidence": 0.91 if sourced else 0.62, "text": text}
+    if _WANTS.search(text):
+        return {"decision": "save", "kind": "preference", "confidence": 0.97, "text": text}
+    return {"decision": "ask", "kind": "other", "confidence": 0.40, "text": text}
+
+
+def gated_save(text, source="", client="meridian", bar=0.80):
+    """Save a note only if the gate says save at or above the bar; otherwise say who has to look at it."""
+    g = gate(text, source)
+    print(f"{g['decision']:<5} {g['confidence']:.2f}  {g['kind']:<11} \"{text}\"")
+    if g["decision"] == "save" and g["confidence"] >= bar:
+        _notes(client).append({"text": text, "source": source or "the gate", "by": "harness"})
+    return g
+
+
 def show_notes(client):
     """Print a client's notes, numbered, with who wrote each one and where it came from."""
     notes = MEMORY.get(client) or []
@@ -166,4 +196,11 @@ if __name__ == "__main__":
     ans, log = agent("Remember that Dana wants tables.", history=hist[:2], verbose=False)
     assert "error" in log[0]["result"], log
     assert [t["name"] for t in MEMORY_TOOL_SCHEMAS][-1] == "remember_note" and callable(azure_memory_model)
+    MEMORY.clear()                                                               # the typed gate (section 3.2.6)
+    assert gate("Dana wants tables, under 150 words")["decision"] == "save"
+    assert gate("Deere grew revenue 64.0% YoY to $12.0B", "the agent's summary")["decision"] == "ask"
+    assert gate("Deere grew revenue 6.4% YoY to $13.8B", "get_financials, Q2-2026")["decision"] == "save"
+    assert gate("Thanks, that's all for today")["decision"] == "skip"
+    gated_save("Deere grew revenue 64.0% YoY to $12.0B", "the agent's summary")
+    assert not MEMORY.get("meridian")                                            # the wrong figure was not saved
     print("ok")
