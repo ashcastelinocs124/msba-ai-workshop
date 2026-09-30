@@ -224,7 +224,7 @@ print("The recommendation:", answer)
 print(f"\nWhat {cited} says:", clause["text"])
 ```
 
-A citation that points to a real clause, which really says what the answer claims, is what lets a person approve thirty of these in the time one used to take. A citation that points nowhere, or to a clause that says something else, is worse than none: it looks checked. Section 3.2.5 comes back to this.
+A citation that points to a real clause, which really says what the answer claims, is what lets a person approve thirty of these in the time one used to take. A citation that points nowhere, or to a clause that says something else, is worse than none: it looks checked. Section 3.2.6 comes back to this.
 
 **Checkpoint.**
 

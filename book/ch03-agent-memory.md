@@ -10,6 +10,7 @@
 - Explain why a model has no memory of its own, and what "memory" means for an agent.
 - Keep a long conversation going by trimming or summarizing it, and say what each one loses.
 - Save notes between sessions two ways, written by the harness or by the agent, and weigh the trade-off.
+- Sort a note into episodic, semantic or procedural memory, and say how each kind is found and corrected.
 - Spot a wrong remembered figure, and name three guards against it.
 - Use a System One model (chapter 0's page 0H) as a fast typed gate that decides what gets saved.
 - Map short-term and long-term memory onto the OpenAI Agents SDK and LangGraph.
@@ -132,7 +133,64 @@ The follow-up works in a session with no history at all, and it arrives as a tab
 
 The rules the harness uses are the decision here. These ones save figures and preferences, and nothing else. They cannot save what they were not written to look for, and a person has to change the code to change what is kept.
 
-## 3.2.4 Long-term memory, written by the agent
+## 3.2.4 Three kinds of long-term memory
+
+So far every note has been treated alike. They are not. Psychologists split human long-term memory three ways, and people who build agents borrow the split because each kind is written, found and fixed differently.
+
+| | Episodic | Semantic | Procedural |
+|---|---|---|---|
+| **It is** | What happened, and when | What is true about the client | How the firm does the task |
+| **At the firm** | "Monday's memo told Dana that Deere grew 6.4%" | "Dana prefers tables, under 150 words" | "For a comparison, look up both companies, say who grew faster, cite each source" |
+| **Found by** | Recency, or how close it is to today's question | The client's name | The task, loaded when it is needed |
+| **Goes stale when** | It does not, but an old figure can mislead | The fact changes, so the old note should be replaced | The firm changes its method, so a person edits it |
+
+The harness in section 3.2.3 saves two of the three. The figures a memo stated are **episodic**: a record of what the firm told the client. The preference Dana gave is **semantic**: a standing fact that stays true until she says otherwise. **Procedural** memory is different in kind. It is not something the agent learns from a client; it is the firm's own method, which is already in this book as the system prompt's rules (chapter 2) and as an agent skill (page 0G). A person writes it and a person edits it.
+
+The boundary is a judgement call: a sourced figure could be filed as a fact about the world. What matters is that the choice changes how you handle the note. This cell tags the same Monday notes by kind and puts them on the desk grouped under three headings:
+
+```{code-block} python
+:class: pyodide
+from agent import agent
+from memory import MEMORY, end_session, kind_of, recall_by_kind
+
+MEMORY.clear()
+monday = "Compare Deere's revenue growth with Caterpillar's last quarter"
+memo, log = agent(monday, verbose=False)
+session = [("user", monday), ("assistant", memo),
+           ("user", "I prefer tables, and keep it under 150 words."), ("assistant", "Understood.")]
+
+notes = end_session("meridian", session, verbose=False)
+for n in notes:
+    print(f"{kind_of(n):9} {n['text']}")
+
+print("\nWhat goes on the desk next Monday:")
+print(recall_by_kind("meridian"))
+
+print("\nThe follow-up:")
+answer, log = agent("And NVIDIA?", system=recall_by_kind("meridian"))
+```
+
+The answer is the same as in 3.2.3, because the notes are the same. Only the layout changed, and the layout is the point: an agent that can tell "what we told her" from "what she wants" from "how we work" can update one without touching the others. Sort five of the firm's notes yourself:
+
+```{raw} html
+:file: widgets/ch03-memory-kinds.html
+```
+
+**Checkpoint.**
+
+```{raw} html
+<div class="quiz" data-answer="b"
+     data-ok="Correct. Dana's preference is a standing fact, so the old note should be replaced. Adding a second note would leave two that disagree, and the agent could follow either one."
+     data-no="Ask which kind of memory a preference is, and what should happen to the old note when the fact changes.">
+  <p class="q">Dana now wants bullet points instead of tables. What should happen to the note that says she prefers tables?</p>
+  <label><input type="radio" name="ch32-q5" value="a"> Keep it, and add a new note beside it</label>
+  <label><input type="radio" name="ch32-q5" value="b"> Replace it: it is a standing fact, and the old one is now wrong</label>
+  <label><input type="radio" name="ch32-q5" value="c"> Leave it; the agent will work out which is newer</label>
+  <div class="fb"></div>
+</div>
+```
+
+## 3.2.5 Long-term memory, written by the agent
 
 The second way hands the decision to the agent. It gets one more tool, `remember_note`, and chooses for itself when something is worth keeping. This is how the memory features in ChatGPT and Claude work, and it catches things no rule anticipated.
 
@@ -167,7 +225,7 @@ Press **Watch** on the first run to see the note being written. The second agent
 </div>
 ```
 
-## 3.2.5 When memory goes wrong
+## 3.2.6 When memory goes wrong
 
 A note is only as good as whoever wrote it. After Monday's memo, Priya asks the agent to remember the figures for next week, and it writes Deere's growth as 64.0% instead of 6.4%. The slip is scripted in this book's mock model, and it happens every time; a real model makes this kind of slip only sometimes, which is harder to catch.
 
@@ -236,12 +294,12 @@ With the wrong note gone, and no other notes left in this example, the agent is 
 ```
 
 ```{raw} html
-<div class="wk-lcp" data-spot="ch03-memory" data-label="3.2 Agent Memory · after §3.2.5 when memory goes wrong"></div>
+<div class="wk-lcp" data-spot="ch03-memory" data-label="3.2 Agent Memory · after §3.2.6 when memory goes wrong"></div>
 ```
 
-## 3.2.6 A fast gate for memory writes
+## 3.2.7 A fast gate for memory writes
 
-Section 3.2.4's `remember_note` accepts any string, which is why "Deere grew 64.0%" got in. A different kind of model suggests a third way: a **System One model**, which returns a decision in a fixed form with a confidence, not a sentence (chapter 0's page 0H). Ask one whether a note should be saved and the only possible answers are `save`, `ask` (a person should look) or `skip`. It cannot answer with a paragraph, and it cannot make up a fourth option. It is also cheap and fast enough to run on every candidate note, before anything is saved.
+Section 3.2.5's `remember_note` accepts any string, which is why "Deere grew 64.0%" got in. A different kind of model suggests a third way: a **System One model**, which returns a decision in a fixed form with a confidence, not a sentence (chapter 0's page 0H). Ask one whether a note should be saved and the only possible answers are `save`, `ask` (a person should look) or `skip`. It cannot answer with a paragraph, and it cannot make up a fourth option. It is also cheap and fast enough to run on every candidate note, before anything is saved.
 
 The cell below uses a **scripted stand-in**, not a real System One model such as Jev. `gate` fills in the same three fields with hand-set confidences, the way this book's mock model stands in for a real one. It does use the figure check from section 3.2.5, so a wrong figure scores low.
 
@@ -264,7 +322,7 @@ Three of the four are decided without a person: the preference is saved, the sma
 :file: widgets/ch03-memory-gate.html
 ```
 
-Two limits. A gate is only as good as its confidence: a real model can be confidently wrong, so the check against the firm's data in section 3.2.5 (`records-5`) still runs before a figure goes to a client. And this idea is the book's own; TypeSafe AI's post describes the model (page 0H), not a memory design.
+Two limits. A gate is only as good as its confidence: a real model can be confidently wrong, so the check against the firm's data in section 3.2.6 (`records-5`) still runs before a figure goes to a client. And this idea is the book's own; TypeSafe AI's post describes the model (page 0H), not a memory design.
 
 **Checkpoint.**
 
@@ -280,7 +338,7 @@ Two limits. A gate is only as good as its confidence: a real model can be confid
 </div>
 ```
 
-## 3.2.7 Memory in real frameworks
+## 3.2.8 Memory in real frameworks
 
 Everything above is a Python dictionary in this browser tab, and it empties when you reload the page. Real agent frameworks keep memory in a database, and they draw the same line between short-term and long-term:
 
@@ -297,7 +355,7 @@ The same Monday-and-next-Monday task, written in each:
 
 In both frameworks the ideas are the ones from this page: a conversation is replayed from storage, notes are kept under a client's name, and a tool lets the agent write them. What the frameworks add is persistence, many users at once, and search over large numbers of notes. What they do not add is judgment about what to keep, or a check that a note is right. Those are still yours.
 
-## 3.2.8 Run it against a real model
+## 3.2.9 Run it against a real model
 
 On the campus copy, these cells send the same memory to the GPT deployment on Illinois Azure through `/api/chat`. A real model decides for itself whether a note is worth using, and whether to call `remember_note` at all.
 
@@ -336,7 +394,7 @@ show_notes("meridian")
 
 Did it call `remember_note`? Is the note in your words or its own, and does it say where it came from?
 
-## 3.2.9 Exercise
+## 3.2.10 Exercise
 
 Open the Colab notebook. It runs the Monday and next-Monday task twice on `glm-5.3-flash` via Lumen, once with the OpenAI Agents SDK and once with LangGraph (see [Setup](setup.md) for the key).
 

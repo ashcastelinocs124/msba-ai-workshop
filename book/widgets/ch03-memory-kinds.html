@@ -1,0 +1,65 @@
+<div class="wk-widget wk-mk" id="w-mk">
+  <style>
+    .wk-mk .note { background: #fff; border: 2px solid var(--wk-line); border-radius: 8px; padding: 8px 10px; margin: 6px 0; cursor: pointer; font-size: 13px; }
+    .wk-mk .note.sel { border-color: var(--wk-orange); background: #fff3ea; }
+    .wk-mk .note.done { opacity: .5; cursor: default; }
+    .wk-mk .note small { display: block; color: var(--wk-muted); font: 11px ui-monospace, Menlo, monospace; margin-top: 2px; }
+    .wk-mk .buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    .wk-mk .b { border: 1px dashed #9aa3b5; border-radius: 8px; padding: 8px; background: #fff; min-height: 96px; }
+    .wk-mk .b button { width: 100%; margin-bottom: 6px; }
+    .wk-mk .b small { color: var(--wk-muted); display: block; font-size: 11.5px; line-height: 1.35; margin-bottom: 4px; }
+    .wk-mk .chip { font-size: 11.5px; background: #e3f6e7; border-radius: 5px; padding: 3px 6px; margin-top: 4px; }
+    .wk-mk .msg { margin-top: 10px; font-size: 12.5px; min-height: 20px; }
+    .wk-mk .msg.bad { color: #a04400; } .wk-mk .msg.good { color: #1b6b2f; }
+    @media (max-width: 640px) { .wk-mk .buckets { grid-template-columns: 1fr; } }
+  </style>
+  <div class="wk-title">/// Interactive · file each note under the kind of memory it is</div>
+  <div id="mk-notes"></div>
+  <div class="buckets" id="mk-buckets"></div>
+  <div class="msg" id="mk-msg" role="status">Pick a note, then the kind it is.</div>
+  <script>
+  (function () {
+    // e = episodic, s = semantic, p = procedural
+    var N = [["Deere grew revenue 6.4% to $13.8B, quoted in Monday's memo", "e", "from get_financials, Q2-2026"],
+             ["Dana prefers tables, under 150 words", "s", "the client, in session"],
+             ["Meridian is a pension trust and wants US-listed companies only", "s", "the client, in session"],
+             ["For a comparison: look up both, say who grew faster, cite each source", "p", "the firm's method"],
+             ["Priya asked on 22 Sep for trade #7104 to be confirmed settled", "e", "the desk log"]];
+    var K = {e: ["Episodic", "What happened, and when. Found by recency."],
+             s: ["Semantic", "A standing fact. Found by client; replace it when it changes."],
+             p: ["Procedural", "How to do it. Loaded when needed; a person edits it."]};
+    var sel = null, done = {}, notes = document.getElementById("mk-notes"), bk = document.getElementById("mk-buckets"),
+        msg = document.getElementById("mk-msg");
+    function say(t, cls) { msg.className = "msg " + (cls || ""); msg.textContent = t; }
+    function draw() {
+      notes.innerHTML = "";
+      N.forEach(function (n, i) {
+        var d = document.createElement("div");
+        d.className = "note" + (sel === i ? " sel" : "") + (done[i] ? " done" : "");
+        d.innerHTML = n[0] + "<small>" + n[2] + "</small>";
+        d.onclick = function () { if (!done[i]) { sel = i; draw(); } };
+        notes.appendChild(d);
+      });
+      bk.innerHTML = "";
+      ["e", "s", "p"].forEach(function (k) {
+        var b = document.createElement("div"); b.className = "b";
+        var btn = document.createElement("button"); btn.textContent = K[k][0];
+        btn.onclick = function () {
+          if (sel === null) { say("Pick a note first.", "bad"); return; }
+          if (N[sel][1] === k) { done[sel] = k; say("Right: " + K[k][0] + ". " + K[k][1], "good"); sel = null; }
+          else say("Not " + K[k][0].toLowerCase() + ". Ask: is it what happened, what is true, or how to do it?", "bad");
+          draw();
+        };
+        b.appendChild(btn);
+        var s = document.createElement("small"); s.textContent = K[k][1]; b.appendChild(s);
+        N.forEach(function (n, i) {
+          if (done[i] === k) { var c = document.createElement("div"); c.className = "chip"; c.textContent = n[0].slice(0, 40) + "…"; b.appendChild(c); }
+        });
+        bk.appendChild(b);
+      });
+      if (Object.keys(done).length === N.length) say("All five filed. Each kind is written, found and corrected differently.", "good");
+    }
+    draw();
+  })();
+  </script>
+</div>

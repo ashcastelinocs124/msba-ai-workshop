@@ -77,7 +77,7 @@ Chapter 1's agent uses a language model for every step, including the small ones
 :file: widgets/ch00-decision-layer.html
 ```
 
-The confidence bar decides when a person is asked (chapter 0's section 0.6 is why a fluent model still needs one). Chapter 3 uses the same idea once more: section 3.2.6 puts a System One gate in front of an agent's memory.
+The confidence bar decides when a person is asked (chapter 0's section 0.6 is why a fluent model still needs one). Chapter 3 uses the same idea once more: section 3.2.7 puts a System One gate in front of an agent's memory.
 
 ## 0H.5 What is claimed, and what is not
 
