@@ -8,7 +8,7 @@ and recalled in the next one (long-term). Two ways to write those notes:
 - remember_note: a tool the agent calls itself, to save what it thinks matters.
 
 ponytail: MEMORY is a dict in this browser tab, so it empties when the page reloads. Real systems
-keep it in a database or a file (section 3.2.8), keyed by client or user.
+keep it in a database or a file (section 3.3.6), keyed by client or user.
 """
 import re
 
@@ -44,7 +44,7 @@ MEMORY_TOOL_SCHEMAS = TOOL_SCHEMAS + [
 
 
 def azure_memory_model(msgs):
-    """The campus copy's real model (llm.azure_model), shown the remember_note tool as well (section 3.2.9)."""
+    """The campus copy's real model (llm.azure_model), shown the remember_note tool as well (section 3.3.7)."""
     from llm import azure_model
     return azure_model(msgs, tools=MEMORY_TOOL_SCHEMAS)
 
@@ -74,7 +74,7 @@ def recall(client):
     return f"What we remember about {name}:\n" + "\n".join(f"- {n['text']} [{n['source']}]" for n in notes)
 
 
-# The three kinds of long-term memory (section 3.2.4). Procedures are the firm's own rules, edited by a person;
+# The three kinds of long-term memory (section 3.3.2). Procedures are the firm's own rules, edited by a person;
 # they are not notes the agent writes (handbook clause records-3).
 PROCEDURES = ["For a comparison: look up both companies, say who grew faster, and cite each source.",
               "Before a figure goes to a client, check it against the firm's data (handbook clause records-5)."]
@@ -155,7 +155,7 @@ _CHAT = re.compile(r"\b(thanks|thank you|that's all|bye|got it)\b", re.I)
 
 
 def gate(text, source=""):
-    """A scripted stand-in for a System One model (section 3.2.7): it cannot write text, only fill in
+    """A scripted stand-in for a System One model (section 3.3.5): it cannot write text, only fill in
     a fixed form {decision: save | ask | skip, kind, confidence}. A real one, such as TypeSafe AI's
     Jev, would compute the confidence; here the numbers are hand-set so the cell always prints the same."""
     if _CHAT.search(text):
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     ans, log = agent("Remember that Dana wants tables.", history=hist[:2], verbose=False)
     assert "error" in log[0]["result"], log
     assert [t["name"] for t in MEMORY_TOOL_SCHEMAS][-1] == "remember_note" and callable(azure_memory_model)
-    MEMORY.clear()                                                               # the three kinds (section 3.2.4)
+    MEMORY.clear()                                                               # the three kinds (section 3.3.2)
     notes = end_session("meridian", hist, verbose=False)
     assert [kind_of(n) for n in notes] == ["episodic", "episodic", "semantic"], [kind_of(n) for n in notes]
     grouped = recall_by_kind("meridian")
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     assert recall_by_kind("nobody") == ""
     ans, _ = agent("And NVIDIA?", system=grouped, verbose=False)
     assert "58.0%" in ans and "6.4%" in ans, ans                                 # same answer as with recall()
-    MEMORY.clear()                                                               # the typed gate (section 3.2.7)
+    MEMORY.clear()                                                               # the typed gate (section 3.3.5)
     assert gate("Dana wants tables, under 150 words")["decision"] == "save"
     assert gate("Deere grew revenue 64.0% YoY to $12.0B", "the agent's summary")["decision"] == "ask"
     assert gate("Deere grew revenue 6.4% YoY to $13.8B", "get_financials, Q2-2026")["decision"] == "save"

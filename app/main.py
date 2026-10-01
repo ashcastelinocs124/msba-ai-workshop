@@ -32,7 +32,7 @@ SIGNIN_LOG = os.environ.get("SIGNIN_LOG", "/home/data/signins.csv")
 ADMIN_USERS = {u.strip().lower() for u in os.environ.get("ADMIN_USERS", "").split(",") if u.strip()}
 # Pages only admins may open (matched by file stem, so the page and its _sources copy are both covered).
 # Set LOCKED_PAGES to an empty string in App Service settings to open them to everyone.
-DEFAULT_LOCKED = "ch03-memory-rag,ch03-retrieval-rag,ch03-agent-memory,ch00-system-one"  # chapter 3 until its session, and page 0H until the instructor releases it; keep deploy.yml's list in step
+DEFAULT_LOCKED = "ch03-memory-rag,ch03-retrieval-rag,ch03-agent-memory,ch03-long-term-memory,ch00-system-one"  # chapter 3 until its session, and page 0H until the instructor releases it; keep deploy.yml's list in step
 LOCKED_PAGES = {p.strip() for p in os.environ.get("LOCKED_PAGES", DEFAULT_LOCKED).split(",") if p.strip()}
 LOCKED_HTML = open(os.path.join(os.path.dirname(__file__), "locked.html")).read()
 ADMIN_HTML = open(os.path.join(os.path.dirname(__file__), "admin.html")).read()

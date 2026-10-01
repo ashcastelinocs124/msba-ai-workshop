@@ -28,6 +28,7 @@ parts:
         sections:
           - file: ch03-retrieval-rag
           - file: ch03-agent-memory
+          - file: ch03-long-term-memory
   - caption: Part II · Machine learning
     chapters:
       - file: ch04-ml-foundations-1

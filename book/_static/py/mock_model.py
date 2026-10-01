@@ -169,9 +169,9 @@ def model(msgs, tools=None):
             return {"type": "text", "text": f"RECOMMEND: DECLINE. {who}: the position has been held {r['holding_days']} days, under the 30-day minimum. [source: personal-trading-3]"}
         return {"type": "text", "text": f"RECOMMEND: APPROVE. {who}: not restricted, outside the blackout window, holding period satisfied. Pre-clearance is required and is granted by compliance, not by this assistant. [source: personal-trading-1]"}
 
-    # §3.2.5: the agent saves a note with its remember_note tool. Asked to remember the memo's figures,
+    # §3.3.3: the agent saves a note with its remember_note tool. Asked to remember the memo's figures,
     # it copies them with a decimal slip on the first company, 6.4% written as 64.0%.
-    # ponytail: scripted failure for §3.2.6; a real model makes this kind of slip only sometimes.
+    # ponytail: scripted failure for §3.3.4; a real model makes this kind of slip only sometimes.
     if "remember" in q:
         if not seen:
             prior = " ".join(m["content"] for m in earlier if m["role"] == "assistant")
