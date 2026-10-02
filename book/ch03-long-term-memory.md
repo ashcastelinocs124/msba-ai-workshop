@@ -1,7 +1,7 @@
 # 3.3 Long-Term Memory
 
 ```{raw} html
-<p class="wk-lede">A week after Monday, Dana writes "And NVIDIA?" in a new session, and the agent has no idea what she means: the conversation from page 3.2 is gone. Decide what to save between sessions, who writes it down, what kind of memory each note is, and how to stop a wrong note from being repeated with confidence. The session 3 recording will be on <a href="ch03-memory-rag.html#ch03-lecture">the chapter 3 page</a>.</p>
+<p class="wk-lede">A week after Monday, Dana writes "And NVIDIA?" in a new session, and the agent has no idea what she means: the conversation from page 3.2 is gone. Decide what to save between sessions, who writes it down, what kind of memory each note is, and how to stop a wrong note from being repeated with confidence. The session 3 recording is on <a href="ch03-memory-rag.html#ch03-lecture">the chapter 3 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch03-agent-memory.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

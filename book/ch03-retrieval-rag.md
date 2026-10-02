@@ -1,7 +1,7 @@
 # 3.1 Retrieval and RAG
 
 ```{raw} html
-<p class="wk-lede">Elena Ruiz's compliance team answers about thirty trade pre-clearance requests a week, and every answer has to cite the handbook clause it rests on. A model has never read that handbook. Find the right clause for each question, put it on the desk, and let the model answer from it. The session 3 recording will be on <a href="ch03-memory-rag.html#ch03-lecture">the chapter 3 page</a>.</p>
+<p class="wk-lede">Elena Ruiz's compliance team answers about thirty trade pre-clearance requests a week, and every answer has to cite the handbook clause it rests on. A model has never read that handbook. Find the right clause for each question, put it on the desk, and let the model answer from it. The session 3 recording is on <a href="ch03-memory-rag.html#ch03-lecture">the chapter 3 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch03-retrieval-rag.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

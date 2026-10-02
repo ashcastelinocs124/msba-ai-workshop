@@ -1,7 +1,7 @@
 # 3.2 Short-Term Memory
 
 ```{raw} html
-<p class="wk-lede">On Monday, Dana Whitfield at Meridian Pension Trust got the Deere and Caterpillar comparison and said she prefers tables. A model keeps nothing between calls, so even inside one long conversation the agent only remembers what the code puts back on the desk. Keep a long conversation going without letting it outgrow the desk, and see what trimming and summarizing each lose. The session 3 recording will be on <a href="ch03-memory-rag.html#ch03-lecture">the chapter 3 page</a>.</p>
+<p class="wk-lede">On Monday, Dana Whitfield at Meridian Pension Trust got the Deere and Caterpillar comparison and said she prefers tables. A model keeps nothing between calls, so even inside one long conversation the agent only remembers what the code puts back on the desk. Keep a long conversation going without letting it outgrow the desk, and see what trimming and summarizing each lose. The session 3 recording is on <a href="ch03-memory-rag.html#ch03-lecture">the chapter 3 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch03-agent-memory.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

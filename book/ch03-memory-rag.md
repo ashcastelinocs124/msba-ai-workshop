@@ -21,4 +21,9 @@ Section 3.1 has its own Colab notebook; 3.2 and 3.3 share one.
 (ch03-lecture)=
 ## Watch the lecture
 
-The session 3 recording and slides will appear here after the session on Friday, October 2.
+```{raw} html
+<figure class="wk-intro-video">
+  <iframe src="https://www.youtube.com/embed/Rx-BJtDumqU" title="Session 3 · Memory, Retrieval and RAG" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Session 3 · Memory, Retrieval and RAG · 1 h 40 min · <a href="https://youtu.be/Rx-BJtDumqU">Open on YouTube</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/workshop-3-memory-retrieval-rag.pdf">Slides (PDF)</a></figcaption>
+</figure>
+```
