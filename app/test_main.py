@@ -202,4 +202,3 @@ def test_lock_lists_in_step():
     root = pathlib.Path(__file__).resolve().parent.parent
     stems = re.search(r"for stem in ([^;]*); do", (root / ".github/workflows/deploy.yml").read_text()).group(1).split()
     assert set(stems) == set(m.DEFAULT_LOCKED.split(",")) - {""}
-    assert {"ch00-system-one"} <= set(stems)
