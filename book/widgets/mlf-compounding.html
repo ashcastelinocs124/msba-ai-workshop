@@ -1,0 +1,76 @@
+<div class="wk-widget" id="w-cmpd" style="background:#fff">
+  <div class="wk-title">/// Why returns need care · simple vs log, and the +50% / −50% trap</div>
+  <div class="ctl">
+    <div class="grp"><span>Series</span><div class="seg" data-g="s"></div></div>
+    <div class="grp"><span>Return type</span><div class="seg" data-g="t"></div></div>
+  </div>
+  <div class="box" aria-live="polite">
+    <div class="row"><div class="lb">Add up the 24 monthly numbers<small data-k="addsmall"></small></div><div class="v" data-v="add"></div></div>
+    <div class="row"><div class="lb">What you actually earned<small>multiply the months together, 24 months</small></div><div class="v" data-v="real"></div></div>
+    <div class="verdict"></div>
+  </div>
+  <div class="trap">
+    <div class="grp"><span>Up then down</span><input type="range" min="10" max="100" step="5" value="50" aria-label="Size of the gain, then the same-sized loss"><b class="gv"></b></div>
+    <div class="steps"></div>
+  </div>
+  <div class="note">Monthly returns are illustrative, made up for teaching (Oct 2024 to Sep 2026), not market data. A simple return is the price change over the old price. A log return is ln(new price ÷ old price).</div>
+  <style>
+    #w-cmpd .ctl { display: grid; gap: 8px; }
+    #w-cmpd .grp { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    #w-cmpd .grp > span { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); width: 118px; }
+    #w-cmpd .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-cmpd .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 5px 12px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-cmpd .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-cmpd .box { margin-top: 14px; display: grid; gap: 10px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 12px; }
+    #w-cmpd .row { display: grid; grid-template-columns: 1fr 140px; gap: 10px; align-items: center; }
+    #w-cmpd .lb { font: 700 13px system-ui, sans-serif; color: var(--wk-navy); }
+    #w-cmpd .lb small { display: block; font-weight: 400; font-size: 11px; color: var(--wk-muted); }
+    #w-cmpd .v { font: 700 16px ui-monospace, Menlo, monospace; color: #1f2430; text-align: right; }
+    #w-cmpd .verdict { border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-cmpd .verdict b { color: #b54200; }
+    #w-cmpd .trap { margin-top: 14px; border: 1px solid var(--wk-line); border-radius: 12px; padding: 12px; background: #fff; }
+    #w-cmpd .gv { font: 700 13px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-cmpd .steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; font: 700 14px ui-monospace, Menlo, monospace; }
+    #w-cmpd .steps .p { border: 1px solid var(--wk-line); border-radius: 8px; padding: 6px 10px; background: #fafbfc; }
+    #w-cmpd .steps .bad { border-color: var(--wk-orange); color: #b54200; background: #fff8f3; }
+    #w-cmpd .steps small { font: 400 12px system-ui, sans-serif; color: var(--wk-muted); width: 100%; line-height: 1.45; }
+    #w-cmpd .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-cmpd .row { grid-template-columns: 1fr; } #w-cmpd .v { text-align: left; } #w-cmpd .grp > span { width: auto; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-cmpd");
+    // Copy of finance_basics.RETURNS (illustrative monthly returns, as fractions). Keep in step with the module.
+    const R = {"DE": [0.0002, -0.0156, 0.0303, 0.0429, 0.143, 0.0623, -0.0545, 0.0035, -0.0284, -0.0655, -0.0669, -0.0805, 0.0887, -0.0112, 0.0538, -0.0353, -0.0482, -0.0356, 0.0137, 0.0464, 0.0277, 0.0372, 0.0427, -0.1365], "CAT": [0.0086, -0.0313, 0.0492, 0.0959, 0.1035, 0.0601, -0.0025, 0.0047, -0.0242, -0.0444, -0.0278, -0.1255, 0.0728, 0.0096, 0.063, -0.0777, 0.0231, 0.0034, 0.0224, -0.0186, -0.004, 0.0588, 0.1594, -0.1386], "MKT": [0.0086, -0.0166, 0.0233, 0.0585, 0.0706, 0.032, 0.01, -0.0021, -0.0093, -0.032, -0.0531, -0.0618, 0.0478, 0.0058, 0.0462, -0.0464, 0.018, 0.0074, 0.0339, -0.0012, 0.0442, 0.0462, 0.0594, -0.0718]};
+    const SERIES = [{ k: "DE", label: "Deere" }, { k: "CAT", label: "Caterpillar" }, { k: "MKT", label: "Market index" }];
+    const TYPES = [{ k: "simple", label: "Simple returns" }, { k: "log", label: "Log returns" }];
+    let s = SERIES[0], t = TYPES[0];
+    const $ = (q) => w.querySelector(q);
+    const pct = (x, d = 1) => (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(d) + "%";
+    const seg = (g, items, cur) => { $(`[data-g="${g}"]`).innerHTML = items.map((m) => `<button type="button" data-k="${m.k}" class="${m === cur ? "on" : ""}">${m.label}</button>`).join(""); };
+    function draw() {
+      seg("s", SERIES, s); seg("t", TYPES, t);
+      const r = R[s.k], real = r.reduce((a, x) => a * (1 + x), 1) - 1;
+      const add = t.k === "simple" ? r.reduce((a, x) => a + x, 0) : r.reduce((a, x) => a + Math.log(1 + x), 0);
+      $('[data-k="addsmall"]').textContent = t.k === "simple" ? "just the simple returns, summed" : "the log returns, summed";
+      $('[data-v="add"]').textContent = pct(add);
+      // for log returns the sum is a log: turn it back into an ordinary percentage with e^x − 1
+      $('[data-v="real"]').textContent = pct(real);
+      $(".verdict").innerHTML = t.k === "simple"
+        ? `Summing simple returns gives <b>${pct(add)}</b>, but the ${s.label} holder really earned <b>${pct(real)}</b>: the sum is off by <b>${(Math.abs(add - real) * 100).toFixed(1)} points</b>, because each month's gain or loss applies to a different starting amount.`
+        : `Summing log returns gives ${pct(add)}, and e<sup>${add.toFixed(3)}</sup> − 1 = <b>${pct(Math.exp(add) - 1)}</b>, exactly what the ${s.label} holder earned. Log returns <b>add up across months</b>; simple returns do not.`;
+      const g = +$("input").value / 100, up = 1 + g, down = 1 - g, end = up * down - 1;
+      $(".gv").textContent = `+${(g * 100).toFixed(0)}% then −${(g * 100).toFixed(0)}%`;
+      $(".steps").innerHTML = `<span class="p">$100</span>→<span class="p">$${(100 * up).toFixed(0)}</span>→<span class="p bad">$${(100 * up * down).toFixed(0)}</span>`
+        + `<small>Up ${(g * 100).toFixed(0)}% and then down ${(g * 100).toFixed(0)}% is a net <b>${pct(end)}</b>, not zero. In log terms the two moves are ln(${up.toFixed(2)}) = ${Math.log(up).toFixed(3)} and ln(${down.toFixed(2)}) = ${Math.log(down).toFixed(3)}, which do not cancel either, so the arithmetic average of simple returns (0%) overstates what you kept.</small>`;
+    }
+    w.addEventListener("click", (e) => {
+      const b = e.target.closest(".seg button"); if (!b) return;
+      if (b.parentElement.dataset.g === "s") s = SERIES.find((m) => m.k === b.dataset.k); else t = TYPES.find((m) => m.k === b.dataset.k);
+      draw();
+    });
+    $("input").addEventListener("input", draw);
+    draw();
+  })();
+  </script>
+</div>

@@ -3,7 +3,7 @@
 // so cells can `from agent import agent`, `from tools import TOOLS`, etc.
 (() => {
   const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/";
-  const PY_FILES = ["mock_model.py", "tools.py", "agent.py", "docs.py", "llm.py", "context.py", "llm_basics.py", "handbook.py", "embeddings.py", "retrieval.py", "memory.py"];
+  const PY_FILES = ["mock_model.py", "tools.py", "agent.py", "docs.py", "llm.py", "context.py", "llm_basics.py", "handbook.py", "embeddings.py", "retrieval.py", "memory.py", "finance_basics.py"];
   const BASE = document.currentScript.src.replace(/pyodide-cell\.js.*$/, "");
   let pyodidePromise = null;
   // The handbook, parsed out of handbook.py's source once it is fetched (docs.py's clauses are a subset) — the Watch view's

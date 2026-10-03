@@ -18,6 +18,7 @@
 | 1 ✓ Done | Fri, Sep 18, 2026 | 1:00–3:00 pm | 3039 BIF | I · Agents | [1. Introduction to AI Agents](ch01-agent-loop.md) |
 | 2 ✓ Done | Fri, Sep 25, 2026 | 1:30–3:30 pm | 3007 BIF | I · Agents | [2. Prompt and Context Engineering](ch02-prompt-and-context.md) |
 | 3 ✓ Done | Fri, Oct 2, 2026 | 1:30–3:30 pm | 2043 BIF | I · Agents | [3. Memory Retrieval and RAG](ch03-memory-rag.md) |
+| F | On your own time, before session 4 | Self-paced | No room | Foundations for ML | [Foundations for ML](mlf-foundations.md) |
 | 4 | Fri, Oct 16, 2026 | 1:30–3:30 pm | 3007 BIF | II · Machine learning | [4. ML Foundations I](ch04-ml-foundations-1.md) |
 | 5 | Fri, Oct 23, 2026 | 1:30–3:30 pm | 3007 BIF | II · Machine learning | [5. ML Foundations II](ch05-ml-foundations-2.md) |
 | 6 | Fri, Oct 30, 2026 | 1:30–3:30 pm | 3007 BIF | III · Systems and decisions | [6. Agent Systems](ch06-agent-systems.md) |
@@ -27,6 +28,6 @@
 
 Sessions 1, 2 and 3 are done; their lecture recordings are on the chapter pages. Session 4 is next (Fri, Oct 16).
 
-Session 0, [How Large Language Models Work](ch00-how-llms-work.md), is self-paced: go through it on your own time before the workshop. It has no meeting, and you can start it now even if you have already attended a session. Before we move to the next module, there will be a foundations section to look at first.
+Session 0, [How Large Language Models Work](ch00-how-llms-work.md), is self-paced: go through it on your own time before the workshop. It has no meeting, and you can start it now even if you have already attended a session. Before the next module (Part II, machine learning), work through [Foundations for ML](mlf-foundations.md) the same way: prices and returns, risk, benchmarks, financial and macro data, and the statistics the models use.
 
 No sessions on Oct 9, Nov 20, or Nov 27. Most sessions are in 3007 BIF; sessions 1 and 3 are not.

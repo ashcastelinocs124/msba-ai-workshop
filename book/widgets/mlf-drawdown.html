@@ -1,0 +1,92 @@
+<div class="wk-widget" id="w-dd" style="background:#fff">
+  <div class="wk-title">/// Volatility, drawdown and Sharpe · illustrative monthly data</div>
+  <div class="ctl">
+    <div class="grp"><span>Series</span><div class="seg"></div></div>
+    <div class="grp"><span>Window</span><input type="range" min="6" max="24" step="1" value="24" aria-label="Number of months in the window"><b class="wn"></b></div>
+  </div>
+  <svg class="chart" viewBox="0 0 640 300" role="img" aria-label="Price path rebased to 100 with the drawdown below it"></svg>
+  <div class="stats">
+    <div><small>Total return</small><b data-s="tot"></b></div>
+    <div><small>Volatility (a year)</small><b data-s="vol"></b></div>
+    <div><small>Worst drawdown</small><b data-s="dd"></b></div>
+    <div><small>Sharpe ratio</small><b data-s="sh"></b></div>
+  </div>
+  <div class="msg" aria-live="polite"></div>
+  <div class="note">Made-up monthly returns, Oct 2024 to Sep 2026, not market data. Volatility is the monthly standard deviation × √12. Drawdown is the fall from the highest price so far. Sharpe is the average monthly return above cash, divided by its standard deviation, × √12. Cash pays 0.35% a month.</div>
+  <style>
+    #w-dd .ctl { display: grid; gap: 8px; }
+    #w-dd .grp { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    #w-dd .grp > span { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); width: 70px; }
+    #w-dd .seg { display: inline-flex; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-dd .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 5px 12px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-dd .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-dd input[type=range] { flex: 1 1 160px; max-width: 320px; }
+    #w-dd .wn { font: 700 12px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-dd .chart { width: 100%; height: auto; margin-top: 12px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-dd .chart text { font: 11px ui-monospace, Menlo, monospace; fill: var(--wk-muted); }
+    #w-dd .stats { margin-top: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    #w-dd .stats div { border: 1px solid var(--wk-line); border-radius: 10px; padding: 8px 10px; background: #fff; }
+    #w-dd .stats small { display: block; font: 700 10px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .05em; color: var(--wk-muted); }
+    #w-dd .stats b { font: 700 18px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-dd .msg { margin-top: 12px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-dd .msg b { color: #b54200; }
+    #w-dd .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-dd .stats { grid-template-columns: repeat(2, 1fr); } #w-dd .grp > span { width: auto; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-dd");
+    // A copy of finance_basics.py's monthly returns (Oct 24 to Sep 26) and the cash rate. Keep in step.
+    const MONTHS = ["Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26","Jul 26","Aug 26","Sep 26"];
+    const RF = 0.0035;
+    const S = {
+      DE:  { name: "Deere", r: [0.0002,-0.0156,0.0303,0.0429,0.143,0.0623,-0.0545,0.0035,-0.0284,-0.0655,-0.0669,-0.0805,0.0887,-0.0112,0.0538,-0.0353,-0.0482,-0.0356,0.0137,0.0464,0.0277,0.0372,0.0427,-0.1365] },
+      CAT: { name: "Caterpillar", r: [0.0086,-0.0313,0.0492,0.0959,0.1035,0.0601,-0.0025,0.0047,-0.0242,-0.0444,-0.0278,-0.1255,0.0728,0.0096,0.063,-0.0777,0.0231,0.0034,0.0224,-0.0186,-0.004,0.0588,0.1594,-0.1386] },
+      MKT: { name: "Market index", r: [0.0086,-0.0166,0.0233,0.0585,0.0706,0.032,0.01,-0.0021,-0.0093,-0.032,-0.0531,-0.0618,0.0478,0.0058,0.0462,-0.0464,0.018,0.0074,0.0339,-0.0012,0.0442,0.0462,0.0594,-0.0718] },
+    };
+    let key = "DE", n = 24;
+    const mean = (x) => x.reduce((a, b) => a + b, 0) / x.length;
+    const sd = (x) => { const m = mean(x); return Math.sqrt(x.reduce((a, b) => a + (b - m) ** 2, 0) / (x.length - 1)); };
+    const pct = (v, d = 1) => (v * 100).toFixed(d) + "%";
+    const seg = w.querySelector(".seg"), rng = w.querySelector("input"), wn = w.querySelector(".wn"), svg = w.querySelector(".chart"), msg = w.querySelector(".msg");
+    for (const k of Object.keys(S)) {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = k; b.title = S[k].name;
+      b.onclick = () => { key = k; draw(); }; seg.appendChild(b);
+    }
+    rng.oninput = () => { n = +rng.value; draw(); };
+    function draw() {
+      const all = S[key].r, r = all.slice(all.length - n), labels = MONTHS.slice(MONTHS.length - n);
+      seg.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.textContent === key));
+      wn.textContent = "last " + n + " months (" + labels[0] + " to " + labels[n - 1] + ")";
+      // price path rebased to 100 at the start of the window, and the drawdown from the highest value so far
+      const p = [100]; for (const x of r) p.push(p[p.length - 1] * (1 + x));
+      let peak = p[0], pk = 0, worst = 0, wp = 0, wt = 0; const dd = [];
+      p.forEach((v, i) => { if (v > peak) { peak = v; pk = i; } const d = v / peak - 1; dd.push(d); if (d < worst) { worst = d; wp = pk; wt = i; } });
+      const tot = p[p.length - 1] / 100 - 1, vol = sd(r) * Math.sqrt(12), ex = r.map((x) => x - RF), sh = mean(ex) / sd(ex) * Math.sqrt(12);
+      w.querySelector('[data-s="tot"]').textContent = pct(tot);
+      w.querySelector('[data-s="vol"]').textContent = pct(vol);
+      w.querySelector('[data-s="dd"]').textContent = pct(worst);
+      w.querySelector('[data-s="sh"]').textContent = sh.toFixed(2);
+      // chart: price on top (y 20-170), drawdown underneath (y 205-280)
+      const X = (i) => 46 + i * (580 / n), lo = Math.min(...p), hi = Math.max(...p);
+      const Y = (v) => 170 - (v - lo) / ((hi - lo) || 1) * 150;
+      const dmin = Math.min(worst, -0.05), D = (d) => 205 + (d / dmin) * 75;
+      let h = "";
+      h += '<text x="46" y="14">Price path, 100 = start of window</text><text x="46" y="198">Drawdown: fall from the highest price so far</text>';
+      h += '<text x="6" y="' + (Y(hi) + 4) + '">' + hi.toFixed(0) + '</text><text x="6" y="' + (Y(lo) + 4) + '">' + lo.toFixed(0) + '</text>';
+      h += '<line x1="46" x2="626" y1="205" y2="205" stroke="#c9ced8"/><text x="6" y="209">0%</text><text x="6" y="284">' + pct(dmin, 0) + '</text>';
+      if (worst < 0) h += '<rect x="' + X(wp) + '" y="20" width="' + (X(wt) - X(wp)) + '" height="150" fill="#f4b183" opacity=".25"/>';
+      h += '<polyline fill="none" stroke="#0b2a4a" stroke-width="2.5" points="' + p.map((v, i) => X(i) + "," + Y(v)).join(" ") + '"/>';
+      h += '<polygon fill="#d9480f" opacity=".55" points="46,205 ' + dd.map((d, i) => X(i) + "," + D(d)).join(" ") + ' ' + X(n) + ',205"/>';
+      const step = n > 12 ? 4 : 2;
+      for (let i = 1; i <= n; i += step) h += '<text x="' + (X(i) - 14) + '" y="297">' + labels[i - 1] + '</text>';
+      svg.innerHTML = h;
+      const mo = (i) => (i === 0 ? "the start of the window" : labels[i - 1]);
+      msg.innerHTML = worst < 0
+        ? "<b>" + S[key].name + "</b>: the worst fall was " + pct(worst) + ", from " + mo(wp) + " to " + mo(wt) + (dd[n] < -0.0005 ? ". By the end of the window it was still " + pct(dd[n]) + " below its peak." : ". It had recovered by the end of the window.")
+        : "<b>" + S[key].name + "</b> never fell below an earlier high in this window.";
+    }
+    draw();
+  })();
+  </script>
+</div>

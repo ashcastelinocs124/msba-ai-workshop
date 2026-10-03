@@ -1,0 +1,80 @@
+<div class="wk-widget" id="w-ovf" style="background:#fff">
+  <div class="wk-title">/// A curve that fits the past too well · overfitting by time split</div>
+  <div class="ctl">
+    <label>Model flexibility: <b class="dg"></b>
+      <input type="range" min="0" max="8" step="1" value="1" aria-label="Polynomial degree"></label>
+    <span class="nm"></span>
+  </div>
+  <svg viewBox="0 0 560 300" role="img" aria-label="Scatter of next-month Deere return against this month's market return, with a fitted curve"></svg>
+  <div class="read">
+    <div><small>Error on the past it studied</small><b class="tr"></b></div>
+    <div><small>Error on the last 6 months it never saw</small><b class="te"></b></div>
+  </div>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Each dot is one month: the market's return that month (across) and Deere's return the next month (up). Illustrative numbers, not market data. Navy dots are the first 17 months, which the curve is fitted to; orange dots are the last 6, held back and never shown to the fit. Error is the typical miss in percentage points (root mean squared error). The split is by date, not shuffled: a model is always used on months later than the ones it learned from.</div>
+  <style>
+    #w-ovf .ctl { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 13px; }
+    #w-ovf .ctl b { color: var(--wk-navy); font-family: ui-monospace, Menlo, monospace; }
+    #w-ovf input[type=range] { width: 220px; vertical-align: middle; }
+    #w-ovf .nm { color: var(--wk-muted); font-size: 12px; }
+    #w-ovf svg { width: 100%; height: auto; margin-top: 8px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-ovf .read { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    #w-ovf .read div { border: 1px solid var(--wk-line); border-radius: 10px; padding: 8px 12px; }
+    #w-ovf .read small { display: block; font-size: 11px; color: var(--wk-muted); }
+    #w-ovf .read b { font: 700 20px ui-monospace, Menlo, monospace; }
+    #w-ovf .read .tr { color: var(--wk-navy); } #w-ovf .read .te { color: #b54200; }
+    #w-ovf .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-ovf .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-ovf .read { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-ovf");
+    // Last month's market return and Deere's return the month after (23 pairs from finance_basics: MARKET[:-1], RETURNS["DE"][1:]), in percent.
+    const X = [0.0086, -0.0166, 0.0233, 0.0585, 0.0706, 0.032, 0.01, -0.0021, -0.0093, -0.032, -0.0531, -0.0618, 0.0478, 0.0058, 0.0462, -0.0464, 0.018, 0.0074, 0.0339, -0.0012, 0.0442, 0.0462, 0.0594].map((v) => v * 100);
+    const Y = [-0.0156, 0.0303, 0.0429, 0.143, 0.0623, -0.0545, 0.0035, -0.0284, -0.0655, -0.0669, -0.0805, 0.0887, -0.0112, 0.0538, -0.0353, -0.0482, -0.0356, 0.0137, 0.0464, 0.0277, 0.0372, 0.0427, -0.1365].map((v) => v * 100);
+    const K = 17;                                   // first 17 months train, last 6 test
+    const NAMES = ["a flat line: just the average", "a straight line", "a gentle curve", "a curve with 2 bends", "3 bends", "4 bends", "5 bends", "6 bends", "7 bends: it can thread nearly every dot"];
+    const S = 6;                                    // scale x so powers stay tame
+    const fit = (deg) => {                          // least squares by the normal equations, tiny ridge for stability
+      const n = deg + 1, A = Array.from({ length: n }, () => Array(n + 1).fill(0));
+      for (let i = 0; i < K; i++) {
+        const p = Array.from({ length: n }, (_, j) => Math.pow(X[i] / S, j));
+        for (let r = 0; r < n; r++) { for (let c = 0; c < n; c++) A[r][c] += p[r] * p[c]; A[r][n] += p[r] * Y[i]; }
+      }
+      for (let r = 0; r < n; r++) A[r][r] += 1e-9;
+      for (let c = 0; c < n; c++) {
+        let m = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[m][c])) m = r;
+        [A[c], A[m]] = [A[m], A[c]];
+        for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; }
+      }
+      return A.map((row, i) => row[n] / row[i]);
+    };
+    const ev = (co, x) => co.reduce((s, c, j) => s + c * Math.pow(x / S, j), 0);
+    const rmse = (co, lo, hi) => { let s = 0; for (let i = lo; i < hi; i++) s += (ev(co, X[i]) - Y[i]) ** 2; return Math.sqrt(s / (hi - lo)); };
+    const svg = w.querySelector("svg"), sl = w.querySelector("input");
+    const xmin = -8, xmax = 8, ymin = -16, ymax = 16, W = 560, H = 300, pad = 34;
+    const px = (x) => pad + (x - xmin) / (xmax - xmin) * (W - 2 * pad);
+    const py = (y) => H - pad - (y - ymin) / (ymax - ymin) * (H - 2 * pad);
+    const draw = () => {
+      const deg = +sl.value, co = fit(deg), tr = rmse(co, 0, K), te = rmse(co, K, X.length);
+      let s = `<line x1="${px(xmin)}" x2="${px(xmax)}" y1="${py(0)}" y2="${py(0)}" stroke="#c8ced8"/><line x1="${px(0)}" x2="${px(0)}" y1="${py(ymin)}" y2="${py(ymax)}" stroke="#c8ced8"/>`;
+      s += `<text x="${W - pad}" y="${py(0) - 5}" font-size="10" text-anchor="end" fill="#6b7280">market return this month (%)</text><text x="${px(0) + 5}" y="${pad - 14}" font-size="10" fill="#6b7280">Deere next month (%)</text>`;
+      let d = ""; for (let i = 0; i <= 160; i++) { const x = xmin + (xmax - xmin) * i / 160, y = Math.max(ymin, Math.min(ymax, ev(co, x))); d += (i ? "L" : "M") + px(x).toFixed(1) + " " + py(y).toFixed(1); }
+      s += `<path d="${d}" fill="none" stroke="#1d3557" stroke-width="2.2"/>`;
+      X.forEach((x, i) => { s += `<circle cx="${px(x)}" cy="${py(Math.max(ymin, Math.min(ymax, Y[i])))}" r="4.5" fill="${i < K ? "#1d3557" : "#e8590c"}" fill-opacity=".8"/>`; });
+      svg.innerHTML = s;
+      w.querySelector(".dg").textContent = deg;
+      w.querySelector(".nm").textContent = NAMES[deg];
+      w.querySelector(".tr").textContent = tr.toFixed(1) + " pts";
+      w.querySelector(".te").textContent = te.toFixed(1) + " pts";
+      const base = rmse(fit(0), K, X.length);
+      w.querySelector(".say").innerHTML = deg === 0 ? `The average ignores the market entirely. It misses the held-back months by <b>${base.toFixed(1)}</b> points: the bar to beat.`
+        : te > base * 1.15 ? `The curve hugs the past (<b>${tr.toFixed(1)}</b> points) but misses the held-back months by <b>${te.toFixed(1)}</b>, worse than just guessing the average (${base.toFixed(1)}). It learned noise: <b>overfitting</b>.`
+        : te < base * 0.97 ? `Here the curve beats the plain average on months it never saw (<b>${te.toFixed(1)}</b> vs ${base.toFixed(1)}). That is the only test that counts.`
+        : `About the same as guessing the average on unseen months (<b>${te.toFixed(1)}</b> vs ${base.toFixed(1)}): the market's last move tells you little about Deere's next one.`;
+    };
+    sl.addEventListener("input", draw); draw();
+  })();
+  </script>
+</div>

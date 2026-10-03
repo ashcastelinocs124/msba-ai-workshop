@@ -1,0 +1,75 @@
+<div class="wk-widget" id="w-rel" style="background:#fff">
+  <div class="wk-title">/// What could a model know on this day? · a release timeline</div>
+  <div class="ctl">
+    <label class="day">Today is <b data-v="date"></b><input type="range" min="0" max="100" value="0" aria-label="Date"></label>
+    <label class="trap"><input type="checkbox"> Cheat: use the final, revised numbers (the look-ahead trap)</label>
+  </div>
+  <div class="rows"></div>
+  <div class="msg" aria-live="polite"></div>
+  <div class="note">Illustrative figures for the firm's macro dashboard, not real releases. Each row shows the period a number describes, the day it came out, and what a model standing on today's date could actually have used.</div>
+  <style>
+    #w-rel .ctl { display: grid; gap: 8px; }
+    #w-rel .day { display: grid; gap: 6px; font-size: 14px; }
+    #w-rel .day b { font: 700 15px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-rel input[type=range] { width: 100%; accent-color: var(--wk-orange); }
+    #w-rel .trap { font-size: 13px; }
+    #w-rel .rows { margin-top: 12px; display: grid; gap: 8px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; padding: 10px; }
+    #w-rel .r { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; background: #fff; border-left: 4px solid var(--wk-line); }
+    #w-rel .r.none { border-left-color: #c3c8d2; color: var(--wk-muted); }
+    #w-rel .r.first { border-left-color: var(--wk-navy); }
+    #w-rel .r.rev { border-left-color: var(--wk-orange); }
+    #w-rel .r.leak { border-left-color: #b00020; background: #fff5f5; }
+    #w-rel .nm { font: 700 13px system-ui, sans-serif; color: var(--wk-navy); }
+    #w-rel .nm small, #w-rel .st small { display: block; font-weight: 400; font-size: 11px; color: var(--wk-muted); }
+    #w-rel .val { font: 700 15px ui-monospace, Menlo, monospace; color: #1f2430; }
+    #w-rel .st { font: 700 11px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .05em; }
+    #w-rel .leak .st { color: #b00020; } #w-rel .rev .st { color: #b54200; }
+    #w-rel .msg { margin-top: 12px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-rel .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-rel .r { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-rel");
+    // A copy of finance_basics.MACRO, plus the last day of the period each figure describes. Keep in step with that file.
+    const MACRO = [
+      { s: "CPI inflation, year on year", p: "Aug 26", end: "2026-08-31", first: "2026-09-11", v: 3.1, rev: null, rv: null, u: "%" },
+      { s: "Unemployment rate", p: "Aug 26", end: "2026-08-31", first: "2026-09-04", v: 4.3, rev: null, rv: null, u: "%" },
+      { s: "Nonfarm payrolls, change (thousands)", p: "Aug 26", end: "2026-08-31", first: "2026-09-04", v: 142, rev: "2026-10-02", rv: 96, u: "k" },
+      { s: "Real GDP growth, annualized", p: "Q2 26", end: "2026-06-30", first: "2026-07-30", v: 2.6, rev: "2026-08-27", rv: 2.1, u: "%" },
+      { s: "Fed funds target, upper bound", p: "Sep 26", end: "2026-09-16", first: "2026-09-16", v: 4.50, rev: null, rv: null, u: "%" },
+    ];
+    const D0 = Date.UTC(2026, 6, 25), DAY = 864e5, N = 100;                 // slider day 0 = Jul 25, 2026
+    const iso = (i) => new Date(D0 + i * DAY).toISOString().slice(0, 10);
+    const pretty = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+    const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / DAY);
+    const $ = (s) => w.querySelector(s);
+    const show = (m, v) => v + (m.u === "%" ? "%" : "k");
+    function draw() {
+      const d = iso(+$("input[type=range]").value), cheat = $(".trap input").checked;
+      $('[data-v="date"]').textContent = pretty(d);
+      let leaks = 0, waiting = 0;
+      $(".rows").innerHTML = MACRO.map((m) => {
+        const lag = days(m.end, m.first);
+        const sub = `describes ${m.p} · out ${pretty(m.first)} · ${lag} day${lag === 1 ? "" : "s"} after the period ended`;
+        let cls, st, val, note = "";
+        if (d < m.first) {
+          if (cheat) { cls = "leak"; st = "From the future"; val = show(m, m.rv ?? m.v); note = "not published yet"; leaks++; }
+          else { cls = "none"; st = "Not published yet"; val = "—"; waiting++; }
+        } else if (m.rev && d >= m.rev) { cls = "rev"; st = "Revised"; val = show(m, m.rv); note = `was ${show(m, m.v)} on first release`; }
+        else if (m.rev && cheat) { cls = "leak"; st = "Revision not out yet"; val = show(m, m.rv); note = `real value on this day: ${show(m, m.v)}; the revision comes ${pretty(m.rev)}`; leaks++; }
+        else { cls = "first"; st = "First release"; val = show(m, m.v); note = m.rev ? `will be revised ${pretty(m.rev)}` : ""; }
+        return `<div class="r ${cls}"><div class="nm">${m.s}<small>${sub}</small></div><div class="val">${val}</div><div class="st">${st}<small>${note}</small></div></div>`;
+      }).join("");
+      $(".msg").innerHTML = leaks
+        ? `<b>${leaks} number${leaks === 1 ? "" : "s"} here did not exist yet</b> on ${pretty(d)}. A model trained on the final series would look brilliant in a test and could not have made those forecasts live. This is look-ahead bias.`
+        : waiting
+          ? `On ${pretty(d)} a model has <b>${MACRO.length - waiting} of ${MACRO.length}</b> figures, and each one describes a month or quarter that has already ended. Drag the date forward and watch the numbers arrive, and some of them change.`
+          : `By ${pretty(d)} every figure is out. Note that payrolls and GDP now show their <b>revised</b> values, not the ones a model would have seen at the time.`;
+    }
+    $("input[type=range]").addEventListener("input", draw);
+    $(".trap input").addEventListener("change", draw);
+    draw();
+  })();
+  </script>
+</div>

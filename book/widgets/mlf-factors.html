@@ -1,0 +1,82 @@
+<div class="wk-widget" id="w-mlf-fac" style="background:#fff">
+  <div class="wk-title">/// Stock against benchmark · beta, alpha and R squared</div>
+  <div class="ctl">
+    <div class="grp"><span>Stock</span><div class="seg" data-g="stock"></div></div>
+    <div class="grp"><span>Benchmark</span><div class="seg" data-g="bench"></div></div>
+  </div>
+  <svg class="plot" viewBox="0 0 520 300" role="img" aria-label="Scatter of the stock's monthly excess return against the benchmark's"></svg>
+  <div class="stats">
+    <div><small>Beta</small><b data-v="beta"></b></div>
+    <div><small>Alpha, a month</small><b data-v="alpha"></b></div>
+    <div><small>R squared</small><b data-v="r2"></b></div>
+  </div>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Each dot is one of the 24 months, Oct 2024 to Sep 2026. Both axes are excess returns: the return minus what cash paid. The series are illustrative, made up for teaching, not market data. The line is the best straight-line fit.</div>
+  <style>
+    #w-mlf-fac .ctl { display: grid; gap: 8px; }
+    #w-mlf-fac .grp { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    #w-mlf-fac .grp > span { font: 700 10.5px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); width: 90px; }
+    #w-mlf-fac .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--wk-line); border-radius: 999px; overflow: hidden; }
+    #w-mlf-fac .seg button { border: 0; border-radius: 0; background: #fff; color: var(--wk-muted); padding: 5px 12px; font: 700 11px ui-monospace, Menlo, monospace; }
+    #w-mlf-fac .seg button.on { background: var(--wk-navy); color: #fff; }
+    #w-mlf-fac .plot { width: 100%; max-width: 560px; display: block; margin: 12px auto 0; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-mlf-fac .plot text { font: 10px ui-monospace, Menlo, monospace; fill: #5b6372; }
+    #w-mlf-fac .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    #w-mlf-fac .stats div { border: 1px solid var(--wk-line); border-radius: 10px; padding: 8px 10px; background: #fff; }
+    #w-mlf-fac .stats small { display: block; font: 700 10px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--wk-muted); }
+    #w-mlf-fac .stats b { font: 700 18px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-mlf-fac .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-mlf-fac .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+  </style>
+  <script>
+  (() => {
+    const w = document.getElementById("w-mlf-fac");
+    // Copies of finance_basics.py's series (monthly returns, Oct 24 to Sep 26) and its 0.35% monthly risk-free rate. Keep in step.
+    const RF = 0.0035;
+    const STOCKS = [
+      { k: "DE", label: "Deere", r: [0.0002, -0.0156, 0.0303, 0.0429, 0.143, 0.0623, -0.0545, 0.0035, -0.0284, -0.0655, -0.0669, -0.0805, 0.0887, -0.0112, 0.0538, -0.0353, -0.0482, -0.0356, 0.0137, 0.0464, 0.0277, 0.0372, 0.0427, -0.1365] },
+      { k: "CAT", label: "Caterpillar", r: [0.0086, -0.0313, 0.0492, 0.0959, 0.1035, 0.0601, -0.0025, 0.0047, -0.0242, -0.0444, -0.0278, -0.1255, 0.0728, 0.0096, 0.063, -0.0777, 0.0231, 0.0034, 0.0224, -0.0186, -0.004, 0.0588, 0.1594, -0.1386] },
+    ];
+    const BENCHES = [
+      { k: "mkt", label: "Market", what: "the market index", r: [0.0086, -0.0166, 0.0233, 0.0585, 0.0706, 0.032, 0.01, -0.0021, -0.0093, -0.032, -0.0531, -0.0618, 0.0478, 0.0058, 0.0462, -0.0464, 0.018, 0.0074, 0.0339, -0.0012, 0.0442, 0.0462, 0.0594, -0.0718] },
+      { k: "size", label: "Size", what: "the small-minus-big benchmark", r: [-0.0237, 0.0292, 0.0526, 0.0111, -0.0058, 0.0251, 0.0053, 0.0052, 0.028, 0.0023, -0.0331, -0.0128, 0.0135, -0.0159, 0.0087, -0.01, 0.0121, -0.0093, 0.0193, -0.0063, -0.0207, 0.0116, 0.0084, 0.0039] },
+      { k: "value", label: "Value", what: "the cheap-minus-expensive benchmark", r: [-0.036, -0.009, 0.0265, 0.0091, -0.0278, 0.0338, 0.0129, 0.0013, -0.0093, -0.0012, 0.0146, -0.0564, -0.0069, -0.0298, 0.0129, 0.0048, 0.0027, 0.0123, 0.0442, 0.0491, -0.0294, 0.0465, 0.0049, -0.0411] },
+      { k: "mom", label: "Momentum", what: "the winners-minus-losers benchmark", r: [0.0436, -0.0202, -0.0155, 0.0316, -0.0019, 0.0089, 0.0414, 0.0146, -0.0756, -0.0074, -0.0363, -0.0341, -0.0352, 0.0098, 0.0072, -0.0032, 0.0356, 0.0078, -0.0043, 0.0346, 0.0208, 0.0111, 0.0375, 0.0278] },
+    ];
+    let stock = STOCKS[0], bench = BENCHES[0];
+    const $ = (s) => w.querySelector(s);
+    const seg = (g, items, cur) => { $(`[data-g="${g}"]`).innerHTML = items.map((m) => `<button type="button" data-k="${m.k}" class="${m === cur ? "on" : ""}">${m.label}</button>`).join(""); };
+    const pct = (v, d = 2) => (v * 100).toFixed(d) + "%";
+    // The market benchmark is a return, so cash is subtracted; the factor benchmarks are already long-short, so they are used as they are.
+    const benchX = () => bench.k === "mkt" ? bench.r.map((v) => v - RF) : bench.r;
+    function draw() {
+      seg("stock", STOCKS, stock); seg("bench", BENCHES, bench);
+      const x = benchX(), y = stock.r.map((v) => v - RF), n = x.length;
+      const mx = x.reduce((a, b) => a + b) / n, my = y.reduce((a, b) => a + b) / n;
+      const sxy = x.reduce((a, v, i) => a + (v - mx) * (y[i] - my), 0), sxx = x.reduce((a, v) => a + (v - mx) ** 2, 0);
+      const beta = sxy / sxx, alpha = my - beta * mx;
+      const ssRes = x.reduce((a, v, i) => a + (y[i] - alpha - beta * v) ** 2, 0), ssTot = y.reduce((a, v) => a + (v - my) ** 2, 0);
+      const r2 = 1 - ssRes / ssTot;
+      const L = 40, R = 510, T = 12, B = 270, lim = 0.16;              // plot box; both axes run -16% to +16%
+      const X = (v) => L + (Math.max(-lim, Math.min(lim, v)) + lim) / (2 * lim) * (R - L), Y = (v) => B - (Math.max(-lim, Math.min(lim, v)) + lim) / (2 * lim) * (B - T);
+      let s = `<line x1="${X(0)}" y1="${T}" x2="${X(0)}" y2="${B}" stroke="#cfd5de"/><line x1="${L}" y1="${Y(0)}" x2="${R}" y2="${Y(0)}" stroke="#cfd5de"/>`;
+      s += `<text x="${R}" y="${Y(0) - 4}" text-anchor="end">${bench.label.toLowerCase()} benchmark, excess return</text><text x="${X(0) + 4}" y="${T + 8}">${stock.label}, excess return</text>`;
+      s += `<text x="${X(-0.1)}" y="${B + 14}" text-anchor="middle">-10%</text><text x="${X(0.1)}" y="${B + 14}" text-anchor="middle">+10%</text>`;
+      s += `<line x1="${X(-lim)}" y1="${Y(alpha + beta * -lim)}" x2="${X(lim)}" y2="${Y(alpha + beta * lim)}" stroke="#e8590c" stroke-width="2"/>`;
+      s += x.map((v, i) => `<circle cx="${X(v)}" cy="${Y(y[i])}" r="4" fill="#1b2a4a" fill-opacity=".75"><title>${["Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26","Jul 26","Aug 26","Sep 26"][i]}: ${bench.label} ${pct(v)}, ${stock.label} ${pct(y[i])}</title></circle>`).join("");
+      $(".plot").innerHTML = s;
+      $('[data-v="beta"]').textContent = beta.toFixed(2);
+      $('[data-v="alpha"]').textContent = (alpha >= 0 ? "+" : "") + pct(alpha);
+      $('[data-v="r2"]').textContent = r2.toFixed(2);
+      const fit = r2 >= 0.5 ? `The benchmark explains <b>${Math.round(r2 * 100)}%</b> of ${stock.label}'s ups and downs, so beta is a trustworthy summary.` : `The benchmark explains only <b>${Math.round(r2 * 100)}%</b> of ${stock.label}'s ups and downs. The dots are scattered around the line, so do not lean on the beta or the alpha.`;
+      $(".say").innerHTML = `When ${bench.what} moved 1%, ${stock.label} moved about <b>${beta.toFixed(2)}%</b> in the same direction. What is left over after that is alpha: <b>${alpha >= 0 ? "+" : ""}${pct(alpha)}</b> a month. ${fit}`;
+    }
+    w.addEventListener("click", (e) => {
+      const b = e.target.closest(".seg button"); if (!b) return;
+      if (b.parentElement.dataset.g === "stock") stock = STOCKS.find((m) => m.k === b.dataset.k); else bench = BENCHES.find((m) => m.k === b.dataset.k);
+      draw();
+    });
+    draw();
+  })();
+  </script>
+</div>
