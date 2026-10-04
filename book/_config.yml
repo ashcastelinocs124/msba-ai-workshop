@@ -28,6 +28,9 @@ sphinx:
   config:
     html_context:
       default_mode: light
+    # The landing page replaces the redirect stub at the site root (index.html).
+    html_extra_path:
+      - landing
     html_js_files:
       - pyodide-cell.js
       - quiz.js
