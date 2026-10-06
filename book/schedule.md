@@ -23,6 +23,7 @@
 | 5 | Fri, Oct 23, 2026 | 1:30–3:30 pm | 3007 BIF | II · Machine learning | [5. ML Foundations II](ch05-ml-foundations-2.md) |
 | 6 | Fri, Oct 30, 2026 | 1:30–3:30 pm | 3007 BIF | III · Systems and decisions | [6. Agent Systems](ch06-agent-systems.md) |
 | 7 | Fri, Nov 6, 2026 | 1:30–3:30 pm | 3007 BIF | III · Systems and decisions | [7. When to Use ML, Agents, or Neither](ch07-ml-agents-or-neither.md) |
+| F | On your own time, before session 8 | Self-paced | No room | Foundations for AI for Finance Markets | Coming soon |
 | 8 | Fri, Nov 13, 2026 | 1:30–3:30 pm | 3007 BIF | IV · Finance | [8. Financial Markets and AI as an Investment Theme](ch08-markets-and-ai.md) |
 | 9 | Fri, Dec 4, 2026 | 1:30–3:30 pm | 3007 BIF | IV · Finance | [9. AI for Financial and Investment Research](ch09-ai-investment-research.md) |
 
