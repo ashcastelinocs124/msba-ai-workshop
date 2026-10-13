@@ -14,7 +14,7 @@
 
 | Session | Date | Time | Room | Part | Chapters |
 |---|---|---|---|---|---|
-| 0 | On your own time, before the workshop | Self-paced | No room | 0 · Foundations for AI | [0. How Large Language Models Work](ch00-how-llms-work.md) |
+| 0 ✓ Done | On your own time, before the workshop | Self-paced | No room | 0 · Foundations for AI | [0. How Large Language Models Work](ch00-how-llms-work.md) |
 | 1 ✓ Done | Fri, Sep 18, 2026 | 1:00–3:00 pm | 3039 BIF | I · Agents | [1. Introduction to AI Agents](ch01-agent-loop.md) |
 | 2 ✓ Done | Fri, Sep 25, 2026 | 1:30–3:30 pm | 3007 BIF | I · Agents | [2. Prompt and Context Engineering](ch02-prompt-and-context.md) |
 | 3 ✓ Done | Fri, Oct 2, 2026 | 1:30–3:30 pm | 2043 BIF | I · Agents | [3. Memory Retrieval and RAG](ch03-memory-rag.md) |
@@ -27,7 +27,7 @@
 | 8 | Fri, Nov 13, 2026 | 1:30–3:30 pm | 3007 BIF | IV · Finance | [8. Financial Markets and AI as an Investment Theme](ch08-markets-and-ai.md) |
 | 9 | Fri, Dec 4, 2026 | 1:30–3:30 pm | 3007 BIF | IV · Finance | [9. AI for Financial and Investment Research](ch09-ai-investment-research.md) |
 
-Sessions 1, 2 and 3 are done; their lecture recordings are on the chapter pages. Session 4 is next (Fri, Oct 16).
+Chapter 0 (session 0) and sessions 1, 2 and 3 are done; their lecture recordings are on the chapter pages. Session 4 is next (Fri, Oct 16).
 
 Session 0, [How Large Language Models Work](ch00-how-llms-work.md), is self-paced: go through it on your own time before the workshop. It has no meeting, and you can start it now even if you have already attended a session. Before the next module (Part II, machine learning), work through [Foundations for ML](mlf-foundations.md) the same way: prices and returns, risk, benchmarks, financial and macro data, and the statistics the models use.
 
