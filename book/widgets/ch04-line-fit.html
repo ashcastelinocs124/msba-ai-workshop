@@ -1,0 +1,57 @@
+<div class="wk-widget" id="w-line" style="background:#fff">
+  <div class="wk-title">/// Fit a line · Deere's return against the market's, same month</div>
+  <div class="ctl">
+    <label>Slope <b class="sv"></b> <input class="s" type="range" min="-1" max="2.5" step="0.05" value="0" aria-label="Slope"></label>
+    <label>Intercept <b class="iv"></b> <input class="i" type="range" min="-4" max="4" step="0.1" value="0" aria-label="Intercept"></label>
+    <button class="alt snap" type="button">Show the best line</button>
+  </div>
+  <svg viewBox="0 0 560 280" role="img" aria-label="Scatter of Deere's monthly return against the market's, with a line and vertical bars showing each miss"></svg>
+  <div class="read"><div><small>Loss: mean squared error</small><b class="l"></b></div><div><small>Loss of the best straight line</small><b class="bl"></b></div></div>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Each dot is one month (illustrative returns in percent, not market data): the market's return across, Deere's return up. The orange bars are the misses. The loss squares each miss and averages them, so one big miss costs more than several small ones.</div>
+  <style>
+    #w-line .ctl { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 13px; }
+    #w-line .ctl b { color: var(--wk-navy); font-family: ui-monospace, Menlo, monospace; }
+    #w-line input[type=range] { width: 200px; vertical-align: middle; }
+    #w-line svg { width: 100%; height: auto; margin-top: 8px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-line .read { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    #w-line .read div { border: 1px solid var(--wk-line); border-radius: 10px; padding: 8px 12px; }
+    #w-line .read small { display: block; font-size: 11px; color: var(--wk-muted); }
+    #w-line .read b { font: 700 20px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-line .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-line .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    #w-line button { font: 700 12px system-ui, sans-serif; background: var(--wk-navy); color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+    #w-line button.alt { background: #fff; color: var(--wk-navy); border: 1px solid var(--wk-navy); }
+    @media (max-width: 640px) { #w-line .read { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+(function () {
+  var root = document.getElementById("w-line");
+  function $(s) { return root.querySelector(s); }
+  var M=[0.86,-1.66,2.33,5.85,7.06,3.2,1.0,-0.21,-0.93,-3.2,-5.31,-6.18,4.78,0.58,4.62,-4.64,1.8,0.74,3.39,-0.12,4.42,4.62,5.94,-7.18],D=[0.02,-1.56,3.03,4.29,14.3,6.23,-5.45,0.35,-2.84,-6.55,-6.69,-8.05,8.87,-1.12,5.38,-3.53,-4.82,-3.56,1.37,4.64,2.77,3.72,4.27,-13.65];
+  var n = M.length, sl = $(".s"), ic = $(".i");
+  var mx = M.reduce(function (a, b) { return a + b; }) / n, my = D.reduce(function (a, b) { return a + b; }) / n, num = 0, den = 0;
+  for (var k = 0; k < n; k++) { num += (M[k] - mx) * (D[k] - my); den += (M[k] - mx) * (M[k] - mx); }
+  var BS = num / den, BI = my - BS * mx;
+  function loss(s, b) { var L = 0; for (var k = 0; k < n; k++) { var e = D[k] - (s * M[k] + b); L += e * e; } return L / n; }
+  var best = loss(BS, BI);
+  function px(x) { return 280 + x * 34; } function py(y) { return 140 - y * 8.4; }
+  function draw() {
+    var s = +sl.value, b = +ic.value, h = "";
+    h += "<line x1='20' y1='" + py(0) + "' x2='540' y2='" + py(0) + "' stroke='#cfd4de'/><line x1='" + px(0) + "' y1='10' x2='" + px(0) + "' y2='270' stroke='#cfd4de'/>";
+    for (var k = 0; k < n; k++) {
+      var p = s * M[k] + b;
+      h += "<line x1='" + px(M[k]) + "' y1='" + py(D[k]) + "' x2='" + px(M[k]) + "' y2='" + py(p) + "' stroke='#ff5f05' stroke-width='2' opacity='.8'/><circle cx='" + px(M[k]) + "' cy='" + py(D[k]) + "' r='4' fill='#13294b'/>";
+    }
+    h += "<line x1='" + px(-8) + "' y1='" + py(s * -8 + b) + "' x2='" + px(8) + "' y2='" + py(s * 8 + b) + "' stroke='#13294b' stroke-width='2.5'/>";
+    $("svg").innerHTML = h;
+    $(".sv").textContent = s.toFixed(2); $(".iv").textContent = b.toFixed(1) + "%";
+    var L = loss(s, b); $(".l").textContent = L.toFixed(1); $(".bl").textContent = best.toFixed(1);
+    $(".say").textContent = L < best * 1.05 ? "That is within 5% of the best a straight line can do. The slope says Deere moves about " + s.toFixed(1) + " points for each point the market moves." : L > 30 ? "A flat line through zero misses by about as much as just guessing the average. Tilt it toward the dots." : "Better. The orange bars are the misses; shrink them and the loss falls.";
+  }
+  sl.addEventListener("input", draw); ic.addEventListener("input", draw);
+  $(".snap").addEventListener("click", function () { sl.value = BS.toFixed(2); ic.value = BI.toFixed(1); draw(); });
+  draw();
+})();
+  </script>
+</div>

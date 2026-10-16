@@ -41,6 +41,10 @@ parts:
   - caption: Part II · Machine learning
     chapters:
       - file: ch04-ml-foundations-1
+        sections:
+          - file: ch04-learning-from-data
+          - file: ch04-fitting-a-line
+          - file: ch04-improving-and-judging
       - file: ch05-ml-foundations-2
   - caption: Part III · Systems and decisions
     chapters:
