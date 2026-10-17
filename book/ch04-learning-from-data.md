@@ -1,7 +1,7 @@
 # 4.1 Learning From Data
 
 ```{raw} html
-<p class="wk-lede">Until now the agent followed instructions. A model learns its rule from examples instead. First decide what kind of learning the task needs, then turn the firm's data into the numbers a model can read. This section is taught in the same session as 4.2 and 4.3.</p>
+<p class="wk-lede">Until now the agent followed instructions. A model learns its rule from examples instead. First decide what kind of learning the task needs, then turn the firm's data into the numbers a model can read. This section is taught in the same session as 4.2 and 4.3. The session 4 lecture recording is on <a href="ch04-ml-foundations-1.html#ch04-lecture">the chapter 4 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch04-ml-foundations-1.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

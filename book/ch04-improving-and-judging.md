@@ -1,7 +1,7 @@
 # 4.3 Improving and Judging a Model
 
 ```{raw} html
-<p class="wk-lede">A closed formula only exists for the simplest models. The rest are found by walking: take a step that lowers the loss, then another. Then comes the harder question, whether a model that scores well on the past will score well on next month. This section is taught in the same session as 4.1 and 4.2.</p>
+<p class="wk-lede">A closed formula only exists for the simplest models. The rest are found by walking: take a step that lowers the loss, then another. Then comes the harder question, whether a model that scores well on the past will score well on next month. This section is taught in the same session as 4.1 and 4.2. The session 4 lecture recording is on <a href="ch04-ml-foundations-1.html#ch04-lecture">the chapter 4 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch04-ml-foundations-1.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

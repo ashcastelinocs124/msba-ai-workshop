@@ -15,3 +15,15 @@ Before this session, work through [Foundations for ML](mlf-foundations.md): retu
 - **[4.3 Improving and Judging a Model](ch04-improving-and-judging.md).** Gradient descent as repeated small steps downhill, then overfitting, underfitting and why a model is judged on months it never saw.
 
 All three use the firm's illustrative monthly returns (made up, not market data) and need no API key. One Colab notebook covers the whole chapter.
+
+(ch04-lecture)=
+## Watch the lecture
+
+The session 4 recording, covering all three parts. Watch it before or alongside 4.1 to 4.3.
+
+```{raw} html
+<figure class="wk-intro-video">
+  <iframe src="https://www.youtube.com/embed/cr98B6VnI1k" title="Session 4 · ML Foundations I" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Session 4 · ML Foundations I · 1 h 21 min · <a href="https://youtu.be/cr98B6VnI1k">Open on YouTube</a></figcaption>
+</figure>
+```

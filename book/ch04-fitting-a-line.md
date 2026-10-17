@@ -1,7 +1,7 @@
 # 4.2 Fitting a Line
 
 ```{raw} html
-<p class="wk-lede">The simplest model that predicts a number is a straight line. Fitting one means choosing two numbers, and judging a choice means turning "how wrong" into one score. That score is the loss. This section is taught in the same session as 4.1 and 4.3.</p>
+<p class="wk-lede">The simplest model that predicts a number is a straight line. Fitting one means choosing two numbers, and judging a choice means turning "how wrong" into one score. That score is the loss. This section is taught in the same session as 4.1 and 4.3. The session 4 lecture recording is on <a href="ch04-ml-foundations-1.html#ch04-lecture">the chapter 4 page</a>.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch04-ml-foundations-1.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 
