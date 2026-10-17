@@ -1,7 +1,7 @@
-# 6. Agent Systems
+# 6. Advanced ML
 
 ```{raw} html
-<p class="wk-lede">Add harness, observability, security, evaluation, and orchestration.</p>
+<p class="wk-lede">Go beyond a straight line: stronger models for harder questions, and how to tell when the extra complexity is worth it.</p>
 ```
 
 ```{raw} html

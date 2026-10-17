@@ -28,14 +28,14 @@
       1: [150, 18, "The agent loop", "The lookup. An agent pulls the figures a client asked for, drafts the comparison, and logs every step it took.", "The analyst checks each number against the log before the memo goes out."],
       2: [300, 18, "Prompt + context", "The draft. The agent writes in the firm's house style, follows the handbook's rules, and reads the right client card and earlier turns on each call.", "The analyst edits and signs the memo."],
       3: [450, 18, "Retrieval + memory", "The citations and the memory. The agent finds and cites the right handbook clause, triages trade pre-clearance requests, and remembers a client between sessions.", "Elena approves or rejects every trade clearance. A person can see, check and delete what the agent remembers."],
-      4: [225, 130, "First model", "The first prediction. A question such as \"which clients are likely not to renew?\" becomes a model trained on the firm's own data.", "Choosing the question, and deciding what the model's score may influence."],
-      5: [375, 130, "Trust the model", "The check. Compare models, read what drives them, and watch for drift so a stale model is caught before it misleads anyone.", "Deciding when a model is retrained or retired."],
-      6: [610, 70, "Production", "The harness. The agents and models run every day with budgets, traces, evaluation sets, injection guards, and an approval queue.", "Approval gates are built into the system, and Elena can read every log."],
-      7: [610, 240, "Choose the tool", "The routing. Each request goes to an agent, a model, a SQL query, or a person, by a written rule.", "The call on what is automated at all."],
-      8: [455, 240, "Markets", "The domain. The same tools are pointed at market data and at the AI investment value chain clients keep asking about.", "The investment view."],
-      9: [300, 240, "Research workflow", "The whole workflow, end to end: data is gathered, the agent drafts, a model tests the signal, and a note reaches the analyst ready to sign.", "The analyst decides and signs. Software gathers, extracts and tests."],
+      4: [150, 130, "Supervised ML", "The first prediction. A question such as \"which clients are likely not to renew?\" becomes a model trained on the firm's own data.", "Choosing the question, and deciding what the model's score may influence."],
+      5: [300, 130, "Structure + RL", "The structure. Clients and months are grouped without labels, odd cases are flagged, and a reward can teach a policy such as how to work an order.", "Deciding what a group means and whether a flagged case matters."],
+      6: [450, 130, "Advanced ML", "The harder questions. Stronger models for forecasts a straight line cannot make, with the checks that show when the extra complexity is worth it.", "Deciding whether a small gain is worth a model nobody can easily explain."],
+      7: [610, 70, "Choose the tool", "The routing. Each request goes to an agent, a model, a SQL query, or a person, by a written rule.", "The call on what is automated at all."],
+      8: [610, 240, "Production", "The harness. The agents and models run every day with budgets, traces, evaluation sets, injection guards, and an approval queue.", "Approval gates are built into the system, and Elena can read every log."],
+      9: [455, 240, "Markets & AI", "The domain and the whole workflow. The same tools are pointed at market data and the AI value chain: data is gathered, the agent drafts, a model tests the signal, and a note reaches the analyst ready to sign.", "The investment view. The analyst decides and signs; software gathers, extracts and tests."],
     };
-    const E = [[0,1],[0,4],[1,2],[2,3],[4,5],[3,6],[5,6],[6,7],[7,8],[8,9]];
+    const E = [[0,1],[0,4],[1,2],[2,3],[4,5],[5,6],[3,7],[6,7],[7,8],[8,9]];
     const W = 130, H = 46, ns = "http://www.w3.org/2000/svg";
     const el = (t, a, p = svg) => { const e = document.createElementNS(ns, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
     const defs = el("defs", {}), mk = el("marker", {id: "gm-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto"}, defs);
@@ -46,11 +46,11 @@
       el("path", {d: `M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}`});
     };
     for (const [a, b] of E) link(N[a], N[b]);
-    el("path", {d: `M300,263 L272,263`});  // chapter 9 → the goal box
+    el("path", {d: `M455,263 L272,263`});  // chapter 9 → the goal box
     el("text", {x: 150, y: 10, class: "lane"}).textContent = "Agent";
-    el("text", {x: 225, y: 192, class: "lane"}).textContent = "Machine learning";
+    el("text", {x: 150, y: 192, class: "lane"}).textContent = "Machine learning";
     el("text", {x: 610, y: 62, class: "lane"}).textContent = "Together";
-    el("text", {x: 300, y: 232, class: "lane"}).textContent = "Into production, onto markets";
+    el("text", {x: 455, y: 232, class: "lane"}).textContent = "Into production, onto markets";
     const g = el("g", {class: "goal"});
     el("rect", {x: 100, y: 234, width: 170, height: 58, rx: 10}, g);
     el("text", {x: 185, y: 258, "text-anchor": "middle", style: "font-size:13.5px;font-weight:700"}, g).textContent = "Goal";

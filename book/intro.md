@@ -40,9 +40,9 @@ Each chapter follows the same shape so you always know where to look:
 |---|---|---|
 | 0 · Foundations for AI | 0, 0A–0H | How does a large language model work and how is it trained, what is the difference between open and closed models, what do training and answering cost, what is an API, how do MCP and agent skills extend an agent, and what is a System One model? |
 | I · Agents | 1–3 | What is an agent, how does it take actions, and how do I keep that honest? |
-| II · Machine learning | 4–5 | How do I turn a business question into a model I can trust? |
-| III · Systems and decisions | 6–7 | How do I run this in production, and when should I not? |
-| IV · Finance | 8–9 | What does all of this look like when the domain is markets? |
+| II · Machine learning | 4–6 | How do I turn a business question into a model I can trust? |
+| III · Systems and decisions | 7–8 | How do I run this in production, and when should I not? |
+| IV · Finance | 9 | What does all of this look like when the domain is markets? |
 
 ## Before session 1
 

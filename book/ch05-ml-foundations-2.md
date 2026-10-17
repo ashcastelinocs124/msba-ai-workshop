@@ -1,7 +1,7 @@
 # 5. ML Foundations II
 
 ```{raw} html
-<p class="wk-lede">Compare models and assess generalization, interpretation, and drift.</p>
+<p class="wk-lede">Find structure with no labels, and learn from rewards: unsupervised and reinforcement learning.</p>
 ```
 
 ```{raw} html

@@ -46,11 +46,11 @@ parts:
           - file: ch04-fitting-a-line
           - file: ch04-improving-and-judging
       - file: ch05-ml-foundations-2
+      - file: ch06-advanced-ml
   - caption: Part III · Systems and decisions
     chapters:
-      - file: ch06-agent-systems
       - file: ch07-ml-agents-or-neither
+      - file: ch08-agent-systems
   - caption: Part IV · Finance
     chapters:
-      - file: ch08-markets-and-ai
-      - file: ch09-ai-investment-research
+      - file: ch09-markets-and-ai
