@@ -19,11 +19,11 @@ All three use the firm's illustrative monthly returns (made up, not market data)
 (ch04-lecture)=
 ## Watch the lecture
 
-The session 4 recording, covering all three parts. Watch it before or alongside 4.1 to 4.3.
+The session 4 recording, covering all three parts. Watch it before or alongside 4.1 to 4.3; the slides are linked below the video.
 
 ```{raw} html
 <figure class="wk-intro-video">
   <iframe src="https://www.youtube.com/embed/cr98B6VnI1k" title="Session 4 · ML Foundations I" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  <figcaption>Session 4 · ML Foundations I · 1 h 21 min · <a href="https://youtu.be/cr98B6VnI1k">Open on YouTube</a></figcaption>
+  <figcaption>Session 4 · ML Foundations I · 1 h 21 min · <a href="https://youtu.be/cr98B6VnI1k">Open on YouTube</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/workshop-4-ml-foundations-1.pdf">Slides (PDF)</a></figcaption>
 </figure>
 ```
