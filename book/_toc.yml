@@ -46,6 +46,10 @@ parts:
           - file: ch04-fitting-a-line
           - file: ch04-improving-and-judging
       - file: ch05-ml-foundations-2
+        sections:
+          - file: ch05-clustering
+          - file: ch05-dimensionality-reduction
+          - file: ch05-anomaly-detection
       - file: ch06-advanced-ml
   - caption: Part III · Systems and decisions
     chapters:

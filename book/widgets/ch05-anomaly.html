@@ -1,0 +1,56 @@
+<div class="wk-widget" id="w-an" style="background:#fff">
+  <div class="wk-title">/// Flag the odd months · distance from a normal month</div>
+  <div class="ctl">
+    <label>Flag months scoring above <b class="tv"></b> <input class="t" type="range" min="1.5" max="4.5" step="0.1" value="2.8" aria-label="Flag threshold"></label>
+    <fieldset class="opt"><legend>Measure unusualness with</legend>
+      <label><input type="radio" name="w-an-m" value="4" checked> the four benchmarks</label>
+      <label><input type="radio" name="w-an-m" value="6"> the four benchmarks plus Deere and Cat</label>
+    </fieldset>
+  </div>
+  <svg viewBox="0 0 560 220" role="img" aria-label="Bar chart of how unusual each of the 24 months is, with a threshold line and flagged months marked with a flag symbol"></svg>
+  <div class="read"><div><small>Months flagged</small><b class="nf"></b></div><div><small>Which ones</small><b class="wh"></b></div></div>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Score = how far a month is from the average month, with every series on the same scale (a typical month scores about 2; 3 and up is rare). Illustrative returns, not market data. A flag means "look at this", never "this is wrong".</div>
+  <style>
+    #w-an .ctl { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; font-size: 13px; }
+    #w-an .ctl b { color: var(--wk-navy); font-family: ui-monospace, Menlo, monospace; }
+    #w-an input[type=range] { width: 220px; vertical-align: middle; }
+    #w-an fieldset { border: 1px solid var(--wk-line); border-radius: 8px; padding: 4px 10px; display: flex; gap: 14px; flex-wrap: wrap; }
+    #w-an legend { font-size: 11px; color: var(--wk-muted); padding: 0 4px; }
+    #w-an svg { width: 100%; height: auto; margin-top: 8px; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-an .read { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 10px; }
+    #w-an .read div { border: 1px solid var(--wk-line); border-radius: 10px; padding: 8px 12px; }
+    #w-an .read small { display: block; font-size: 11px; color: var(--wk-muted); }
+    #w-an .read b { font: 700 16px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-an .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-an .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-an .read { grid-template-columns: 1fr; } }
+  </style>
+  <script>
+(function () {
+  var root = document.getElementById("w-an");
+  function $(s) { return root.querySelector(s); }
+  var S = { "4": [2.37,1.7,2.77,1.61,1.93,1.7,1.33,0.45,3.03,1.1,2.87,3.13,1.74,1.53,1.05,1.59,1.17,0.81,1.85,2.08,1.98,1.92,1.71,2.64], "6": [2.37,1.83,2.87,2.15,3.31,2.1,1.61,0.46,3.1,1.73,3.12,3.92,2.43,1.54,1.56,2.12,1.42,1.01,1.87,2.25,2.04,2.13,2.85,4.08] }, MO = ["Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26","Jul 26","Aug 26","Sep 26"], ts = $(".t");
+  function mode() { return root.querySelector("input[name=w-an-m]:checked").value; }
+  function draw() {
+    var s = S[mode()], t = +ts.value, h = "", flagged = [], i, y = function (v) { return 190 - v * 38; };
+    for (i = 0; i < s.length; i++) {
+      var x = 14 + i * 22.5, on = s[i] > t;
+      if (on) flagged.push(MO[i] + " (" + s[i].toFixed(1) + ")");
+      h += "<rect x='" + x + "' y='" + y(s[i]) + "' width='16' height='" + (190 - y(s[i])) + "' fill='" + (on ? "#ff5f05" : "#13294b") + "'><title>" + MO[i] + ": " + s[i].toFixed(2) + "</title></rect>";
+      if (on) h += "<text x='" + (x + 8) + "' y='" + (y(s[i]) - 4) + "' text-anchor='middle' font-size='12' fill='#a63d00'>⚑</text>";
+      if (i % 3 === 0) h += "<text x='" + (x + 8) + "' y='207' text-anchor='middle' font-size='9' fill='#5b6577'>" + MO[i] + "</text>";
+    }
+    h += "<line x1='8' y1='" + y(t) + "' x2='552' y2='" + y(t) + "' stroke='#a63d00' stroke-dasharray='5 4' stroke-width='1.5'/><text x='550' y='" + (y(t) - 4) + "' text-anchor='end' font-size='10' fill='#a63d00'>threshold " + t.toFixed(1) + "</text>";
+    $("svg").innerHTML = h;
+    $(".tv").textContent = t.toFixed(1);
+    $(".nf").textContent = flagged.length;
+    $(".wh").textContent = flagged.length ? flagged.join(", ") : "none";
+    $(".say").textContent = flagged.length === 0 ? "Nothing clears this bar. Lower the threshold to see the most unusual months first." : flagged.length > 8 ? "A third of the months flagged is not an alert, it is noise. A flag list nobody can review gets ignored." : mode() === "6" ? "With Deere and Cat added, Sep 26 (market -7.2, Deere -13.7, Cat -13.9) is the most unusual month while Feb 25 (Deere +14.3) and Aug 26 (Cat +15.9) join the list. What counts as odd depends on what you measure." : "On the four benchmarks alone, the most unusual months are Sep 25, Jun 25 and Aug 25. Switch to six series and watch the list change.";
+  }
+  ts.addEventListener("input", draw);
+  root.querySelectorAll("input[name=w-an-m]").forEach(function (r) { r.addEventListener("change", draw); });
+  draw();
+})();
+  </script>
+</div>

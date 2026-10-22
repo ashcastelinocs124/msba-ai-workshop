@@ -1,0 +1,69 @@
+<div class="wk-widget" id="w-pca" style="background:#fff">
+  <div class="wk-title">/// Shrink the table · principal components of six monthly series</div>
+  <div class="ctl">
+    <label>Components kept <b class="kv"></b> <input class="k" type="range" min="1" max="4" step="1" value="2" aria-label="Number of components kept"></label>
+  </div>
+  <div class="cols">
+    <div>
+      <div class="cap">Share of all the variation each component carries</div>
+      <svg class="scree" viewBox="0 0 270 170" role="img" aria-label="Bar chart of the share of variation carried by each of the first four components"></svg>
+    </div>
+    <div>
+      <div class="cap">Each month on the first two components</div>
+      <svg class="sc" viewBox="0 0 270 170" role="img" aria-label="Scatter of the 24 months on the first two components; Sep 25 and Sep 26 sit far to the left"></svg>
+    </div>
+  </div>
+  <table class="tb"><caption>What each component is made of (weights on the six series)</caption><thead><tr><th scope="col">Component</th><th scope="col">market</th><th scope="col">size</th><th scope="col">value</th><th scope="col">momentum</th><th scope="col">Deere</th><th scope="col">Cat</th></tr></thead><tbody></tbody></table>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Illustrative monthly returns in percent, not market data. Every series is put on the same scale first. The weights are the model's answer; the plain-English names ("the market tide") are ours.</div>
+  <style>
+    #w-pca .ctl { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 13px; }
+    #w-pca .ctl b { color: var(--wk-navy); font-family: ui-monospace, Menlo, monospace; }
+    #w-pca input[type=range] { width: 220px; vertical-align: middle; }
+    #w-pca .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    #w-pca .cap { font-size: 12px; color: var(--wk-muted); margin-bottom: 3px; }
+    #w-pca svg { width: 100%; height: auto; border: 1px solid var(--wk-line); border-radius: 12px; background: #fafbfc; }
+    #w-pca .tb { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    #w-pca .tb caption { text-align: left; font-size: 12px; color: var(--wk-muted); padding-bottom: 4px; }
+    #w-pca .tb th, #w-pca .tb td { border-bottom: 1px solid var(--wk-line); padding: 5px 6px; text-align: left; }
+    #w-pca .tb td.n { font-family: ui-monospace, Menlo, monospace; }
+    #w-pca .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-pca .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-pca .cols { grid-template-columns: 1fr; } #w-pca .tb { font-size: 11.5px; } }
+  </style>
+  <script>
+(function () {
+  var root = document.getElementById("w-pca");
+  function $(s) { return root.querySelector(s); }
+  var SH = [0.5158, 0.2126, 0.1487, 0.0855, 0.0272, 0.0103];
+  var C = [[0.54, 0.24, 0.31, 0.14, 0.5, 0.54], [-0.15, 0.66, 0.32, -0.65, -0.06, -0.1], [-0.16, 0.18, 0.67, 0.59, -0.36, -0.12]];
+  var P = [[-0.59, -2.24], [-0.71, 1.45], [1.53, 2.24], [1.98, -0.63], [2.24, -1.04], [1.84, 0.77], [-0.21, -0.58], [-0.1, -0.15], [-0.95, 2.6], [-1.62, 0.46], [-2.19, 0.12], [-3.69, 0.15], [1.57, 0.77], [-0.7, -1.14], [1.54, -0.05], [-1.89, 0.09], [0.09, -0.41], [-0.4, -0.37], [1.16, 1.07], [0.55, -0.45], [0.02, -1.7], [1.8, 0.37], [2.44, -1.0], [-3.71, -0.35]];
+  var MO = ["Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26","Jul 26","Aug 26","Sep 26"], ks = $(".k");
+  var NAME = ["the market tide", "size against momentum", "value and momentum together"];
+  function draw() {
+    var k = +ks.value, h = "", i, cum = 0;
+    for (i = 0; i < 4; i++) {
+      var hgt = SH[i] * 225, x = 14 + i * 62, on = i < k;
+      if (on) cum += SH[i];
+      h += "<rect x='" + x + "' y='" + (150 - hgt) + "' width='46' height='" + hgt + "' fill='" + (on ? "#13294b" : "#cfd4de") + "'/><text x='" + (x + 23) + "' y='" + (144 - hgt) + "' text-anchor='middle' font-size='11' fill='#13294b'>" + (SH[i] * 100).toFixed(0) + "%</text><text x='" + (x + 23) + "' y='164' text-anchor='middle' font-size='11' fill='#5b6577'>PC" + (i + 1) + "</text>";
+    }
+    $(".scree").innerHTML = h;
+    h = "<line x1='10' y1='85' x2='260' y2='85' stroke='#cfd4de'/><line x1='135' y1='8' x2='135' y2='162' stroke='#cfd4de'/>";
+    for (i = 0; i < P.length; i++) {
+      var x2 = 135 + P[i][0] * 30, y2 = 85 - P[i][1] * 27, big = (MO[i] === "Sep 25" || MO[i] === "Sep 26");
+      h += "<circle cx='" + x2 + "' cy='" + y2 + "' r='" + (big ? 5 : 3.5) + "' fill='" + (big ? "#ff5f05" : "#13294b") + "'><title>" + MO[i] + "</title></circle>";
+      if (big) h += "<text x='" + (x2 + 7) + "' y='" + (y2 + 4) + "' font-size='10' fill='#13294b'>" + MO[i] + "</text>";
+    }
+    h += "<text x='256' y='80' text-anchor='end' font-size='10' fill='#5b6577'>PC1</text><text x='140' y='18' font-size='10' fill='#5b6577'>PC2</text>";
+    $(".sc").innerHTML = h;
+    var rows = "";
+    for (i = 0; i < 3; i++) rows += "<tr><td>PC" + (i + 1) + " " + NAME[i] + "</td>" + C[i].map(function (v) { return "<td class='n'>" + (v > 0 ? "+" : "") + v.toFixed(2) + "</td>"; }).join("") + "</tr>";
+    $("tbody").innerHTML = rows;
+    $(".kv").textContent = k;
+    $(".say").textContent = "Keeping " + k + " of the 6 numbers per month keeps " + (cum * 100).toFixed(0) + "% of the variation." + (k === 1 ? " One number, the market tide, already carries about half of everything the table varies in." : k === 2 ? " Two numbers keep nearly three quarters: the six columns were largely saying two things." : k === 3 ? " Past two, each extra number adds less. Where to stop is a judgement, not a rule." : " Four numbers keep almost nine tenths; the last two components are mostly noise.");
+  }
+  ks.addEventListener("input", draw);
+  draw();
+})();
+  </script>
+</div>
