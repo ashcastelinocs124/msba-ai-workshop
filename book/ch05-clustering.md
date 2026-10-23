@@ -1,7 +1,7 @@
 # 5.1 Clustering
 
 ```{raw} html
-<p class="wk-lede">Clustering sorts rows into groups of similar rows without being told what the groups are. This section is taught in the same session as 5.2 and 5.3. Each month of the firm's data is one row, and the question is which months look alike.</p>
+<p class="wk-lede">Clustering sorts rows into groups of similar rows without being told what the groups are. This section is taught in the same session as 5. The session 5 slides are on <a href="ch05-ml-foundations-2.html#ch05-lecture">the chapter 5 page</a>.2 and 5.3. Each month of the firm's data is one row, and the question is which months look alike.</p>
 <a class="wk-colab" href="https://colab.research.google.com/github/ashcastelinocs124/msba-ai-workshop/blob/main/notebooks/ch05-ml-foundations-2.ipynb" target="_blank">▶ Open in Colab</a>
 ```
 

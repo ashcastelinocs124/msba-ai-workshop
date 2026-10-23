@@ -16,6 +16,15 @@ Chapter 4 was supervised learning: every month came with a label (Deere's return
 
 All three use the firm's illustrative monthly returns (made up, not market data) and need no API key. One Colab notebook covers the whole chapter, and it also shows the same three methods in scikit-learn.
 
+(ch05-lecture)=
+## Watch the lecture
+
+The session 5 slides cover all three parts. The recording will be added here after the session; watch it alongside 5.1 to 5.3.
+
+```{raw} html
+<p><a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/workshop-5-ml-foundations-2.pdf">Session 5 slides (PDF, 81 pages)</a></p>
+```
+
 ## Learning from rewards
 
 The third kind of learning from section 4.1 is **reinforcement learning**: no table of answers and no table of unlabeled data, but an agent that acts, gets a reward, and adjusts. It is not part of the three sections above. The simulator in [chapter 0's section on post-training](ch00-post-training.md) lets you run one, and chapter 6 returns to how stronger models are trained.
