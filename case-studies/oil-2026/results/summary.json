@@ -1,0 +1,344 @@
+{
+ "1_anomalies": {
+  "share_of_days_flagged_top_years": {
+   "2020": 24.3,
+   "2026": 17.2,
+   "2008": 6.7,
+   "2009": 5.6,
+   "2001": 3.6,
+   "1999": 3.5
+  },
+  "after_flagged_vs_normal_days": {
+   "normal": {
+    "days": 7171,
+    "pct_up_20d_later": 55.2,
+    "median_abs_20d_move": 6.7,
+    "avg_next20_volatility": 35.0
+   },
+   "flagged": {
+    "days": 158,
+    "pct_up_20d_later": 55.1,
+    "median_abs_20d_move": 14.9,
+    "avg_next20_volatility": 113.8
+   }
+  }
+ },
+ "2_forecast_walk_forward_2005_2026": {
+  "y_vol": {
+   "volatility only": {
+    "oos_r2_pct": 15.6,
+    "months": 261
+   },
+   "momentum+value+spread+volatility": {
+    "oos_r2_pct": 29.0,
+    "months": 261
+   },
+   "momentum+value+spread+anomaly": {
+    "oos_r2_pct": 32.1,
+    "months": 261
+   },
+   "core set": {
+    "oos_r2_pct": 31.8,
+    "months": 261
+   }
+  },
+  "y_ret": {
+   "volatility only": {
+    "oos_r2_pct": 1.7,
+    "months": 261,
+    "sign_right_pct": 52.5,
+    "always_up_pct": 55.6
+   },
+   "momentum+value+spread+volatility": {
+    "oos_r2_pct": -3.2,
+    "months": 261,
+    "sign_right_pct": 47.5,
+    "always_up_pct": 55.6
+   },
+   "momentum+value+spread+anomaly": {
+    "oos_r2_pct": -3.5,
+    "months": 261,
+    "sign_right_pct": 54.0,
+    "always_up_pct": 55.6
+   },
+   "core set": {
+    "oos_r2_pct": 0.5,
+    "months": 261,
+    "sign_right_pct": 51.0,
+    "always_up_pct": 55.6
+   }
+  }
+ },
+ "3_holdout_2026_volatility": {
+  "with anomaly score": {
+   "oos_r2_pct": 25.7,
+   "rows": [
+    [
+     "Jan 2026",
+     27.9,
+     33.7
+    ],
+    [
+     "Feb 2026",
+     20.2,
+     34.1
+    ],
+    [
+     "Mar 2026",
+     32.7,
+     94.7
+    ],
+    [
+     "Apr 2026",
+     65.4,
+     98.9
+    ],
+    [
+     "May 2026",
+     78.9,
+     57.4
+    ],
+    [
+     "Jun 2026",
+     60.0,
+     49.0
+    ],
+    [
+     "Jul 2026",
+     56.4,
+     80.3
+    ],
+    [
+     "Aug 2026",
+     45.1,
+     53.2
+    ],
+    [
+     "Sep 2026",
+     48.4,
+     63.3
+    ],
+    [
+     "Oct 2026",
+     30.0,
+     87.9
+    ]
+   ]
+  },
+  "without anomaly score": {
+   "oos_r2_pct": -24.3,
+   "rows": [
+    [
+     "Jan 2026",
+     31.3,
+     33.7
+    ],
+    [
+     "Feb 2026",
+     21.9,
+     34.1
+    ],
+    [
+     "Mar 2026",
+     34.3,
+     94.7
+    ],
+    [
+     "Apr 2026",
+     14.9,
+     98.9
+    ],
+    [
+     "May 2026",
+     52.5,
+     57.4
+    ],
+    [
+     "Jun 2026",
+     59.0,
+     49.0
+    ],
+    [
+     "Jul 2026",
+     57.6,
+     80.3
+    ],
+    [
+     "Aug 2026",
+     29.3,
+     53.2
+    ],
+    [
+     "Sep 2026",
+     45.4,
+     63.3
+    ],
+    [
+     "Oct 2026",
+     22.2,
+     87.9
+    ]
+   ]
+  }
+ },
+ "4_variable_search": {
+  "y_vol (max 1 vars)": {
+   "tried": 24,
+   "share_beating_average_pct": 62.5,
+   "winners": [
+    {
+     "vars": [
+      "Brent vol 3m"
+     ],
+     "select_r2": 55.0,
+     "holdout": {
+      "oos_r2_pct": 0.9,
+      "months": 92
+     }
+    },
+    {
+     "vars": [
+      "Brent vol last month"
+     ],
+     "select_r2": 51.6,
+     "holdout": {
+      "oos_r2_pct": 25.2,
+      "months": 92
+     }
+    },
+    {
+     "vars": [
+      "Anomaly score"
+     ],
+     "select_r2": 44.9,
+     "holdout": {
+      "oos_r2_pct": 25.4,
+      "months": 92
+     }
+    },
+    {
+     "vars": [
+      "Brent-WTI spread"
+     ],
+     "select_r2": 32.0,
+     "holdout": {
+      "oos_r2_pct": 5.2,
+      "months": 92
+     }
+    },
+    {
+     "vars": [
+      "VIX avg"
+     ],
+     "select_r2": 26.4,
+     "holdout": {
+      "oos_r2_pct": 17.0,
+      "months": 92
+     }
+    }
+   ]
+  },
+  "y_ret (max 1 vars)": {
+   "tried": 24,
+   "share_beating_average_pct": 16.7,
+   "winners": [
+    {
+     "vars": [
+      "VIX change 1m"
+     ],
+     "select_r2": 2.7,
+     "holdout": {
+      "oos_r2_pct": 0.8,
+      "months": 92,
+      "sign_right_pct": 54.3,
+      "always_up_pct": 56.5
+     }
+    },
+    {
+     "vars": [
+      "S&P 500 mom 3m"
+     ],
+     "select_r2": 0.7,
+     "holdout": {
+      "oos_r2_pct": -2.2,
+      "months": 92,
+      "sign_right_pct": 52.2,
+      "always_up_pct": 56.5
+     }
+    },
+    {
+     "vars": [
+      "Nat gas mom 12m"
+     ],
+     "select_r2": 0.2,
+     "holdout": {
+      "oos_r2_pct": -0.4,
+      "months": 92,
+      "sign_right_pct": 52.2,
+      "always_up_pct": 56.5
+     }
+    },
+    {
+     "vars": [
+      "Brent vol 3m"
+     ],
+     "select_r2": 0.1,
+     "holdout": {
+      "oos_r2_pct": 4.0,
+      "months": 92,
+      "sign_right_pct": 50.0,
+      "always_up_pct": 56.5
+     }
+    },
+    {
+     "vars": [
+      "Anomaly days"
+     ],
+     "select_r2": -0.0,
+     "holdout": {
+      "oos_r2_pct": -3.8,
+      "months": 92,
+      "sign_right_pct": 45.7,
+      "always_up_pct": 56.5
+     }
+    }
+   ]
+  }
+ },
+ "5_trump_posts_event_study": {
+  "pressure_on_opec": {
+   "days": 9,
+   "avg_move_on_post_days": -1.97,
+   "effect_after_controls": -2.06,
+   "p_value": 0.022
+  },
+  "cheap_gas_brag": {
+   "days": 26,
+   "avg_move_on_post_days": 0.07,
+   "effect_after_controls": 0.02,
+   "p_value": 0.979
+  },
+  "iran_escalation": {
+   "days": 42,
+   "avg_move_on_post_days": 0.13,
+   "effect_after_controls": 0.09,
+   "p_value": 0.863
+  },
+  "hormuz": {
+   "days": 2,
+   "avg_move_on_post_days": 1.89,
+   "effect_after_controls": 1.94,
+   "p_value": 0.025
+  }
+ },
+ "6_war_attribution_2026": {
+  "days": 139,
+  "r2_pct": {
+   "market variables": 21.8,
+   "Hormuz/policy events": 13.8,
+   "Trump posts": 1.1,
+   "events + market": 29.3,
+   "events + market + posts": 29.8
+  }
+ }
+}
