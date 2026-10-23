@@ -8,13 +8,33 @@ description: Reproduce and extend the MSBA Workshop 5 oil case study (Brent 2026
 You are helping a student work with the oil case study in `case-studies/oil-2026/` of the
 `ashcastelinocs124/msba-ai-workshop` repository. It asks: **what moves oil, and what can we predict?**
 
-## Setup
+## Setup: do it for the student, one step at a time
 
-1. If the folder isn't present: `git clone --depth 1 https://github.com/ashcastelinocs124/msba-ai-workshop` and `cd msba-ai-workshop/case-studies/oil-2026`.
-2. `pip install -r requirements.txt` (numpy, pandas, scikit-learn, statsmodels, matplotlib).
-3. `python fetch_data.py` for the Trump post archives (needed only for the `posts` step). Add `--refresh` to pull the latest prices.
-4. `python run.py` runs everything except the slow search (~1 min). `python run.py --search` adds the full 2,047-combination search (~25 min). `python run.py --step <anomalies|forecast|holdout|search|posts|war>` runs one step.
-5. Read `results/summary.md` and explain it in plain language.
+Many students have no coding background. Run each command yourself, check it worked, and explain in one plain sentence what it did before moving on. If a step fails, fix it (see Troubleshooting) instead of handing the error back.
+
+1. **Check Python.** Run `python3 --version` (on Windows: `python --version` or `py --version`). Need 3.9 or newer. If it's missing, tell the student the simplest option for their machine: macOS `brew install python` (or the installer from python.org); Windows the python.org installer with "Add python.exe to PATH" ticked. If they'd rather not install anything, use the **Colab route** below.
+2. **Check git.** `git --version`. If missing and not easy to install, download the repo as a ZIP from GitHub (Code → Download ZIP) and unzip it instead.
+3. **Get the code.** `git clone --depth 1 https://github.com/ashcastelinocs124/msba-ai-workshop` then `cd msba-ai-workshop/case-studies/oil-2026`. If the folder already exists, `cd` into it and run `git pull`.
+4. **Make a virtual environment** so nothing clashes with other projects:
+   - macOS/Linux: `python3 -m venv .venv && source .venv/bin/activate`
+   - Windows (PowerShell): `py -m venv .venv; .venv\Scripts\Activate.ps1`
+5. **Install the libraries.** `pip install -r requirements.txt` (numpy, pandas, scikit-learn, statsmodels, matplotlib).
+6. **Smoke test** (a few seconds): `python -c "import oilcase as oc; p = oc.load_prices(); print(p['brent'].index[-1], round(p['brent'].iloc[-1], 2))"` should print the last date and Brent price.
+7. **Get the post archives** (only needed for the `posts` step): `python fetch_data.py`. Add `--refresh` to pull the latest prices too.
+8. **Run it.** `python run.py` runs everything except the slow search (~1 min). `python run.py --search` adds the full 2,047-combination search (~25 min). `python run.py --step <anomalies|forecast|holdout|search|posts|war>` runs one step.
+9. **Explain the results.** Open `results/summary.md` and walk the student through it in plain language, step by step, using the numbers in the file.
+
+**Colab route (no install):** open `notebooks/oil_case_study_colab.ipynb` from the GitHub folder in Google Colab (File → Open notebook → GitHub, paste the repo URL) and Runtime → Run all. The notebook clones the repo, installs, runs and shows the results.
+
+### Troubleshooting
+
+- `pip: command not found` → use `python3 -m pip install -r requirements.txt` (Windows: `py -m pip …`).
+- `externally-managed-environment` → you skipped the virtual environment; do step 4 first.
+- PowerShell refuses to run `Activate.ps1` → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, then retry, or use Command Prompt: `.venv\Scripts\activate.bat`.
+- `ModuleNotFoundError: oilcase` → you're not in `case-studies/oil-2026`; `cd` there.
+- `FileNotFoundError … posts/truth.csv` → run `python fetch_data.py` (only the posts step needs it).
+- Download blocked (school network, proxy) → use the Colab route; all price data already ships in `data/`.
+- Apple Silicon build errors for scikit-learn/statsmodels → `pip install --upgrade pip` first, then reinstall.
 
 ## How the code is organised (`oilcase.py`)
 
