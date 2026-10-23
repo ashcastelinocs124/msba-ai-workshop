@@ -19,10 +19,13 @@ All three use the firm's illustrative monthly returns (made up, not market data)
 (ch05-lecture)=
 ## Watch the lecture
 
-The session 5 slides cover all three parts. The recording will be added here after the session; watch it alongside 5.1 to 5.3.
+The session 5 recording, covering all three parts. Watch it before or alongside 5.1 to 5.3; the slides are linked below the video.
 
 ```{raw} html
-<p><a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/workshop-5-ml-foundations-2.pdf">Session 5 slides (PDF, 81 pages)</a></p>
+<figure class="wk-intro-video">
+  <iframe src="https://www.youtube.com/embed/bg_Mn7bUbMI" title="Session 5 · ML Foundations II" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Session 5 · ML Foundations II · <a href="https://youtu.be/bg_Mn7bUbMI">Open on YouTube</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/workshop-5-ml-foundations-2.pdf">Slides (PDF)</a></figcaption>
+</figure>
 ```
 
 ## Learning from rewards
