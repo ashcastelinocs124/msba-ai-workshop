@@ -30,7 +30,7 @@
       3: [450, 18, "Retrieval + memory", "The citations and the memory. The agent finds and cites the right handbook clause, triages trade pre-clearance requests, and remembers a client between sessions.", "Elena approves or rejects every trade clearance. A person can see, check and delete what the agent remembers."],
       4: [150, 130, "Supervised ML", "The first prediction. A question such as \"which clients are likely not to renew?\" becomes a model trained on the firm's own data.", "Choosing the question, and deciding what the model's score may influence."],
       5: [300, 130, "Structure + RL", "The structure. Clients and months are grouped without labels, odd cases are flagged, and a reward can teach a policy such as how to work an order.", "Deciding what a group means and whether a flagged case matters."],
-      6: [450, 130, "Advanced ML", "The harder questions. Stronger models for forecasts a straight line cannot make, with the checks that show when the extra complexity is worth it.", "Deciding whether a small gain is worth a model nobody can easily explain."],
+      6: [450, 130, "Self-learning", "The improvement. Agents run in a harness that scores each attempt, keep what worked in memory, adapt from feedback, and are measured on whether they really get better.", "Deciding what counts as better, and whether a lesson the agent saved is true."],
       7: [610, 70, "Choose the tool", "The routing. Each request goes to an agent, a model, a SQL query, or a person, by a written rule.", "The call on what is automated at all."],
       8: [610, 240, "Production", "The harness. The agents and models run every day with budgets, traces, evaluation sets, injection guards, and an approval queue.", "Approval gates are built into the system, and Elena can read every log."],
       9: [455, 240, "Markets & AI", "The domain and the whole workflow. The same tools are pointed at market data and the AI value chain: data is gathered, the agent drafts, a model tests the signal, and a note reaches the analyst ready to sign.", "The investment view. The analyst decides and signs; software gathers, extracts and tests."],
@@ -48,7 +48,7 @@
     for (const [a, b] of E) link(N[a], N[b]);
     el("path", {d: `M455,263 L272,263`});  // chapter 9 → the goal box
     el("text", {x: 150, y: 10, class: "lane"}).textContent = "Agent";
-    el("text", {x: 150, y: 192, class: "lane"}).textContent = "Machine learning";
+    el("text", {x: 150, y: 192, class: "lane"}).textContent = "Learning";
     el("text", {x: 610, y: 62, class: "lane"}).textContent = "Together";
     el("text", {x: 455, y: 232, class: "lane"}).textContent = "Into production, onto markets";
     const g = el("g", {class: "goal"});

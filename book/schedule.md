@@ -21,7 +21,8 @@
 | F | On your own time, before session 4 | Self-paced | No room | Foundations for ML | [Foundations for ML](mlf-foundations.md) |
 | 4 ✓ Done | Fri, Oct 16, 2026 | 1:30–3:30 pm | 3007 BIF | II · Machine learning | [4. ML Foundations I](ch04-ml-foundations-1.md) |
 | 5 ✓ Done | Fri, Oct 23, 2026 | 1:30–3:30 pm | 3007 BIF | II · Machine learning | [5. ML Foundations II](ch05-ml-foundations-2.md) |
-| 6 | Fri, Oct 30, 2026 | 1:30–3:30 pm | 3007 BIF | II · Machine learning | [6. Advanced ML](ch06-advanced-ml.md) |
+| D | On your own time, alongside session 6 | Self-paced | No room | Deep Learning | Coming soon |
+| 6 | Fri, Oct 30, 2026 | 1:30–3:30 pm | 3007 BIF | III · Systems and decisions | [6. Building Self-Learning AI Agents](ch06-self-learning-agents.md) |
 | 7 | Fri, Nov 6, 2026 | 1:30–3:30 pm | 3007 BIF | III · Systems and decisions | [7. When to Use ML, Agents, or Neither](ch07-ml-agents-or-neither.md) |
 | 8 | Fri, Nov 13, 2026 | 1:30–3:30 pm | 3007 BIF | III · Systems and decisions | [8. Agent Systems](ch08-agent-systems.md) |
 | F | On your own time, before session 9 | Self-paced | No room | Foundations for AI for Finance Markets | Coming soon |

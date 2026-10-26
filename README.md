@@ -6,8 +6,8 @@ An interactive textbook for the Gies MSBA workshop series. Ten chapters in five 
 |---|---|
 | 0 · Foundations | 0 How Large Language Models Work (tokens, next-token prediction, open vs closed models) |
 | I · Agents | 1 Introduction to AI Agents (what an agent is, the loop, tool design) · 2 Prompt and Context Engineering · 3 Memory Retrieval and RAG (chunking, embeddings, keyword/semantic/hybrid/rerank retrieval, agent memory) |
-| II · Machine learning | 4 ML Foundations I · 5 ML Foundations II · 6 Advanced ML |
-| III · Systems and decisions | 7 When to Use ML, Agents, or Neither · 8 Agent Systems |
+| II · Machine learning | 4 ML Foundations I · 5 ML Foundations II |
+| III · Systems and decisions | 6 Building Self-Learning AI Agents · 7 When to Use ML, Agents, or Neither · 8 Agent Systems |
 | IV · Finance | 9 Markets and AI |
 
 Every chapter is set at a fictional equity research firm, Champaign Capital Research (see `book/the-firm.md`), and has runnable Python cells that execute in the browser (Pyodide, no server), one interactive explainer widget, a checkpoint quiz, and a Colab notebook for the exercise against a real model on Lumen, the campus LLM service.

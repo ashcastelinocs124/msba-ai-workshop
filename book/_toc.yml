@@ -50,9 +50,9 @@ parts:
           - file: ch05-clustering
           - file: ch05-dimensionality-reduction
           - file: ch05-anomaly-detection
-      - file: ch06-advanced-ml
   - caption: Part III · Systems and decisions
     chapters:
+      - file: ch06-self-learning-agents
       - file: ch07-ml-agents-or-neither
       - file: ch08-agent-systems
   - caption: Part IV · Finance
