@@ -18,6 +18,18 @@ What the session covers:
 
 Deep learning, which the plan once placed in this session, is now a self-paced item on the [schedule](schedule.md), to do on your own time.
 
+(ch06-lecture)=
+## Watch the lecture
+
+The session 6 recording. The written chapter is still to come, so the lecture is the material for now.
+
+```{raw} html
+<figure class="wk-intro-video">
+  <iframe src="https://www.youtube.com/embed/BbT-xdsY3f8" title="Session 6 · Building Self-Learning AI Agents" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <figcaption>Session 6 · Building Self-Learning AI Agents · <a href="https://youtu.be/BbT-xdsY3f8">Open on YouTube</a></figcaption>
+</figure>
+```
+
 ```{admonition} Coming soon
 :class: tip
 This chapter is being written. Chapter 1 shows the format every chapter will follow: objectives, concepts, runnable cells, an interactive explainer, a checkpoint quiz, and a Colab exercise.
