@@ -21,12 +21,12 @@ Deep learning, which the plan once placed in this session, is now a self-paced i
 (ch06-lecture)=
 ## Watch the lecture
 
-The session 6 recording. The written chapter is still to come, so the lecture is the material for now.
+The session 6 recording. The written chapter is still to come, so the lecture and its slides, linked below the video, are the material for now.
 
 ```{raw} html
 <figure class="wk-intro-video">
   <iframe src="https://www.youtube.com/embed/BbT-xdsY3f8" title="Session 6 · Building Self-Learning AI Agents" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-  <figcaption>Session 6 · Building Self-Learning AI Agents · <a href="https://youtu.be/BbT-xdsY3f8">Open on YouTube</a></figcaption>
+  <figcaption>Session 6 · Building Self-Learning AI Agents · <a href="https://youtu.be/BbT-xdsY3f8">Open on YouTube</a> · <a href="https://github.com/ashcastelinocs124/Workshop-Slides/blob/main/AI/education/quantitative-analyst-course/workshop-6-self-learning-agents.pdf">Slides (PDF)</a></figcaption>
 </figure>
 ```
 
