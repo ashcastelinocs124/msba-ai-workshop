@@ -53,6 +53,11 @@ parts:
   - caption: Part III · Systems and decisions
     chapters:
       - file: ch06-self-learning-agents
+        sections:
+          - file: ch06-what-self-learning-means
+          - file: ch06-learning-harness
+          - file: ch06-memory-and-experience
+          - file: ch06-for-reference
       - file: ch07-ml-agents-or-neither
       - file: ch08-agent-systems
   - caption: Part IV · Finance

@@ -1,0 +1,56 @@
+<div class="wk-widget" id="w-held" style="background:#fff">
+  <div class="wk-title">/// Practice score vs held-out score</div>
+  <fieldset class="ctl">
+    <legend>What is in lessons.md?</legend>
+    <label><input type="radio" name="w-held-l" value="none" checked> Nothing yet</label>
+    <label><input type="radio" name="w-held-l" value="memo"> Memorized answers ("Deere: $45.7B" …)</label>
+    <label><input type="radio" name="w-held-l" value="rule"> The general rule (fiscal year, cite the 10-K)</label>
+  </fieldset>
+  <label class="hack"><input type="checkbox" class="hk"> Let the agent edit the grader that marks its practice tasks</label>
+  <div class="bars" role="img" aria-label=""></div>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Practice: the four memos from the week (Deere, Apple, Caterpillar, NVIDIA). Held-out: a Microsoft memo the agent never learned from, always marked by the real grader. Results from <code>evaluate()</code> in learning.py, on the mock model.</div>
+  <style>
+    #w-held .ctl { border: 0; padding: 0; margin: 0 0 8px; font-size: 13.5px; }
+    #w-held .ctl legend { float: none; width: auto; font: 600 13.5px system-ui, sans-serif; color: #1f2430; margin-bottom: 4px; padding: 0; }
+    #w-held .ctl label { display: block; padding: 2px 0; }
+    #w-held .hack { display: block; font-size: 13.5px; margin: 4px 0 12px; padding: 6px 10px; border: 1px dashed #b42318; border-radius: 8px; background: #fff7f6; }
+    #w-held input:focus-visible { outline: 3px solid var(--wk-orange); outline-offset: 2px; }
+    #w-held .bar { display: grid; grid-template-columns: 150px 1fr 80px; gap: 10px; align-items: center; margin: 8px 0; font-size: 13px; }
+    #w-held .bar .tr { height: 22px; border-radius: 6px; background: #f1f3f6; border: 1px solid var(--wk-line); overflow: hidden; }
+    #w-held .bar .fill { height: 100%; }
+    #w-held .bar.p .fill { background: var(--wk-navy); }
+    #w-held .bar.p .fill.fake { background: repeating-linear-gradient(45deg, #13294b, #13294b 6px, #8a96ad 6px, #8a96ad 12px); }
+    #w-held .bar.h .fill { background: var(--wk-orange); }
+    #w-held .bar b { font: 700 14px ui-monospace, Menlo, monospace; color: var(--wk-navy); }
+    #w-held .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-held .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-held .bar { grid-template-columns: 1fr 64px; } #w-held .bar .tr { grid-column: 1 / -1; grid-row: 2; } }
+  </style>
+  <script>
+(function () {
+  var root = document.getElementById("w-held");
+  // Copy of evaluate()'s results in learning.py: [practice right of 4, held-out right of 1]; keep in step.
+  var R = { none: [1, 0], memo: [4, 0], rule: [4, 1] };
+  var SAY = {
+    none: "With nothing in lessons.md the agent gets only Caterpillar right, whose fiscal year is the calendar year.",
+    memo: "100% on practice, 0% on Microsoft. It learned four answers, not the rule behind them, so the first new company fails.",
+    rule: "The rule carries over: Microsoft's memo is right too, though the agent never wrote one before. That is transfer."
+  };
+  var bars = root.querySelector(".bars"), say = root.querySelector(".say"), hk = root.querySelector(".hk");
+  function draw() {
+    var k = root.querySelector("input[name=w-held-l]:checked").value, hacked = hk.checked;
+    var p = hacked ? 4 : R[k][0], h = R[k][1];
+    bars.innerHTML =
+      '<div class="bar p"><span>Practice (4 memos)' + (hacked ? "<br><small>marked by the agent's own grader</small>" : "") + '</span><div class="tr"><div class="fill' + (hacked ? " fake" : "") + '" style="width:' + p / 4 * 100 + '%"></div></div><b>' + p + " of 4</b></div>" +
+      '<div class="bar h"><span>Held-out (Microsoft)</span><div class="tr"><div class="fill" style="width:' + h * 100 + '%"></div></div><b>' + h + " of 1</b></div>";
+    bars.setAttribute("aria-label", "Practice: " + p + " of 4 right" + (hacked ? ", self-graded" : "") + ". Held-out: " + h + " of 1 right.");
+    say.textContent = hacked
+      ? "Reward hacking. A grader that always says pass makes practice read 4 of 4. The held-out memo, marked by a grader the agent can't touch, is " + h + " of 1, exactly as before."
+      : SAY[k];
+  }
+  root.querySelectorAll("input").forEach(function (i) { i.addEventListener("change", draw); });
+  draw();
+})();
+  </script>
+</div>

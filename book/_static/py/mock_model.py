@@ -219,6 +219,24 @@ def model(msgs, tools=None):
         fields = "; ".join(f"{r['name']} REV_Q {r['revenue']:,.0f}" for r in rows)
         return {"type": "text", "text": f"Here are the raw vendor fields behind the memo: {fields}, from the vendor feed."}
 
+    # §6.2.3: the annual revenue memo. With no lesson on the desk the mock asks for the calendar-year figure,
+    # which is not what the firm reports (Priya's correction); with a "fiscal year" lesson in the system prompt
+    # it asks for the fiscal year and cites the 10-K page. A lesson that is a memorized answer ("Deere: $45.7B")
+    # is copied without a lookup (§6.4.3). ponytail: scripted, like every mock answer.
+    if "annual revenue" in q:
+        sys_text = _system_text(msgs)
+        t = named[0] if named else "DE"
+        known = re.search(re.escape(_DISPLAY[t]) + r": (\$[\d.]+B)", sys_text)
+        if known and not seen:
+            return {"type": "text", "text": f"{_DISPLAY[t]} annual revenue was {known.group(1)}. [source: lessons.md]"}
+        if not seen:
+            basis = "fiscal" if "fiscal year" in sys_text.lower() else "calendar"
+            return {"type": "tool_call", "tool": "get_annual_revenue", "args": {"ticker": t, "basis": basis}}
+        r = seen[-1]["content"]
+        if "error" in r:
+            return {"type": "text", "text": f"The firm holds no annual figures for {_DISPLAY[t]}."}
+        return {"type": "text", "text": f"{r['name']} annual revenue was ${r['revenue']/1e9:.1f}B in {r['period']}. [source: {r['source']}]"}
+
     if "price" in q:
         if not seen:
             return {"type": "tool_call", "tool": "get_price", "args": {"ticker": named[0] if named else "DE"}}

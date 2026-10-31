@@ -1,0 +1,71 @@
+<div class="wk-widget" id="w-dream" style="background:#fff">
+  <div class="wk-title">/// Dreaming · Friday night</div>
+  <div class="cols">
+    <div class="file"><div class="fh">lessons.md · Friday 5 pm</div><div class="old"></div></div>
+    <div class="arrow" aria-hidden="true">dream<br>▸</div>
+    <div class="file new"><div class="fh">lessons-new.md · after dreaming</div><div class="newf"></div></div>
+  </div>
+  <div class="ctrl">
+    <button type="button" class="primary dreambtn">Dream</button>
+    <button type="button" class="approve" disabled>Approve as Priya</button>
+    <button type="button" class="reject" disabled>Reject</button>
+    <button type="button" class="again">Start over</button>
+  </div>
+  <div class="say" aria-live="polite"></div>
+  <div class="note">Scripted: the merging follows fixed rules here, the same ones as <code>dream()</code> in learning.py. In the Colab notebook a real model does the rereading.</div>
+  <style>
+    #w-dream .cols { display: grid; grid-template-columns: 1fr 56px 1fr; gap: 8px; }
+    #w-dream .file { border: 1px solid var(--wk-line); border-radius: 8px; background: #fff; padding: 8px 10px; font: 12.5px/1.6 ui-monospace, Menlo, monospace; min-height: 170px; }
+    #w-dream .file.new { border-color: var(--wk-orange); }
+    #w-dream .fh { font: 700 11px ui-monospace, Menlo, monospace; letter-spacing: .06em; color: var(--wk-muted); margin-bottom: 6px; text-transform: uppercase; }
+    #w-dream .arrow { display: flex; align-items: center; justify-content: center; font: 700 12px ui-monospace, Menlo, monospace; color: #b84300; text-align: center; }
+    #w-dream .tag { font: 700 10px ui-monospace, Menlo, monospace; padding: 1px 6px; border-radius: 8px; margin-left: 4px; white-space: nowrap; }
+    #w-dream .t-merge { background: #eceffd; color: #283a8f; }
+    #w-dream .t-keep { background: #fff1e6; color: #8a3a00; }
+    #w-dream .t-drop { background: #fde8e7; color: #9b1c14; }
+    #w-dream .gone { text-decoration: line-through; color: #6b7384; }
+    #w-dream .muted { color: #6b7384; }
+    #w-dream .ctrl { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    #w-dream button:focus-visible { outline: 3px solid var(--wk-orange); outline-offset: 2px; }
+    #w-dream button:disabled { opacity: .45; cursor: default; }
+    #w-dream .say { margin-top: 10px; border-left: 4px solid var(--wk-orange); background: #fff8f3; border-radius: 6px; padding: 9px 12px; font-size: 14px; line-height: 1.5; }
+    #w-dream .note { margin-top: 8px; font-size: 11.5px; color: var(--wk-muted); line-height: 1.45; }
+    @media (max-width: 640px) { #w-dream .cols { grid-template-columns: 1fr; } #w-dream .arrow { min-height: 24px; } }
+  </style>
+  <script>
+(function () {
+  var root = document.getElementById("w-dream");
+  // Copy of learning.WEEK_NOTES and what dream() makes of them; keep in step with learning.py.
+  var OLD = ["Mon · Use fiscal year (Deere)", "Tue · Fiscal year, not calendar", "Wed · FY figures; cite 10-K",
+             "Wed · Tables only for institutional clients", "Thu · Tables whenever a client asks", "Thu · 2025 guidance: Deere expects $46-48B revenue"];
+  var NEW = ["Revenue: use the fiscal year in the company's 10-K, and cite the 10-K page. <span class=\"tag t-merge\">3 notes merged</span>",
+             "Tables whenever a client asks <span class=\"tag t-keep\">newest of 2 that disagree</span>",
+             "<span class=\"gone\">2025 guidance: Deere expects $46-48B revenue</span> <span class=\"tag t-drop\">removed: stale</span>"];
+  var old = root.querySelector(".old"), nf = root.querySelector(".newf"), say = root.querySelector(".say");
+  var ap = root.querySelector(".approve"), rj = root.querySelector(".reject"), db = root.querySelector(".dreambtn");
+  function list(a) { return a.map(function (l) { return "- " + l; }).join("<br>"); }
+  function start() {
+    old.innerHTML = list(OLD);
+    nf.innerHTML = '<span class="muted">Not written yet. Click Dream.</span>';
+    ap.disabled = rj.disabled = true; db.disabled = false;
+    say.textContent = "Six notes from a busy week. Three say the same thing, two disagree, and one figure is out of date.";
+  }
+  db.addEventListener("click", function () {
+    nf.innerHTML = list(NEW);
+    ap.disabled = rj.disabled = false; db.disabled = true;
+    say.textContent = "A new file, written beside the old one: six notes became two, and the stale figure is gone. The agent still reads the Friday file until Priya decides.";
+  });
+  ap.addEventListener("click", function () {
+    ap.disabled = rj.disabled = true;
+    say.textContent = "Approved. From Monday the agent reads the new file. The Friday file is kept, so the change can be undone.";
+  });
+  rj.addEventListener("click", function () {
+    ap.disabled = rj.disabled = true;
+    nf.innerHTML = '<span class="muted">Discarded.</span>';
+    say.textContent = "Rejected. The Friday file is untouched: dreaming wrote a new file instead of editing the old one, so a bad cleanup costs nothing.";
+  });
+  root.querySelector(".again").addEventListener("click", start);
+  start();
+})();
+  </script>
+</div>
